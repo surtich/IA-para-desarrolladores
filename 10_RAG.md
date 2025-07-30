@@ -2,6 +2,8 @@
 
 **RAG (Retrieval-Augmented Generation)** es una técnica avanzada en el campo de la inteligencia artificial generativa que potencia las capacidades de los LLM. Su objetivo principal es mejorar la precisión, actualidad y relevancia de las respuestas generadas por estos modelos, permitiéndoles acceder a información externa más allá de los datos con los que fueron entrenados.
 
+![RAG pipeline](../imgs/rag_pipeline.png)
+
 **¿Cómo funciona RAG?**
 
 El proceso de RAG se compone de tres etapas principales:

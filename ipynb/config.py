@@ -18,6 +18,7 @@ train_url = "https://github.com/phoebetronic/mnist/raw/main/mnist_train.csv.zip"
 test_url = "https://github.com/phoebetronic/mnist/raw/main/mnist_test.csv.zip"
 
 
+
 def download_from_zip(url, file_output):
     if os.path.exists(file_output):
         return
