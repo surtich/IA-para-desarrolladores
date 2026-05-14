@@ -1,0 +1,17 @@
+---
+title: "IA para Desarrolladores"
+---
+
+# Bienvenido al curso de IA para Desarrolladores 
+
+Este portal contiene todo el material necesario para dominar la implementación de modelos de lenguaje y herramientas de IA en el flujo de desarrollo.
+
+### 🚀 Acceso Rápido
+* **[Antes de empezar](../../README.md){target="_blank"}**: Configuración del entorno.
+* **[Introducción](10_fundamentos/10_intro.qmd)**: Conceptos básicos.
+* **[Presentación 2025](presentacion_2025.html){target="_blank"}**: Presentación sobre modelos de lenguaje realizada en 2025.
+
+::: {.callout-tip}
+## ¿Por dónde empezar?
+Si es tu primera vez aquí, te recomendamos seguir el orden de la barra lateral izquierda.
+:::

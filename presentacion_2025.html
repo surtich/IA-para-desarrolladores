@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>IA en el aula</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/black.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <style>
+      :root {
+        --r-main-font-size: 32px;
+        --r-heading1-size: 2.5em;
+        --r-heading2-size: 1.6em;
+        --r-heading3-size: 1.3em;
+        --r-heading4-size: 1em;
+        --r-link-color: #42affa;
+        --r-link-color-hover: #8dcffc;
+      }
+
+      .reveal {
+        font-family: "Source Sans Pro", Helvetica, sans-serif;
+      }
+
+      .reveal h1,
+      .reveal h2,
+      .reveal h3 {
+        text-transform: none;
+      }
+
+      .reveal .slides section {
+        text-align: left;
+      }
+
+      .reveal .slide-title {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+
+      .reveal .slide-title h1 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .reveal .index-list {
+        list-style-type: none;
+        padding-left: 0;
+        columns: 2;
+        -webkit-columns: 2;
+        -moz-columns: 2;
+      }
+
+      .reveal .index-list li {
+        margin-bottom: 15px;
+      }
+
+      .reveal .note {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 20px;
+        border-left: 5px solid #3498db;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+
+      .reveal mark {
+        background-color: #f1c40f;
+        color: #000;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+
+      .reveal blockquote {
+        border-left: 3px solid var(--r-link-color);
+        padding-left: 20px;
+        font-style: italic;
+      }
+
+      .reveal .icon {
+        margin-right: 20px;
+        color: var(--r-link-color);
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+
+      .reveal .provider-list {
+        list-style-type: none;
+        padding-left: 0;
+      }
+
+      .reveal .provider-list li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 1.1em;
+      }
+
+      .reveal .provider-list .icon {
+        font-size: 2em;
+      }
+
+      .icon-red {
+        color: #e74c3c !important;
+      }
+      .icon-green {
+        color: #2ecc71 !important;
+      }
+
+      .instruction-type-heading {
+        margin-top: 30px;
+      }
+
+      .prompt-container {
+        position: relative;
+        background-color: #282c34; /* Dark background for code */
+        color: #abb2bf; /* Light text color */
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #61afef; /* A nice blue border */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .prompt-container pre,
+      .prompt-container blockquote {
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        border: none;
+        font-size: 0.9em; /* Slightly smaller font for prompts */
+        white-space: pre-wrap; /* Ensure text wraps */
+        word-break: break-word; /* Break long words */
+      }
+
+      .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #61afef; /* Blue button */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 0.8em;
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Center the icon */
+        width: 40px; /* Fixed width for icon only */
+        height: 30px; /* Fixed height for icon only */
+        gap: 0; /* Remove gap as text is gone */
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+      }
+
+      .copy-button i {
+        margin: 0; /* Ensure no extra margin on icon */
+      }
+
+      .copy-button:hover {
+        opacity: 1;
+      }
+
+      .notification {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        z-index: 1000;
+      }
+
+      .notification.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section class="slide-title">
+          <h1 style="text-align: center">
+            <i class="fa-solid fa-chalkboard-user icon"></i>Inteligencia
+            Artificial <br />
+            en el aula
+          </h1>
+          <p>4 de septiembre de 2025</p>
+          <p>Javier Pérez Arteaga</p>
+        </section>
+
+        <section>
+          <h2 class="slide-title">Índice</h2>
+          <ul class="index-list">
+            <li><a href="#/2">IA vs LLM</a></li>
+            <li><a href="#/3">¿Por qué la IA en el aula?</a></li>
+            <li><a href="#/5">Proveedores IA</a></li>
+            <li><a href="#/6">Modelos LLM</a></li>
+            <li><a href="#/7">Parámetros en LLM</a></li>
+            <li><a href="#/8">El contexto en los LLM</a></li>
+            <li><a href="#/9">Herramientas (Tools)</a></li>
+            <li><a href="#/10">Workflow y agentes</a></li>
+            <li><a href="#/11">Recursos IA de la Comunidad de Madrid</a></li>
+            <li><a href="#/12">Prompt</a></li>
+            <li><a href="#/13">Prompting</a></li>
+            <li><a href="#/15">Ejemplos de prompting</a></li>
+            <li><a href="#/16">Elementos clave de un prompt</a></li>
+            <li><a href="#/17">El ciclo iterativo</a></li>
+            <li>
+              <a href="#/18">Técnicas esenciales para un prompting efectivo</a>
+            </li>
+            <li><a href="#/19">Meta prompting</a></li>
+            <li><a href="#/20">Plantillas de prompt</a></li>
+            <li><a href="#/21">Chain of Thought (pensamiento en cadena)</a></li>
+            <li><a href="#/22">Ejemplo de Chain of Thought</a></li>
+            <li><a href="#/23">Self-critique prompting</a></li>
+            <li><a href="#/24">Decision matrix generation</a></li>
+            <li><a href="#/26">Reverse prompt engineering</a></li>
+            <li><a href="#/27">Tree of Thought (árbol de pensamiento)</a></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-brain icon"></i>IA vs LLM
+          </h2>
+          <img src="img/ia_diagram.svg" alt="IA vs LLM" style="max-height: 600px; display: block; margin: 0 auto;">
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-circle-question icon"></i>¿Por qué la IA en el
+            aula?
+          </h2>
+          <p class="fragment">
+            La integración de la Inteligencia Artificial (IA) en el ámbito
+            educativo ya no es una opción, sino una
+            <mark>necesidad imperante</mark>.
+          </p>
+          <p class="fragment">
+            La IA ha marcado un antes y un después en la forma en que accedemos
+            a la información, procesamos el conocimiento y, en última instancia,
+            aprendemos.
+          </p>
+          <div class="fragment note">
+            <h3>
+              <i class="fa-solid fa-lightbulb icon"></i>La IA en la educación
+            </h3>
+            <p>
+              Nuestros estudiantes ya están interactuando con herramientas de IA
+              fuera del aula. La verdadera pregunta no es si van a usar la IA,
+              sino <mark>cómo</mark>, y cómo nosotros, como profesores, vamos a
+              responder a esta realidad.
+            </p>
+          </div>
+          <div class="fragment note">
+            <h3>
+              <i class="fa-solid fa-arrows-rotate icon"></i>Adaptación vs.
+              resistencia
+            </h3>
+            <p>
+              Debemos reconocer que la IA es una herramienta poderosa. Intentar
+              frenar su uso solo generaría frustración y una brecha aún mayor
+              entre la escuela y la empresa.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">Riesgos y oportunidades de la IA</h2>
+          <div style="display: flex; gap: 20px">
+            <div class="fragment" style="flex: 1">
+              <h3>
+                <i class="fa-solid fa-triangle-exclamation icon icon-red"></i
+                >Riesgos y desafíos
+              </h3>
+              <ul>
+                <li class="fragment">
+                  <strong>Delegación excesiva y plagio:</strong> Es crucial
+                  diseñar actividades que requieran pensamiento crítico.
+                </li>
+                <li class="fragment">
+                  <strong>Alucinaciones y desinformación:</strong> Los alumnos
+                  deben aprender a verificar la información y evaluar las
+                  fuentes.
+                </li>
+                <li class="fragment">
+                  <strong>Redefinición del rol docente:</strong> El profesor
+                  evoluciona de transmisor a <mark>facilitador o guía</mark>.
+                </li>
+              </ul>
+            </div>
+            <div class="fragment" style="flex: 1">
+              <h3>
+                <i class="fa-solid fa-rocket icon icon-green"></i>Oportunidades
+                y beneficios
+              </h3>
+              <ul>
+                <li class="fragment">
+                  <strong>Aprendizaje interactivo y personalizado:</strong>
+                  Experiencias adaptadas al ritmo de cada alumno.
+                </li>
+                <li class="fragment">
+                  <strong>Eliminación de tareas rutinarias:</strong> Libera
+                  tiempo para el profesor y el alumno.
+                </li>
+                <li class="fragment">
+                  <strong>Fomento de habilidades complejas:</strong> Impulsa el
+                  pensamiento crítico, la resolución de problemas y la
+                  creatividad.
+                </li>
+                <li class="fragment">
+                  <strong>Acceso a información y recursos:</strong> Democratiza
+                  el acceso al conocimiento.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-cloud icon"></i>Proveedores IA
+          </h2>
+          <p>
+            El panorama de la IA está en constante evolución. Conocer a los
+            principales proveedores te permitirá explorar diversas opciones.
+          </p>
+          <ul class="provider-list fragment">
+            <li>
+              <i class="fa-solid fa-brain icon"></i
+              ><strong><a href="https://openai.com/">OpenAI</a></strong
+              >: Creadores de GPT-5 y ChatGPT.
+            </li>
+            <li>
+              <i class="fa-brands fa-google icon"></i
+              ><strong
+                ><a href="https://gemini.google.com/app?hl=es-ES"
+                  >Google Gemini</a
+                ></strong
+              >: Modelo multimodal de Google.
+            </li>
+            <li>
+              <i class="fa-brands fa-x-twitter icon"></i
+              ><strong><a href="https://grok.com/">Grok</a></strong
+              >: La IA de X (anteriormente Twitter).
+            </li>
+            <li>
+              <i class="fa-solid fa-magnifying-glass icon"></i
+              ><strong><a href="https://www.deepseek.com/">DeepSeek</a></strong
+              >: Modelos de lenguaje de código abierto.
+            </li>
+            <li>
+              <i class="fa-brands fa-meta icon"></i
+              ><strong><a href="https://ai.meta.com/">Meta AI</a></strong
+              >: Creadores de Llama, modelo de código abierto.
+            </li>
+            <li>
+              <i class="fa-brands fa-microsoft icon"></i
+              ><strong
+                ><a href="https://copilot.microsoft.com/"
+                  >Microsoft Copilot</a
+                ></strong
+              >: Asistente integrado en productos de Microsoft como Office 365,
+              Teams o Visual Studio Code.
+            </li>
+            <li>
+              <i class="fa-solid fa-magnifying-glass-plus icon"></i
+              ><strong
+                ><a href="https://www.perplexity.ai/">Perplexity AI</a></strong
+              >: Motor de búsqueda conversacional que cita sus fuentes.
+            </li>
+            <li>
+              <i class="fa-solid fa-brain icon"></i
+              ><strong
+                ><a href="https://www.anthropic.com/product/claude"
+                  >Anthropic Claude</a
+                ></strong
+              >: Modelo de lenguaje de ex-miembros de OpenAI.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-robot icon"></i>Modelos LLM (Large Language
+            Models)
+          </h2>
+          <p class="fragment">
+            Un <strong>modelo de lenguaje</strong> es un sistema informático
+            entrenado para realizar tareas que requieren inteligencia humana.
+          </p>
+          <p class="fragment">
+            Hay LLM de diversos tipos. Los que más nos interesan son los
+            <mark>modelos conversacionales</mark>, que funcionan prediciendo el
+            siguiente <strong>token</strong> en una secuencia.
+          </p>
+          <div class="fragment note">
+            <h3>
+              <i class="fa-solid fa-puzzle-piece icon"></i>¿Qué es un token?
+            </h3>
+            <p>
+              Es la unidad básica de procesamiento: una palabra, parte de una
+              palabra o un signo de puntuación.
+            </p>
+            <p>Ejemplo: "El perro juega" -> ["El", " perro", " juega"]</p>
+            <p>
+              Puedes experimentar con este
+              <a href="https://tiktokenizer.vercel.app/" target="_blank"
+                >tokenizador en línea</a
+              >.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-sliders icon"></i>Parámetros en LLM
+          </h2>
+          <p>
+            Permiten controlar cómo se genera la respuesta. Puedes probarlos en
+            un
+            <a href="https://console.groq.com/playground" target="_blank"
+              >playground como el de Groq</a
+            >.
+          </p>
+          <ul>
+            <li class="fragment">
+              <i class="fa-solid fa-temperature-half icon"></i
+              ><strong>Temperatura:</strong> Controla la
+              <mark>creatividad</mark>. Baja para precisión, alta para
+              originalidad.
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-chart-pie icon"></i
+              ><strong>Top P:</strong> Controla la aleatoriedad considerando
+              solo los tokens más probables. Mantiene la coherencia.
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-window-maximize icon"></i
+              ><strong>Ventana de contexto:</strong> La cantidad de texto
+              (tokens) que el modelo puede "recordar" en una conversación.
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-file-word icon"></i
+              ><strong>Máx. tokens:</strong> El número máximo de tokens que el
+              modelo generará como respuesta.
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-circle-stop icon"></i
+              ><strong>Secuencia de parada:</strong> Una cadena de texto que
+              detiene la generación de la respuesta.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-book-open icon"></i>El contexto en los LLM
+          </h2>
+          <p class="fragment">
+            Un LLM <mark>no tiene memoria</mark> en el sentido humano. Cada
+            interacción es una instancia nueva y aislada.
+          </p>
+          <div class="fragment note">
+            <h3>
+              <i class="fa-solid fa-sd-card icon"></i>La ilusión de la memoria
+            </h3>
+            <p>
+              Las aplicaciones de chatbot reenvían todo el historial de la
+              conversación con cada nueva petición. Esto crea la ilusión de
+              memoria, pero está limitado por la
+              <strong>ventana de contexto</strong>.
+            </p>
+          </div>
+          <div class="fragment note">
+            <h3>
+              <i class="fa-solid fa-paperclip icon"></i>Ampliando el contexto:
+              archivos adjuntos
+            </h3>
+            <p>
+              Muchos proveedores permiten subir documentos, imágenes o enlaces
+              para añadir contexto adicional, potenciando la capacidad del
+              modelo para responder preguntas específicas.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-screwdriver-wrench icon"></i>Herramientas
+            (Tools)
+          </h2>
+          <p class="fragment">
+            Hasta hace poco, un LLM no podía realizar cálculos matemáticos
+            complejos o buscar información actualizada en tiempo real.
+          </p>
+          <p class="fragment">
+            La solución es la integración de
+            <strong>herramientas (tools)</strong>: funcionalidades externas que
+            el LLM puede "invocar".
+          </p>
+          <blockquote class="fragment">
+            Piensa en el LLM como un director de orquesta y las herramientas
+            como los músicos especializados.
+          </blockquote>
+          <p class="fragment">
+            El LLM no ejecuta la herramienta, sino que
+            <mark>sugiere su uso</mark> a la interfaz que lo controla, la cual
+            ejecuta la acción y devuelve el resultado al modelo.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-diagram-project icon"></i>Workflow y agentes
+          </h2>
+          <p>
+            Llevan la integración de herramientas a un nivel superior,
+            permitiendo realizar tareas más complejas y autónomas.
+          </p>
+          <div style="display: flex; gap: 20px">
+            <div class="fragment" style="flex: 1">
+              <h3>
+                <i class="fa-solid fa-sitemap icon"></i>Workflows (flujos de
+                trabajo)
+              </h3>
+              <p>
+                Una <mark>secuencia predefinida</mark> de pasos que un LLM sigue
+                para lograr un objetivo. Es como una receta.
+              </p>
+              <p>
+                <strong>Ventajas:</strong> Automatización, consistencia y
+                eficiencia.
+              </p>
+            </div>
+            <div class="fragment" style="flex: 1">
+              <h3><i class="fa-solid fa-user-robot icon"></i>Agentes LLM</h3>
+              <p>
+                Un software inteligente que usa un LLM como "cerebro" para
+                <mark>planificar, ejecutar y monitorizar</mark> tareas de forma
+                autónoma.
+              </p>
+              <p>
+                <strong>Ventajas:</strong> Autonomía, flexibilidad y resolución
+                de problemas complejos.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-landmark icon"></i>Recursos IA de la Comunidad
+            de Madrid
+          </h2>
+          <p>
+            La Comunidad de Madrid ha establecido acuerdos con Google y
+            Microsoft para integrar herramientas de IA en el entorno educativo.
+          </p>
+          <ul>
+            <li class="fragment">
+              <strong
+                ><i class="fa-brands fa-google icon"></i
+                ><a
+                  href="https://dgbilinguismoycalidad.educa.madrid.org/googlemadrid/"
+                  >Colaboración con Google</a
+                >
+                (@educa.madrid.org):</strong
+              >
+              <ul>
+                <li>
+                  <strong>Google Gemini:</strong> Modelo de lenguaje para
+                  investigar, resumir y crear.
+                </li>
+                <li>
+                  <strong>NotebookLM:</strong> Herramienta para organizar y
+                  analizar contenido a partir de tus propios documentos.
+                </li>
+              </ul>
+            </li>
+            <li class="fragment">
+              <strong
+                ><i class="fa-brands fa-microsoft icon"></i
+                ><a
+                  href="https://news.microsoft.com/es-es/2025/05/23/la-comunidad-de-madrid-y-microsoft-impulsan-la-competencia-digital-y-el-uso-responsable-y-seguro-de-soluciones-de-ia-en-el-aula/"
+                  >Colaboración con Microsoft </a
+                >(@ieszayas.onmicrosoft.com):</strong
+              >
+              <ul>
+                <li>
+                  <strong>Copilot:</strong> Asistente de IA integrado en Office
+                  365 (Word, Excel, PowerPoint, etc.).
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-terminal icon"></i>Prompt
+          </h2>
+          <p class="fragment">
+            Un <strong>prompt</strong> es la
+            <strong>entrada que proporcionas a un LLM</strong>: una pregunta,
+            una tarea o una instrucción.
+          </p>
+          <blockquote class="fragment">
+            Imagina un prompt como la acción de
+            <mark>montar el escenario para una conversación</mark>. Le indica a
+            la IA qué papel debe desempeñar, qué contexto considerar y qué
+            resultado se espera.
+          </blockquote>
+          <p class="fragment">
+            La calidad de la respuesta depende de 3 factores:
+          </p>
+          <ol>
+            <li class="fragment">Los datos de entrenamiento del modelo.</li>
+            <li class="fragment">Su arquitectura y parámetros.</li>
+            <li class="fragment">
+              <mark>Tu prompt</mark> (el elemento que controlas directamente).
+            </li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-pen-to-square icon"></i>Prompting
+          </h2>
+          <p class="fragment">
+            <strong>Prompting</strong> es el proceso de
+            <mark>diseñar, escribir y refinar</mark> los prompts para obtener la
+            mejor respuesta posible de un modelo de IA.
+          </p>
+          <p class="fragment">
+            Es una habilidad iterativa que requiere experimentación y ajuste.
+          </p>
+          <div class="fragment note">
+            <h3>
+              <i class="fa-solid fa-arrows-spin icon"></i>Desglose del proceso:
+            </h3>
+            <ol>
+              <li>
+                <strong>Define tu objetivo:</strong> ¿Qué resultado específico
+                quiero?
+              </li>
+              <li>
+                <strong>Escribe un borrador:</strong> Plasma tus ideas
+                iniciales.
+              </li>
+              <li>
+                <strong>Prueba el prompt:</strong> Ejecútalo en el modelo.
+              </li>
+              <li>
+                <strong>Evalúa la salida:</strong> Compara el resultado con tu
+                objetivo.
+              </li>
+              <li>
+                <strong>Refina y repite:</strong> Modifica el prompt para
+                mejorarlo y vuelve a probar.
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-lightbulb-on icon"></i>Ejemplo de ciclo de
+            prompting
+          </h2>
+          <div class="fragment note">
+            <p>
+              <strong>1. Objetivo:</strong>
+			  "Necesito un resumen de la
+              Revolución Francesa para estudiantes de 3º de la ESO, enfocado en
+              las causas y consecuencias principales, con una extensión de 200
+              palabras."
+            </p>
+          </div>
+          <div class="fragment note">
+            <p>
+              <strong>2. Primer borrador:</strong>
+			  <div class="prompt-container">
+                <span id="prompt-content-script-prompt" style="display: block">
+                  <blockquote style="font-size: 0.8em">
+"Haz un resumen de la Revolución Francesa para alumnos de 3º ESO.
+Que sea sobre las causas y lo que pasó después. Unas 200 palabras."
+                  </blockquote>
+                </span>
+                <button
+                  class="copy-button"
+                  onclick="copyPrompt('prompt-content-script-prompt')"
+                >
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>			  			  
+            </p>
+          </div>
+          <div class="fragment note">
+            <p>
+              <strong>3. Evaluación:</strong> "El resumen es demasiado largo, no
+              menciona el papel de Napoleón y el lenguaje es un poco complejo
+              para esa edad."
+            </p>
+          </div>
+          <div class="fragment note">
+            <p>
+              <strong>4. Refinamiento:</strong>
+			  <div class="prompt-container">
+                <span id="prompt-content-refine-prompt" style="display: block">
+                  <blockquote style="font-size: 0.8em">
+"Actúa como un profesor de historia de secundaria.
+Genera un resumen de la Revolución Francesa de no más de 200 palabras.
+Céntrate en las principales causas (crisis económica, ideas ilustradas) y las consecuencias
+clave, incluyendo la ascensión y el impacto de Napoleón.
+Utiliza un lenguaje sencillo y accesible para estudiantes de 3º de la ESO."                 </blockquote>
+                </span>
+                <button
+                  class="copy-button"
+                  onclick="copyPrompt('prompt-content-refine-prompt')"
+                >
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div> 			  
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-lightbulb-on icon"></i>Ejemplos de prompting
+          </h2>
+          <p>
+            La diferencia radica en la especificidad, el contexto y las
+            instrucciones claras.
+          </p>
+          <div style="display: flex; gap: 20px">
+            <div class="fragment" style="flex: 1">
+              <h3>
+                <i class="fa-solid fa-thumbs-down icon icon-red"></i>Mal prompt
+              </h3>
+              <p>Demasiado genérico y vago.</p>
+              <div class="prompt-container">
+                <span id="prompt-content-bad-prompt-1" style="display: block">
+                  <blockquote style="font-size: 0.8em">
+                    "¿Qué hoteles hay en París?"
+                  </blockquote>
+                </span>
+                <button
+                  class="copy-button"
+                  onclick="copyPrompt('prompt-content-bad-prompt-1')"
+                >
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>
+              <p>La respuesta será una lista sin criterio, poco útil.</p>
+            </div>
+            <div class="fragment" style="flex: 1">
+              <h3>
+                <i class="fa-solid fa-thumbs-up icon icon-green"></i>Buen prompt
+              </h3>
+              <p>Establece rol, contexto, preferencias y formato.</p>
+              <div class="prompt-container">
+                <span id="prompt-content-good-prompt-1" style="display: block">
+                  "Eres un asesor de viajes especializado en ayudar a los
+                  viajeros a encontrar estancias únicas y de gran valor. Estoy
+                  planeando un viaje a París para una pareja de recién casados. Busca hoteles
+                  estilo boutique en barrios animados y peatonales con buena
+                  oferta gastronómica cerca. Es importante tanto la comodidad como
+                  la experiencia, no solo el precio. Recomiénda 5 hoteles en
+                  París que se ajusten a estas preferencias. Formatea tu
+                  respuesta como una lista numerada, con 1-2 frases describiendo
+                  cada hotel. Incluye solo hoteles de menos de 400$ por noche
+                  que ofrezcan servicios como gimnasio o piscina, y estén a poca
+                  distancia a pie de restaurantes. Describe cada opción de forma
+                  concisa y cautivadora. Aquí tienes un ejemplo de lo que busco:
+                  'Un elegante hotel boutique cerca del Barrio Latino con
+                  terraza en la azotea, conocido por su ambiente acogedor y sus
+                  increíbles vistas a la ciudad.'"
+                </span>
+                <button
+                  class="copy-button"
+                  onclick="copyPrompt('prompt-content-good-prompt-1')"
+                >
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>
+              <p>La respuesta será precisa y alineada con las necesidades.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-list-check icon"></i>Elementos clave de un
+            prompt
+          </h2>
+          <ol>
+            <li class="fragment">
+              <i class="fa-solid fa-user-tie icon"></i
+              ><span><strong>Define tu objetivo y asigna un rol (persona)</strong>
+			  <br/>Ejemplo: "Actúa como un profesor de historia de secundaria."
+            </span></li>
+            <li class="fragment">
+              <i class="fa-solid fa-circle-info icon"></i
+              ><strong>Proporciona contexto detallado</strong>
+			  <span><br/>Ejemplo: "El viaje es para una pareja que celebra su aniversario."</span>
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-bullhorn icon"></i
+              ><strong>Especifica instrucciones claras (qué hacer)</strong>
+			  <br/>Ejemplo: "Recomiéndame 5 hoteles en París que se ajusten a estas preferencias."
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-ban icon"></i
+              ><strong>Establece límites y restricciones</strong>
+			  <span><br/>Ejemplo: "Incluye solo hoteles de menos de 400$ por noche."</span>
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-file-lines icon"></i
+              ><strong>Define el formato de salida</strong>
+			  <br/>Ejemplo: "Devuélveme la respuesta en forma de lista numerada."
+            </li>
+            <li class="fragment">
+              <i class="fa-solid fa-quote-right icon"></i
+              ><strong>Proporciona ejemplos (opcional)</strong>
+			  <span><br/>Ejemplo: "Un elegante hotel boutique cerca del Barrio Latino con terraza en la azotea, conocido por su ambiente acogedor y sus increíbles vistas a la ciudad."</span>
+            </li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-arrows-spin icon"></i>El ciclo iterativo:
+            prueba, evalúa y refina
+          </h2>
+          <p class="fragment">
+            El proceso de prompting no es lineal, es un ciclo continuo.
+          </p>
+          <ul class="fragment">
+            <li>
+              <i class="fa-solid fa-play icon"></i
+              ><strong>Prueba el prompt:</strong> Ejecuta tu prompt en el modelo
+              de IA.
+            </li>
+            <li>
+              <i class="fa-solid fa-magnifying-glass icon"></i
+              ><strong>Evalúa la salida:</strong> Compara críticamente la
+              respuesta con tu objetivo.
+            </li>
+            <li>
+              <i class="fa-solid fa-pen icon"></i
+              ><strong>Refina y repite:</strong> Modifica tu prompt para
+              mejorarlo.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-star icon"></i>Técnicas esenciales para un
+            prompting efectivo
+          </h2>
+          <div class="fragment">
+            <h3>
+              <i class="fa-solid fa-bullseye icon"></i>Claridad vs. verbosidad:
+              la precisión concreta
+            </h3>
+            <p>
+              "Específico" no es sinónimo de "largo". Evita la ambigüedad y ve
+              al grano.
+            </p>
+            <ul>
+              <li>
+                <strong>Ejemplo de Prompt Preciso:</strong> "Lista 3 títulos de
+                blogs impactantes sobre la aplicación de la IA en el sector de
+                la restauración."
+              </li>
+            </ul>
+          </div>
+          <div class="fragment instruction-type-heading">
+            <h3>
+              <i class="fa-solid fa-signs-post icon"></i>Tipos de instrucción:
+              abiertas vs. directivas
+            </h3>
+            <p>
+              <strong>Abiertas</strong> para creatividad,
+              <strong>directivas</strong> para resultados estructurados.
+            </p>
+            <ul>
+              <li>
+                <strong>Ejemplo instrucciones abiertas:</strong> "Sugiere una idea
+                creativa para un cortometraje que aborde los desafíos de la
+                economía circular." <br /><em>Uso en el aula:</em> Ideal para
+                generar ideas para proyectos de estudiantes, temas de debate o
+                enfoques originales para presentaciones.
+              </li>
+              <li>
+                <strong>Ejemplo instrucciones directivas:</strong> "Redacta una lista de
+                5 pasos clave para lanzar un nuevo producto tecnológico en el
+                mercado actual." <br /><em>Uso en el aula:</em> Perfecto para
+                crear guías de estudio, checklists para proyectos, resúmenes de
+                conceptos complejos en informática o economía, o rúbricas de
+                evaluación.
+              </li>
+            </ul>
+          </div>
+          <div class="fragment  instruction-type-heading">
+            <h3>
+              <i class="fa-solid fa-microphone-lines icon"></i>Control de tono y
+              audiencia
+            </h3>
+            <p>
+              Adapta la respuesta a un contexto particular especificando el tono
+              y la persona.
+            </p>
+            <ul>
+              <li>
+                <strong>Ejemplo de Tono:</strong> "Usa un tono amigable y
+                accesible para explicar el concepto de 'Blockchain' a un
+                principiante."
+              </li>
+              <li>
+                <strong>Ejemplo de Persona:</strong> "Escribe como un directivo
+                de hotel experto en atención al cliente, ofreciendo consejos
+                para mejorar la experiencia del huésped."
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-wand-magic-sparkles icon"></i>Meta prompting
+          </h2>
+          <p class="fragment">
+            Esta técnica invierte el proceso tradicional, permitiendo que sea la
+            propia IA quien nos ayude a generar el prompt ideal para nuestras
+            necesidades.
+          </p>
+          <p class="fragment">
+            Es la práctica de instruir a la IA para que
+            <mark>te genere un prompt</mark>.
+          </p>
+          <p class="fragment">
+            Inviertes el proceso: en lugar de diseñar el prompt final, le pides
+            a la IA que lo elabore por ti basándose en un objetivo y un marco
+            que tú le proporcionas.
+          </p>
+          <div class="fragment note">
+            <h3>¿Cómo funciona el Meta Prompting?</h3>
+            <p>
+              El proceso de Meta Prompting se basa en aprovechar la capacidad de
+              la IA para comprender y aplicar marcos conceptuales, reglas y
+              listas de verificación que tú le proporcionas.
+            </p>
+            <ol>
+              <li>
+                <strong>Define el objetivo final:</strong> Ten claro qué quieres
+                lograr con el prompt final. <br />
+              </li>
+              <li>
+                <strong>Proporciona un marco:</strong> En lugar de
+                decirle a la IA "Genera un plan de negocio", le proporcionas un
+                conjunto de reglas, principios, preguntas clave o la estructura
+                que un buen prompt para esa tarea debería tener.
+              </li>
+              <li>
+                <strong>La IA genera el prompt:</strong> Con el objetivo
+                y el marco en mente, le pides a la IA que elabore el prompt.
+                <div class="prompt-container">
+                  <span
+                    id="prompt-content-meta-prompting-1"
+                    style="display: block"
+                  >
+                    <pre><code data-trim data-noescape>
+Eres un experto en diseño de prompts. Tu tarea es crear el prompt más efectivo para que otra IA (o tú mismo, en una segunda interacción) genere directrices de un plan de negocio para una pequeña empresa de turismo rural.
+                    </code></pre>
+                  </span>
+                  <button
+                    class="copy-button"
+                    onclick="copyPrompt('prompt-content-meta-prompting-1')"
+                  >
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+              </li>
+              <li>
+                <strong>Uso y refinamiento del prompt generado:</strong> La IA
+                te devolverá un prompt elaborado. Puedes entonces tomar ese
+                prompt, quizás hacerle algunos ajustes menores, y usarlo para
+                obtener la respuesta final deseada.
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-file-invoice icon"></i>Plantillas de prompt
+          </h2>
+          <p class="fragment">
+            Una plantilla es una <mark>estructura predefinida</mark> que puedes
+            reutilizar para crear prompts personalizados de manera eficiente. En
+            lugar de empezar desde cero cada vez, puedes crear un prompt
+            genérico parametrizable al que simplemente le pases una serie de
+            parámetros que se insertarán en lugares específicos de la plantilla.
+          </p>
+          <p class="fragment">
+            Actualmente, ningún proveedor de LLMs ofrece plantillas de prompt
+            como una funcionalidad integrada, pero puedes crear tus propias
+            plantillas y utilizarlas en tus interacciones con la IA usando
+            utilidades de algunos proveedores como los GEM de Gemini o los GPT
+            de ChatGPT.
+          </p>
+          <div class="fragment note">
+            <h3>Ejemplo de plantilla</h3>
+            <div class="prompt-container">
+              <span id="prompt-content-template-1" style="display: block; font-size: 0.7em;">
+                <pre><code data-trim data-noescape>
+Analiza el siguiente [TIPO_DE_DOCUMENTO] y [TAREA_DE_ANALISIS].
+El objetivo es [OBJETIVO_DEL_ANALISIS].
+Dirigido a [PÚBLICO_OBJETIVO].
+El resumen debe ser [LONGITUD_MAXIMA] y destacar [PUNTOS_CLAVE_A_DESTACAR].
+[TEXTO_A_ANALIZAR]
+
+TIPO_DE_DOCUMENTO: "informe financiero"
+TAREA_DE_ANALISIS: "extrae las principales conclusiones sobre la rentabilidad de la empresa"
+OBJETIVO_DEL_ANALISIS: "presentar un resumen para la junta directiva"
+PÚBLICO_OBJETIVO: "directivos no financieros"
+LONGITUD_MAXIMA: "200 palabras"
+PUNTOS_CLAVE_A_DESTACAR: "los 3 factores clave que influyen en la rentabilidad"
+TEXTO_A_ANALIZAR: https://www.bbva.com/wp-content/uploads/2025/04/Informe-Enero-Marzo-2025.pdf
+                </code></pre>
+              </span>
+              <button
+                class="copy-button"
+                onclick="copyPrompt('prompt-content-template-1')"
+              >
+                <i class="fa-solid fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-link icon"></i>Chain of Thought (pensamiento
+            en cadena)
+          </h2>
+          <p class="fragment">
+            Esta técnica le pide a la IA que <mark>"piense en voz alta"</mark> o
+            que explique su razonamiento paso a paso antes de dar la solución
+            definitiva.
+          </p>
+          <p class="fragment">
+            Mejora la precisión, la transparencia y maneja mejor la complejidad.
+          </p>
+          <div class="fragment note">
+            <h3>Entendiendo el concepto de Chain of Thought</h3>
+            <p>
+              El Chain of Thought (CoT) instruye al LLM para que desglose el
+              problema en una serie de pasos intermedios, un proceso de
+              razonamiento paso a paso, antes de proporcionar la respuesta
+              final. Esta técnica es particularmente efectiva porque:
+            </p>
+            <ul>
+              <li>
+                <strong>Mejora la Precisión:</strong> Reduce la probabilidad de
+                errores o "alucinaciones".
+              </li>
+              <li>
+                <strong>Fomenta la Transparencia:</strong> Permite entender cómo
+                la IA llegó a su conclusión.
+              </li>
+              <li>
+                <strong>Maneja la Complejidad:</strong> Permite abordar
+                problemas más complejos.
+              </li>
+              <li>
+                <strong>Guía el Razonamiento:</strong> Actúa como una "pista" o
+                un "esqueleto" para el proceso de pensamiento del LLM.
+              </li>
+            </ul>
+            <p>
+              La implementación de Chain of Thought a menudo supone añadir
+              frases como "piensa paso a paso", "razona de forma lógica",
+              "explica tu proceso de pensamiento", o dar ejemplos de
+              razonamiento secuencial dentro del prompt.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-lightbulb-on icon"></i>Ejemplo de Chain of
+            Thought
+          </h2>
+          <h3>Prompt (sin Chain of Thought):</h3>
+          <div class="prompt-container">
+            <span
+              id="prompt-content-cot-no-cot-prompt-1"
+              style="display: block; font-size: 0.7em;"
+            >
+              <pre><code data-trim data-noescape>
+Completa la frase con una sola palabra:
+Estoy harto de mi coche. No para de dar problemas. Ya he mirado el modelo de coche que me quiero comprar.
+<br/>
+Mañana voy a llevar mi coche al ______
+              </code></pre>
+            </span>
+            <button
+              class="copy-button"
+              onclick="copyPrompt('prompt-content-cot-no-cot-prompt-1')"
+            >
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+          <p><strong>Respuesta (sin Chain of Thought):</strong></p>
+              <blockquote style="font-size: 0.6em">taller</blockquote>
+          
+          <h3>Prompt (con Chain of Thought implícito):</h3>
+          <div class="prompt-container">
+            <span id="prompt-content-cot-prompt-1" style="display: block; font-size: 0.7em;">
+              <pre><code data-trim data-noescape>
+Completa la frase analizando paso a paso lo que se dice y completando con la palabra que sea más probable:
+
+Estoy harto de mi coche. No para de dar problemas. Ya he mirado el modelo de coche que me quiero comprar.
+<br/>
+Mañana voy a llevar mi coche al ______
+              </code></pre>
+            </span>
+            <button
+              class="copy-button"
+              onclick="copyPrompt('prompt-content-cot-prompt-1')"
+            >
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+          <p><strong>Respuesta (con Chain of Thought):</strong></p>
+              <blockquote style="font-size: 0.6em">
+                El paso a paso del análisis es el siguiente:
+				<br/>
+				1. "Estoy harto de mi coche. No para de dar problemas." Esto indica que el coche
+                actual está en mal estado o es una fuente constante de
+                frustración.
+				<br/>
+				
+				2. "Ya he mirado el modelo de coche que me quiero
+                comprar." Esto sugiere que el usuario está planeando deshacerse
+                de su coche actual para adquirir uno nuevo.
+				<br/>
+				3. "Mañana voy a llevar mi coche al ______" Dada la frustración con el coche
+                actual y el plan de comprar uno nuevo, la acción más lógica es
+                deshacerse del coche viejo. La palabra más probable para
+                completar la frase es desguace (o concesionario, si la intención
+                es entregarlo como parte de pago). 
+				<br/>
+				--- Mañana voy a llevar mi coche al desguace.
+              </blockquote>
+          </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-user-check icon"></i>Self-critique prompting
+          </h2>
+          <p class="fragment">
+            Es una técnica que permite a la IA no solo generar contenido, sino
+            también <mark>evaluarlo y mejorarlo</mark> de manera autónoma en un
+            proceso de dos fases: generación y crítica.
+          </p>
+          <div class="fragment note">
+            <h3>¿Qué es el Self-Critique Prompting?</h3>
+            <p>
+              En esencia, el Self-Critique Prompting implica dos fases
+              principales:
+            </p>
+            <ol>
+              <li>
+                <strong>Generación Inicial:</strong> La IA produce un borrador o
+                una respuesta inicial a una solicitud específica.
+              </li>
+              <li>
+                <strong>Crítica y Refinamiento:</strong> Se le pide a la IA que
+                revise críticamente el borrador, sugiera mejoras o lo ajuste
+                basándose en sus propias observaciones.
+              </li>
+            </ol>
+          </div>
+          <div class="fragment">
+            <h3>Ejemplos de prompts utilizando Self-Critique Prompting:</h3>
+                <div class="prompt-container">
+                  <span
+                    id="prompt-content-self-critique-1"
+                    style="display: block"
+                  >
+                    "Analiza las causas de la inflación
+                    en la Eurozona durante el último año y propón tres posibles
+                    medidas de política monetaria para su contención. Luego,
+                    crítica la profundidad del análisis de causas, la coherencia
+                    de las medidas propuestas con los principios económicos y la
+                    viabilidad de su implementación. Ajusta tu respuesta para
+                    que sea más completa y fundamentada."
+                  </span>
+                  <button
+                    class="copy-button"
+                    onclick="copyPrompt('prompt-content-self-critique-1')"
+                  >
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+                <div class="prompt-container">
+                  <span
+                    id="prompt-content-self-critique-2"
+                    style="display: block"
+                  >
+                    "Diseña un caso práctico para
+                    estudiantes de turismo sobre la gestión de un evento
+                    internacional, incluyendo posibles desafíos logísticos y
+                    soluciones. A continuación, evalúa el caso en términos de su
+                    realismo, la claridad de los desafíos presentados y si las
+                    soluciones propuestas son innovadoras y aplicables. Mejora
+                    el caso para que sea más atractivo y didáctico."
+                  </span>
+                  <button
+                    class="copy-button"
+                    onclick="copyPrompt('prompt-content-self-critique-2')"
+                  >
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-table-list icon"></i>Decision matrix
+            generation
+          </h2>
+          <p class="fragment">
+            Es una técnica que permite a la IA construir
+            <mark>tablas comparativas multifactoriales</mark> para evaluar y
+            comparar múltiples opciones basándose en una serie de criterios.
+          </p>
+          <div class="fragment note">
+            <h3>¿Qué es la Generación de Matrices de Decisión?</h3>
+            <p>
+              Una matriz de decisión es una tabla que se utiliza para comparar y
+              evaluar múltiples opciones (alternativas) basándose en una serie
+              de criterios predefinidos.
+            </p>
+            <p>La Generación de Matrices de Decisión con IA implica:</p>
+            <ol>
+              <li>
+                <strong>Identificación de Opciones:</strong> La IA recibe las
+                diferentes alternativas.
+              </li>
+              <li>
+                <strong>Definición de Criterios:</strong> Se especifican los
+                factores relevantes para la evaluación.
+              </li>
+              <li>
+                <strong>Evaluación Ponderada (Opcional):</strong> Se puede pedir
+                a la IA que asigne pesos a cada criterio.
+              </li>
+              <li>
+                <strong>Generación de la Matriz:</strong> La IA organiza esta
+                información en formato de tabla.
+              </li>
+            </ol>
+            <p>
+              <em
+                >Es adecuada cuando necesitas comparar múltiples opciones de
+                forma estructurada, considerando varios factores y sus
+                respectivas importancias.</em
+              >
+            </p>
+          </div>
+
+        </section>
+          <section>
+			<h2 class="slide-title">
+			  <i class="fa-solid fa-table-list icon"></i>Ejemplos de prompts con matrices de decisión:
+			</h2>
+			     <div class="fragment prompt-container">
+                  <span
+                    id="prompt-content-decision-matrix-1"
+                    style="display: block"
+                  >
+            "Crea una matriz de decisión para
+                    evaluar la viabilidad de tres destinos turísticos para el
+                    desarrollo de un nuevo resort de lujo (Destino A, Destino B,
+                    Destino C). Los criterios a considerar son: costes de
+                    adquisición de terreno, estabilidad política local,
+                    atractivo turístico existente, infraestructura de transporte
+                    y potencial de rentabilidad a cinco años. Asigna un peso del
+                    30% al potencial de rentabilidad, y el 15% a cada uno de los
+                    demás criterios. Proporciona una puntuación del 1 al 10 para
+                    cada opción en cada criterio y una puntuación total
+                    ponderada, y concluye cuál sería la mejor elección."
+                  </span>
+                  <button
+                    class="copy-button"
+                    onclick="copyPrompt('prompt-content-decision-matrix-1')"
+                  >
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+                <div class="fragment prompt-container">
+                  <span
+                    id="prompt-content-decision-matrix-2"
+                    style="display: block"
+                  >
+                    "Genera una matriz de decisión para
+                    seleccionar la mejor base de datos relacional (MySQL,
+                    PostgreSQL, SQL Server) para el backend de una aplicación
+                    web de comercio electrónico con alto tráfico previsto. Los
+                    criterios a evaluar son: escalabilidad, seguridad, coste de
+                    licenciamiento, facilidad de uso para el equipo de
+                    desarrollo y soporte de la comunidad. Asigna una importancia
+                    mayor a la escalabilidad y seguridad (25% cada una) y el
+                    resto de los criterios con igual peso (16.67% cada uno).
+                    Puntúa cada base de datos en cada criterio del 1 al 5 y
+                    calcula una puntuación ponderada total."
+                  </span>
+                  <button
+                    class="copy-button"
+                    onclick="copyPrompt('prompt-content-decision-matrix-2')"
+                  >
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+                <div class="fragment prompt-container">
+                  <span
+                    id="prompt-content-decision-matrix-3"
+                    style="display: block"
+                  >
+                    "Diseña una matriz de decisión para
+                    elegir el mejor proveedor de catering para un evento
+                    empresarial con 500 asistentes. Los criterios a considerar
+                    son: coste por persona, variedad del menú, experiencia
+                    previa en eventos similares, capacidad para gestionar
+                    restricciones dietéticas y reputación (basada en reseñas).
+                    Asigna un mayor peso a la reputación y el coste por persona
+                    (30% cada uno), y el resto (20% cada uno) a los otros
+                    criterios. Puntúa cada proveedor del 1 al 10 y determina
+                    cuál sería la opción más adecuada."
+                  </span>
+                  <button
+                    class="copy-button"
+                    onclick="copyPrompt('prompt-content-decision-matrix-3')"
+                  >
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+             
+			</section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-arrow-rotate-left icon"></i>Reverse prompt
+            engineering
+          </h2>
+          <p class="fragment">
+            Se utiliza para analizar una salida existente y
+            <mark>deducir el prompt original</mark> que probablemente la generó.
+          </p>
+          <div class="fragment note">
+            <h3>Ejemplo:</h3>
+            <div class="prompt-container">
+              <span id="prompt-content-reverse-prompt-1" style="display: block">
+                <pre><code data-trim data-noescape>
+"Aquí está el plan de lanzamiento del producto para las cámaras de seguridad inteligentes para el hogar. ¿Qué `prompt` creó con mayor probabilidad este plan?"
+                </code></pre>
+              </span>
+              <button
+                class="copy-button"
+                onclick="copyPrompt('prompt-content-reverse-prompt-1')"
+              >
+                <i class="fa-solid fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="slide-title">
+            <i class="fa-solid fa-sitemap icon"></i>Tree of Thought (árbol de
+            pensamiento)
+          </h2>
+          <p class="fragment">
+            Es útil cuando se necesita <mark>creatividad y flexibilidad</mark>.
+            Permite que la IA se ramifique en múltiples estrategias o ideas
+            potenciales antes de centrarse en la mejor.
+          </p>
+          <div class="fragment note">
+            <h3>Ejemplo:</h3>
+            <div class="prompt-container">
+              <span
+                id="prompt-content-tree-of-thought-1"
+                style="display: block"
+              >
+                <pre><code data-trim data-noescape>
+"Genere de tres a cinco ideas de campañas creativas para lanzar una nueva herramienta de productividad de IA. Usando el razonamiento `Tree of Thought`, explore diferentes enfoques de marketing. Luego, evalúe cada idea basándose en el alcance, el costo y la idoneidad para un presupuesto de `startup`, y recomiende la mejor."
+                </code></pre>
+              </span>
+              <button
+                class="copy-button"
+                onclick="copyPrompt('prompt-content-tree-of-thought-1')"
+              >
+                <i class="fa-solid fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section style="text-align: center">
+          <h1>Gracias</h1>
+          <h2>¿Alguna pregunta?</h2>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+    <script>
+      Reveal.initialize({
+        hash: true,
+        width: 1920,
+        height: 1080,
+        margin: 0.04,
+        minScale: 0.2,
+        maxScale: 2.0,
+        plugins: [],
+      });
+
+      function copyPrompt(elementId) {
+        const element = document.getElementById(elementId);
+        let textToCopy = "";
+
+        if (element.querySelector("pre code")) {
+          textToCopy = element.querySelector("pre code").innerText;
+        } else if (element.querySelector("blockquote")) {
+          textToCopy = element.querySelector("blockquote").innerText;
+        } else {
+          textToCopy = element.innerText;
+        }
+
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(() => {
+            showNotification('¡Prompt copiado!');
+          })
+          .catch((err) => {
+            console.error("Error al el prompt: ", err);
+          });
+      }
+
+      function showNotification(message) {
+        let notification = document.getElementById('copy-notification');
+        if (!notification) {
+          notification = document.createElement('div');
+          notification.id = 'copy-notification';
+          notification.className = 'notification';
+          document.body.appendChild(notification);
+        }
+        notification.innerText = message;
+        notification.classList.add('show');
+        setTimeout(() => {
+          notification.classList.remove('show');
+        }, 2000); // Notification disappears after 2 seconds
+      }
+    </script>
+  </body>
+</html>

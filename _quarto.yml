@@ -1,0 +1,35 @@
+project:
+  type: website
+  
+website:
+  title: "IA para desarrolladores"
+  navbar:
+    left:
+    - text: Inicio
+      file: qmd/index.qmd
+  sidebar:
+      style: "docked"
+      search: true
+      contents:
+        - section: "Fundamentos"
+          contents:
+            - qmd/10_fundamentos/10_intro.qmd
+        - section: "Apéndices"
+          contents:
+              - qmd/90_apendices/10_derivadas.qmd
+              - text: "Presentación 2025"
+                href: presentacion_2025.html
+                target: _blank
+format:
+  html:
+    charset: "utf-8"
+    lang: es
+    theme:
+      - cosmo
+      - brand
+    toc: true
+resources:
+    - presentacion_2025.html
+    - README.md
+
+

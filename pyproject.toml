@@ -1,0 +1,10 @@
+[project]
+name = "ia-para-desarrolladores"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "jupyter>=1.1.1",
+    "numpy>=2.4.4",
+    "pandas>=3.0.3",
+    "plotnine>=0.15.4",
+]

@@ -1,0 +1,37 @@
+<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" />
+      <feOffset dx="3" dy="3" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- IA: El círculo más grande -->
+  <circle cx="320" cy="270" r="240" fill="#d18e80" opacity="0.8" filter="url(#softShadow)" />
+  <text x="320" y="90" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" fill="white" font-size="24">Inteligencia Artificial</text>
+
+  <!-- ML -->
+  <circle cx="320" cy="300" r="180" fill="#a36d62" opacity="0.85" filter="url(#softShadow)" />
+  <text x="320" y="180" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" fill="white" font-size="18">Aprendizaje Automático</text>
+
+  <!-- DL -->
+  <circle cx="320" cy="335" r="120" fill="#a8a1d4" opacity="0.9" filter="url(#softShadow)" />
+  <text x="320" y="270" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" fill="white" font-size="16">Aprendizaje Profundo</text>
+
+  <!-- NLP: Círculo lateral que intersecta -->
+  <circle cx="560" cy="280" r="170" fill="#86b896" opacity="0.75" filter="url(#softShadow)" />
+  <text x="580" y="250" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" fill="white" font-size="18">Procesamiento de</text>
+  <text x="580" y="275" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" fill="white" font-size="18">Lenguaje Natural</text>
+
+  <!-- IA Generativa & LLM: Ubicados en la intersección de DL y NLP -->
+  <ellipse cx="430" cy="340" rx="75" ry="50" fill="white" stroke="#ff4444" stroke-width="3" />
+  <text x="430" y="335" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" fill="#cc0000" font-size="13">IA GENERATIVA</text>
+  <text x="430" y="355" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="black" fill="#cc0000" font-size="16">LLM</text>
+</svg>
