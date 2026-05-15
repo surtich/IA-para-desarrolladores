@@ -7,4 +7,5 @@ dependencies = [
     "numpy>=2.4.4",
     "pandas>=3.0.3",
     "plotnine>=0.15.4",
+    "torch>=2.12.0",
 ]

@@ -1,5 +1,237 @@
 ---
 title: Derivadas
+execute:
+  echo: false
 ---
 
 ## ¿Qué es una derivada?
+
+
+```{python}
+%run ../common/data_science_imports.py
+%run ../common/data_science_plots.py
+```
+
+
+```{python}
+b_0 = 3
+b_1 = 2
+b_2 = 1
+x_0 = 0.0
+x_1 = 2.0
+eps = 0.001
+
+def f_lineal(x):
+    return b_0 + b_1 * x
+
+def f_cuadratica(x):
+    return b_0 + b_1 * x + b_2 * x**2
+```
+
+Supongamos que tenemos la siguiente ecuación lineal:
+
+::: {layout-ncol=2}
+
+```{python}
+Markdown(rf"$$y =  {b_0} + {b_1} \cdot x$$")
+```
+
+
+```{python}
+#| warning: false
+p = (
+    ggplot()
+    + labs(title=f"Ecuación lineal: y = {b_0} + {b_1}x")
+    + clean_theme()
+    + theme(figure_size=(3, 3))
+    + stat_function(fun=f_lineal, color="green", size=1.5)
+)
+
+p
+```
+
+:::
+
+
+Queremos entender cómo cambia $y$ con respecto a $x$. Es decir, queremos entender la tasa de cambio de $y$ con respecto a $x$. Por ejemplo, si $x$ está en `{python} x_0`, entonces $y$ es igual a `{python} f_lineal(x_0)`. Si aumentamos $x$ a `{python} x_1`, entonces $y$ tendrá valor `{python} f_lineal(x_1)`. Por lo tanto el cambio de $y$ con respecto a $x$ es:
+
+
+::: {layout-ncol=2}
+
+```{python}
+Markdown(rf"$$\frac{{\Delta y}}{{\Delta x}} = \frac{{f({x_1}) - f({x_0})}}{{{x_1} - {x_0}}} = \frac{{{f_lineal(x_1)} - {f_lineal(x_0)}}}{{{x_1} - {x_0}}} = {b_1}$$")
+```
+
+```{python}
+#| warning: false
+(
+    p
+    + geom_segment(
+        aes(x=x_0, y=f_lineal(x_0), xend=x_1, yend=f_lineal(x_0)),
+        color="red",
+        size=1.5,
+        arrow=arrow(length=0.15, type='closed'),
+        linetype='dashed'
+    )
+    + annotate('text', x=(x_0 + x_1)/2, y=f_lineal(x_0) - 1, label=x_1-x_0, color='red', size=12)
+    + geom_segment(
+        aes(x=x_1, y=f_lineal(x_0), xend=x_1, yend=f_lineal(x_1)),
+        color="red",
+        size=1.5,
+        arrow=arrow(length=0.15, type='closed'),
+        linetype='dashed'
+    )
+    + annotate('text', x=x_1 + 1, y=(f_lineal(x_0) + f_lineal(x_1))/2, label=f_lineal(x_1) - f_lineal(x_0), color='red', size=12)
+) 
+```
+
+:::
+
+Es decir, que cuando $x$ aumenta en `{python} x_1 - x_0`, $y$ aumenta en `{python} f_lineal(x_1) - f_lineal(x_0)`. Por lo tanto, $y$ ha aumentado `{python} b_1` veces más que $x$.
+
+Ahora supongamos que queremos entender cómo cambia $y$ con respecto a un incremento minúsculo de $x$.
+
+```{python}
+Markdown(rf"$$\frac{{\Delta y}}{{\Delta x}} = \frac{{f({x_0 } + {eps}) - f({x_0})}}{{{x_0+eps} - {x_0}}} = \frac{{{f_lineal(x_0 + eps)} - {f_lineal(x_0)}}}{{{eps}}} = {b_1}$$")
+```
+
+Y eso es simplemente la derivada:
+
+> La derivada de una función $f$ con respecto a $x$ es el límite de la tasa de cambio de $f$ con respecto a $x$ cuando el incremento de $x$ tiende a cero.
+
+Matemáticamente, se define como:
+$$f'(x) = \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}$$
+
+Para una función lineal, la tasa de cambio de $y$ con respecto a $x$ es constante (es decir, no depende de el punto en el que se evalúe la función) y tampoco depende del tamaño incremento de $x$. Así, para una función lineal la derivada es simplemente el coeficiente de $x$ (en este ejemplo, `{python} b_1`).
+
+Gráficamente:
+
+```{python}
+#| warning: false
+p + stat_function(fun=lambda x: b_1, color="blue", size=1.5, linetype='dashed') + labs(title=f"Ecuación lineal: y = {b_0} + {b_1}x\nDerivada: y' = {b_1}")
+```
+
+En general, la derivada de una función no es constante y depende del punto en el que se evalúe la función. Por ejemplo, para la siguiente función cuadrática:
+
+
+::: {layout-ncol=2}
+```{python}
+Markdown(rf"$$y =  {b_0} + {b_1} \cdot x + {b_2} \cdot x^2$$")
+```
+
+```{python}
+#| warning: false
+p2 = (
+    ggplot()
+    + labs(title=f"y = {b_0} + {b_1}x + {b_2}x²")
+    + clean_theme((-5, 5), (-10, 10))
+    + theme(figure_size=(3, 3))
+    + stat_function(fun=f_cuadratica, color="green", size=1.5))   
+
+p2
+```
+:::
+Observamos que, en esta función (y en general en cualquier función no lineal), el cambio en $y$ depende del punto $x$ en el que se evalúe la función y del tamaño del incremento de $x$:
+
+
+```{python}
+Markdown(rf"$$\frac{{\Delta y}}{{\Delta x}} = \frac{{f({x_1}) - f({x_0})}}{{{x_1} - {x_0}}} = \frac{{{f_cuadratica(x_1)} - {f_cuadratica(x_0)}}}{{{x_1} - {x_0}}} = {{{(f_cuadratica(x_1) - f_cuadratica(x_0)) / (x_1 - x_0):.2f}}}$$")
+```
+
+```{python}
+Markdown(rf"$$\frac{{\Delta y}}{{\Delta x}} = \frac{{f({x_0 } + {eps}) - f({x_0})}}{{{x_0+eps} - {x_0}}} = \frac{{{f_cuadratica(x_0 + eps):.3f} - {f_cuadratica(x_0)}}}{{{eps}}} = {{{(f_cuadratica(x_0 + eps) - f_cuadratica(x_0)) / eps:.2f}}}$$")
+```
+
+```{python}
+Markdown(rf"$$\frac{{\Delta y}}{{\Delta x}} = \frac{{f({x_1 } + {eps}) - f({x_1})}}{{{x_1+eps} - {x_1}}} = \frac{{{f_cuadratica(x_1 + eps):.3f} - {f_cuadratica(x_1)}}}{{{eps}}} = {{{(f_cuadratica(x_1 + eps) - f_cuadratica(x_1)) / eps:.2f}}}$$")
+```
+
+Por lo tanto, la derivada en una función depende del punto $x$ en que es evalúe y requiere tomar incrementos infinitesimales para su cálculo. Para la función cuadrática, aplicando la definición de la derivada, podemos demostrar que la función de la derivada es:
+
+$$f'(x) = \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}$$
+
+```{python}
+Markdown(rf"$$f'(x) = \lim_{{\Delta x \to 0}} \frac{{({b_0} + {b_1}(x + \Delta x) + {b_2}(x + \Delta x)^2) - ({b_0} + {b_1}x + {b_2}x^2)}}{{\Delta x}} = \lim_{{\Delta x \to 0}} \frac{{{b_1}\Delta x + {b_2}(2x\Delta x + \Delta x^2)}}{{\Delta x}} = {b_1} + {2*b_2}x$$")
+```
+
+Si aplicamos la función de la derivada a los puntos $x_0$ y $x_1$, obtenemos los mismos resultados que obtuvimos al calcular la tasa de cambio con incrementos infinitesimales:
+
+```{python}
+Markdown(rf"$$f'({x_0}) = {b_1} + {2*b_2} \cdot {x_0} = {b_1:.2f}$$")
+```
+
+```{python}
+Markdown(rf"$$f'({x_1}) = {b_1} + {2*b_2} \cdot {x_1} = {b_1 + 2*b_2*x_1:.2f}$$")
+```
+
+Podemos representar gráficamente la función de la derivada:
+
+```{python}
+#| warning: false
+p2 + stat_function(fun=lambda x: b_1 + 2*b_2*x, color="blue", size=1.5, linetype='dashed') + labs(title=f"y = {b_0} + {b_1}x + {b_2}x²\ny' = {b_1} + {2*b_2}x")
+```
+
+## ¿Para qué sirven las derivadas?
+
+En la sección anterior vimos que la derivada de una función nos permite entender cómo cambia la función con respecto a cambios infinitesimales en su variable independiente ($x$). Esto es útil para entender el comportamiento de la función y para encontrar puntos críticos (máximos, mínimos y puntos de inflexión).
+
+Otra forma de entender la derivada es como la función que nos da la pendiente de la tangente a la curva de la función original en cada punto. Así cuando la derivada es positiva, la función original está aumentando, y cuando la derivada es negativa, la función original está disminuyendo. Cuando la derivada es cero, la función original tiene un punto crítico (puede ser un máximo, un mínimo o un punto de inflexión).
+
+En el ejemplo de la función cuadrática anterior, podemos encontrar su mínimo global encontrando el punto en el que la derivada es cero:
+
+::: {layout-ncol=2}
+```{python}
+Markdown(rf"$$0 = {b_1} + {2*b_2}x \Rightarrow x = -\frac{{{b_1}}}{{{2*b_2}}} = {-b_1/(2*b_2):.2f}$$")
+```
+
+
+```{python}
+#| warning: false
+p2 + stat_function(fun=lambda x: b_1 + 2*b_2*x, color="blue", size=1.5, linetype='dashed') + geom_segment(aes(x = -b_1/(2*b_2), y = 0, xend = -b_1/(2*b_2), yend = b_0 + b_1*(-b_1/(2*b_2)) + b_2*(-b_1/(2*b_2))**2), color="red", size=1.5, linetype='dashed') + labs(title=f"y = {b_0} + {b_1}x + {b_2}x²\ny' = {b_1} + {2*b_2}x\nMínimo en x = {-b_1/(2*b_2):.2f}")
+```
+
+:::
+
+## Derivadas parciales
+
+Hasta ahora hemos visto la derivada de una función con una sola variable independiente ($x$). Sin embargo, en muchos casos, las funciones pueden tener múltiples variables independientes. Por ejemplo, podríamos tener la siguiente función:
+
+$$y = b_0 + b_1 x_1 + b_2 x_2 $$
+
+En este caso, la función tiene dos variables independientes ($x_1$ y $x_2$). Para entender cómo cambia $y$ con respecto a cada una de las variables independientes, podemos calcular las derivadas parciales:
+
+$$\frac{{\partial y}}{{\partial x_1}} = b_1$$
+$$\frac{{\partial y}}{{\partial x_2}} = b_2$$
+
+Para calcular la derivada parcial de $y$ con respecto a $x_1$, tratamos a $x_2$ como una constante y calculamos la derivada de $y$ con respecto a $x_1$. De manera similar, para calcular la derivada parcial de $y$ con respecto a $x_2$, tratamos a $x_1$ como una constante y calculamos la derivada de $y$ con respecto a $x_2$.
+
+Calcular el mínimo y el máximo de una función con múltiples variables independientes es un poco más complicado que en el caso de una función con una sola variable independiente. Sin embargo, el concepto es similar: encontramos los puntos críticos de la función (donde las derivadas parciales son cero) y luego evaluamos la función en esos puntos para determinar si son máximos, mínimos o puntos de inflexión. Esto se puede realizar resolviendo el sistema de ecuaciones formado por las derivadas parciales igualadas a cero:
+
+$$
+\begin{cases}
+\frac{{\partial y}}{{\partial x_1}} &= 0 \\
+\frac{{\partial y}}{{\partial x_2}} &= 0
+\end{cases}
+$$
+
+## Las derivadas en el aprendizaje automático
+
+En el aprendizaje automático, las derivadas son fundamentales para optimizar los modelos. Por ejemplo, en la regresión lineal, queremos encontrar los coeficientes $b_0$, $b_1$, ..., $b_n$ que minimizan la función de pérdida (por ejemplo, el error cuadrático). Afortunadamente, en general no es necesario calcular las derivadas a mano, ya que existen librerías como TensorFlow, PyTorch y JAX que calculan las derivadas de manera automática utilizando técnicas de diferenciación automática. Así que lo único realmente importante es entender el concepto de derivada y cómo se relaciona con la optimización de los modelos.
+
+Por ejemplo, podemos utilizar Pytorch para calcular la derivada de la función cuadrática que vimos anteriormente en los puntos $x_0$ (`{python} x_0`) y $x_1$ (`{python} x_1`):
+
+```{python}
+#| echo: true
+import torch
+x = torch.tensor(x_0, requires_grad=True)
+y = b_0 + b_1 * x + b_2 * x**2
+y.backward()
+print(f"Derivada de y con respecto a x en x={x.item():.2f}: {x.grad.item():.2f}")
+
+x = torch.tensor(x_1, requires_grad=True)
+y = b_0 + b_1 * x + b_2 * x**2
+y.backward()
+print(f"Derivada de y con respecto a x en x={x.item():.2f}: {x.grad.item():.2f}")
+```
+
+Se puede comprobar que los resultados obtenidos con Pytorch son los mismos que los obtenidos al calcular la derivada de manera analítica. Esto es una gran ventaja, ya que nos permite calcular derivadas de funciones mucho más complejas sin tener que preocuparnos por el cálculo manual de las derivadas.
