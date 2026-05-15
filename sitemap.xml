@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://surtich.github.io/IA-para-desarrolladores/index.html</loc>
-    <lastmod>2026-05-14T23:17:40.333Z</lastmod>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/index.html</loc>
+    <lastmod>2026-05-15T06:37:14.548Z</lastmod>
   </url>
   <url>
-    <loc>https://surtich.github.io/IA-para-desarrolladores/intro.html</loc>
-    <lastmod>2026-05-15T00:09:16.398Z</lastmod>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/90_apendices/10_derivadas.html</loc>
+    <lastmod>2026-05-15T06:39:31.044Z</lastmod>
+  </url>
+  <url>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/10_fundamentos/10_intro.html</loc>
+    <lastmod>2026-05-15T06:38:10.836Z</lastmod>
   </url>
 </urlset>
