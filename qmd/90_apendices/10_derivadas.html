@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -71,6 +106,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -177,6 +241,9 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#qué-es-una-derivada" id="toc-qué-es-una-derivada" class="nav-link active" data-scroll-target="#qué-es-una-derivada">¿Qué es una derivada?</a></li>
+  <li><a href="#para-qué-sirven-las-derivadas" id="toc-para-qué-sirven-las-derivadas" class="nav-link" data-scroll-target="#para-qué-sirven-las-derivadas">¿Para qué sirven las derivadas?</a></li>
+  <li><a href="#derivadas-parciales" id="toc-derivadas-parciales" class="nav-link" data-scroll-target="#derivadas-parciales">Derivadas parciales</a></li>
+  <li><a href="#las-derivadas-en-el-aprendizaje-automático" id="toc-las-derivadas-en-el-aprendizaje-automático" class="nav-link" data-scroll-target="#las-derivadas-en-el-aprendizaje-automático">Las derivadas en el aprendizaje automático</a></li>
   </ul>
 </nav>
     </div>
@@ -204,6 +271,187 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="qué-es-una-derivada" class="level2">
 <h2 class="anchored" data-anchor-id="qué-es-una-derivada">¿Qué es una derivada?</h2>
+<p>Supongamos que tenemos la siguiente ecuación lineal:</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div id="db7da702" class="cell quarto-layout-cell" data-execution_count="3" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="143">
+<p><span class="math display">\[y =  3 + 2 \cdot x\]</span></p>
+</div>
+</div>
+<div id="d5e7451a" class="cell quarto-layout-cell" data-execution_count="4" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output cell-output-display" data-execution_count="144">
+<div>
+<figure class="figure">
+<p><img src="10_derivadas_files/figure-html/cell-5-output-1.png" width="288" height="288" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Queremos entender cómo cambia <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x\)</span>. Es decir, queremos entender la tasa de cambio de <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x\)</span>. Por ejemplo, si <span class="math inline">\(x\)</span> está en 0.0, entonces <span class="math inline">\(y\)</span> es igual a 3.0. Si aumentamos <span class="math inline">\(x\)</span> a 2.0, entonces <span class="math inline">\(y\)</span> tendrá valor 7.0. Por lo tanto el cambio de <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x\)</span> es:</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div id="dec65d06" class="cell quarto-layout-cell" data-execution_count="5" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="145">
+<p><span class="math display">\[\frac{\Delta y}{\Delta x} = \frac{f(2.0) - f(0.0)}{2.0 - 0.0} = \frac{7.0 - 3.0}{2.0 - 0.0} = 2\]</span></p>
+</div>
+</div>
+<div id="4e8bdce2" class="cell quarto-layout-cell" data-execution_count="6" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output cell-output-display" data-execution_count="146">
+<div>
+<figure class="figure">
+<p><img src="10_derivadas_files/figure-html/cell-7-output-1.png" width="288" height="288" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Es decir, que cuando <span class="math inline">\(x\)</span> aumenta en 2.0, <span class="math inline">\(y\)</span> aumenta en 4.0. Por lo tanto, <span class="math inline">\(y\)</span> ha aumentado 2 veces más que <span class="math inline">\(x\)</span>.</p>
+<p>Ahora supongamos que queremos entender cómo cambia <span class="math inline">\(y\)</span> con respecto a un incremento minúsculo de <span class="math inline">\(x\)</span>.</p>
+<div id="2294acbe" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="147">
+<p><span class="math display">\[\frac{\Delta y}{\Delta x} = \frac{f(0.0 + 0.001) - f(0.0)}{0.001 - 0.0} = \frac{3.002 - 3.0}{0.001} = 2\]</span></p>
+</div>
+</div>
+<p>Y eso es simplemente la derivada:</p>
+<blockquote class="blockquote">
+<p>La derivada de una función <span class="math inline">\(f\)</span> con respecto a <span class="math inline">\(x\)</span> es el límite de la tasa de cambio de <span class="math inline">\(f\)</span> con respecto a <span class="math inline">\(x\)</span> cuando el incremento de <span class="math inline">\(x\)</span> tiende a cero.</p>
+</blockquote>
+<p>Matemáticamente, se define como: <span class="math display">\[f'(x) = \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}\]</span></p>
+<p>Para una función lineal, la tasa de cambio de <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x\)</span> es constante (es decir, no depende de el punto en el que se evalúe la función) y tampoco depende del tamaño incremento de <span class="math inline">\(x\)</span>. Así, para una función lineal la derivada es simplemente el coeficiente de <span class="math inline">\(x\)</span> (en este ejemplo, 2).</p>
+<p>Gráficamente:</p>
+<div id="402454d3" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="148">
+<div>
+<figure class="figure">
+<p><img src="10_derivadas_files/figure-html/cell-9-output-1.png" width="288" height="288" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>En general, la derivada de una función no es constante y depende del punto en el que se evalúe la función. Por ejemplo, para la siguiente función cuadrática:</p>
+<div id="0974ba44" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="149">
+<p><span class="math display">\[y =  3 + 2 \cdot x + 1 \cdot x^2\]</span></p>
+</div>
+</div>
+<div id="2ea57107" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="150">
+<div>
+<figure class="figure">
+<p><img src="10_derivadas_files/figure-html/cell-11-output-1.png" width="288" height="288" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Observamos que, en esta función (y en general en cualquier función no lineal) el cambio en <span class="math inline">\(y\)</span> depende del punto <span class="math inline">\(x\)</span> en el que se evalúe la función y del tamaño del incremento de <span class="math inline">\(x\)</span>:</p>
+<div id="9f618cf1" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="151">
+<p><span class="math display">\[\frac{\Delta y}{\Delta x} = \frac{f(2.0) - f(0.0)}{2.0 - 0.0} = \frac{11.0 - 3.0}{2.0 - 0.0} = {4.00}\]</span></p>
+</div>
+</div>
+<div id="2d6140e9" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="152">
+<p><span class="math display">\[\frac{\Delta y}{\Delta x} = \frac{f(0.0 + 0.001) - f(0.0)}{0.001 - 0.0} = \frac{3.002 - 3.0}{0.001} = {2.00}\]</span></p>
+</div>
+</div>
+<div id="c4c80aa8" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="153">
+<p><span class="math display">\[\frac{\Delta y}{\Delta x} = \frac{f(2.0 + 0.001) - f(2.0)}{2.001 - 2.0} = \frac{11.006 - 11.0}{0.001} = {6.00}\]</span></p>
+</div>
+</div>
+<p>Por lo tanto, la derivada en una función que depende de <span class="math inline">\(x\)</span> y requiere tomar incrementos infinitesimales para su cálculo. Para la función cuadrática, aplicando la definición de la derivada, podemos demotrar que la función de la derivada es:</p>
+<p><span class="math display">\[f'(x) = \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}\]</span></p>
+<div id="8596938c" class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="154">
+<p><span class="math display">\[f'(x) = \lim_{\Delta x \to 0} \frac{(3 + 2(x + \Delta x) + 1(x + \Delta x)^2) - (3 + 2x + 1x^2)}{\Delta x} = \lim_{\Delta x \to 0} \frac{2\Delta x + 1(2x\Delta x + \Delta x^2)}{\Delta x} = 2 + 2x\]</span></p>
+</div>
+</div>
+<p>Si aplicamos la función de la derivada a los puntos <span class="math inline">\(x_0\)</span> y <span class="math inline">\(x_1\)</span>, obtenemos los mismos resultados que obtuvimos al calcular la tasa de cambio con incrementos infinitesimales:</p>
+<div id="24702643" class="cell" data-execution_count="15">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="155">
+<p><span class="math display">\[f'(0.0) = 2 + 2 \cdot 0.0 = 2.00\]</span></p>
+</div>
+</div>
+<div id="5c7caf84" class="cell" data-execution_count="16">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="156">
+<p><span class="math display">\[f'(2.0) = 2 + 2 \cdot 2.0 = 6.00\]</span></p>
+</div>
+</div>
+<p>Podemos representar gráficamente la función de la derivada:</p>
+<div id="0a23b71b" class="cell" data-execution_count="17">
+<div class="cell-output cell-output-display" data-execution_count="157">
+<div>
+<figure class="figure">
+<p><img src="10_derivadas_files/figure-html/cell-18-output-1.png" width="288" height="288" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="para-qué-sirven-las-derivadas" class="level2">
+<h2 class="anchored" data-anchor-id="para-qué-sirven-las-derivadas">¿Para qué sirven las derivadas?</h2>
+<p>En la sección anterior vimos que la derivada de una función nos permite entender cómo cambia la función con respecto a cambios infinitesimales en su variable independiente (<span class="math inline">\(x\)</span>). Esto es útil para entender el comportamiento de la función y para encontrar puntos críticos (máximos, mínimos y puntos de inflexión).</p>
+<p>Otra forma de entender la derivada es como la función que nos da la pendiente de la tangente a la curva de la función original en cada punto. Así cuando la derivada es positiva, la función original está aumentando, y cuando la derivada es negativa, la función original está disminuyendo. Cuando la derivada es cero, la función original tiene un punto crítico (puede ser un máximo, un mínimo o un punto de inflexión).</p>
+<p>En el ejemplo de la función cuadrática anterior, podemos encontrar su mínimo global encontrando el punto en el que la derivada es cero:</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div id="00d64d6f" class="cell quarto-layout-cell" data-execution_count="18" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="158">
+<p><span class="math display">\[0 = 2 + 2x \Rightarrow x = -\frac{2}{2} = -1.00\]</span></p>
+</div>
+</div>
+<div id="ec6cc6b4" class="cell quarto-layout-cell" data-execution_count="19" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="cell-output cell-output-display" data-execution_count="159">
+<div>
+<figure class="figure">
+<p><img src="10_derivadas_files/figure-html/cell-20-output-1.png" width="288" height="288" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="derivadas-parciales" class="level2">
+<h2 class="anchored" data-anchor-id="derivadas-parciales">Derivadas parciales</h2>
+<p>Hasta ahora hemos visto la derivada de una función con una sola variable independiente (<span class="math inline">\(x\)</span>). Sin embargo, en muchos casos, las funciones pueden tener múltiples variables independientes. Por ejemplo, podríamos tener la siguiente función:</p>
+<p><span class="math display">\[y = b_0 + b_1 x_1 + b_2 x_2 \]</span></p>
+<p>En este caso, la función tiene dos variables independientes (<span class="math inline">\(x_1\)</span> y <span class="math inline">\(x_2\)</span>). Para entender cómo cambia <span class="math inline">\(y\)</span> con respecto a cada una de las variables independientes, podemos calcular las derivadas parciales:</p>
+<p><span class="math display">\[\frac{{\partial y}}{{\partial x_1}} = b_1\]</span> <span class="math display">\[\frac{{\partial y}}{{\partial x_2}} = b_2\]</span></p>
+<p>Para calcular la derivada parcial de <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x_1\)</span>, tratamos a <span class="math inline">\(x_2\)</span> como una constante y calculamos la derivada de <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x_1\)</span>. De manera similar, para calcular la derivada parcial de <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x_2\)</span>, tratamos a <span class="math inline">\(x_1\)</span> como una constante y calculamos la derivada de <span class="math inline">\(y\)</span> con respecto a <span class="math inline">\(x_2\)</span>.</p>
+<p>Calcular el mínimo y el máximo de una función con múltiples variables independientes es un poco más complicado que en el caso de una función con una sola variable independiente. Sin embargo, el concepto es similar: encontramos los puntos críticos de la función (donde las derivadas parciales son cero) y luego evaluamos la función en esos puntos para determinar si son máximos, mínimos o puntos de inflexión. Esto se puede realizar resolviendo el sistema de ecuaciones formado por las derivadas parciales igualadas a cero:</p>
+<p><span class="math display">\[
+\begin{cases}
+\frac{{\partial y}}{{\partial x_1}} &amp;= 0 \\
+\frac{{\partial y}}{{\partial x_2}} &amp;= 0
+\end{cases}
+\]</span></p>
+</section>
+<section id="las-derivadas-en-el-aprendizaje-automático" class="level2">
+<h2 class="anchored" data-anchor-id="las-derivadas-en-el-aprendizaje-automático">Las derivadas en el aprendizaje automático</h2>
+<p>En el aprendizaje automático, las derivadas son fundamentales para optimizar los modelos. Por ejemplo, en la regresión lineal, queremos encontrar los coeficientes <span class="math inline">\(b_0\)</span>, <span class="math inline">\(b_1\)</span>, …, <span class="math inline">\(b_n\)</span> que minimizan la función de pérdida (por ejemplo, el error cuadrático). Afortunadamente, en general no es necesario calcular las derivadas a mano, ya que existen librerías como TensorFlow, PyTorch y JAX que calculan las derivadas de manera automática utilizando técnicas de diferenciación automática. Así que lo único realmente importante es entender el concepto de derivada y cómo se relaciona con la optimización de los modelos.</p>
+<p>Por ejemplo, podemos utilizar Pytorch para calcular la derivada de la función cuadrática que vimos anteriormente en los puntos <span class="math inline">\(x_0\)</span> (0.0) y <span class="math inline">\(x_1\)</span> (2.0):</p>
+<div id="37aa1cda" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(x_0, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> b_0 <span class="op">+</span> b_1 <span class="op">*</span> x <span class="op">+</span> b_2 <span class="op">*</span> x<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>y.backward()</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Derivada de y con respecto a x en x=</span><span class="sc">{</span>x<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">: </span><span class="sc">{</span>x<span class="sc">.</span>grad<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(x_1, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> b_0 <span class="op">+</span> b_1 <span class="op">*</span> x <span class="op">+</span> b_2 <span class="op">*</span> x<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>y.backward()</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Derivada de y con respecto a x en x=</span><span class="sc">{</span>x<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">: </span><span class="sc">{</span>x<span class="sc">.</span>grad<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Derivada de y con respecto a x en x=0.00: 2.00
+Derivada de y con respecto a x en x=2.00: 6.00</code></pre>
+</div>
+</div>
+<p>Se puede comprobar que los resultados obtenidos con Pytorch son los mismos que los obtenidos al calcular la derivada de manera analítica. Esto es una gran ventaja, ya que nos permite calcular derivadas de funciones mucho más complejas sin tener que preocuparnos por el cálculo manual de las derivadas.</p>
 
 
 </section>
