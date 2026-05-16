@@ -1,0 +1,574 @@
+---
+title: Regresión lineal
+execute:
+  echo: false
+---
+
+## Introducción
+
+En la [lección anterior](10_intro.qmd), vimos que podemos utilizar distintos modelos para ajustar una función a un conjunto de datos. Se justificó que el modelo más sencillo es el lineal, ya que tiene menos parámetros y, por ello, es más fácil de interpretar. En esta lección, vamos a ver cómo se puede ajustar un modelo lineal a un conjunto de datos utilizando el método de mínimos cuadrados, que es el método más utilizado para ajustar modelos de regresión lineal.
+
+## Función de pérdida
+
+```{python}
+%run ../common/data_science_imports.py
+%run ../common/data_science_plots.py
+%run ../common/data_science_df.py
+```
+
+
+En el [capítulo anterior](10_intro.qmd#best_model) vimos que, dados dos modelos, podemos calcular el error que comete cada uno de ellos en cada uno de los puntos de entrenamiento.
+
+Así, partiendo del `dataset` de entrenamiento:
+
+```{python}
+df = people_df[["horas_estudio", "notas"]]
+
+df
+```
+
+Supongamos que tenemos dos modelos:
+
+```{python}
+b_0 = 3
+b_1 = 0
+
+
+m_0 = 0.3
+m_1 = 1.37 
+
+def linear_model(x, b, m):
+    return b + m * x        
+```
+
+
+::: {layout-ncol=2}
+
+```{python}
+display(Markdown(
+    rf"""$$
+    \begin{{aligned}}
+    \text{{Modelo 0: }} y &= {b_0} + {m_0} \cdot x \\
+    \text{{Modelo 1: }} y &= {b_1} + {m_1} \cdot x
+    \end{{aligned}}
+    $$"""
+))
+```
+
+```{python}
+#| warning: false
+p = (
+      ggplot(df, aes(x="horas_estudio", y="notas")) 
+    + custom_points()
+    + clean_theme(xrange=(0, 10), yrange=(0, 10), xlabel="horas de estudio", ylabel="notas", xintercept=0, yintercept=0)
+    + geom_segment(aes(color='"Modelo 0"', x=df["horas_estudio"].min(), xend=df["horas_estudio"].max(), y=linear_model(df["horas_estudio"].min(), b_0, m_0), yend=linear_model(df["horas_estudio"].max(), b_0, m_0)), size=1.5, show_legend=True)
+    + geom_segment(aes(color='"Modelo 1"', x=df["horas_estudio"].min(), xend=df["horas_estudio"].max(), y=linear_model(df["horas_estudio"].min(), b_1, m_1), yend=linear_model(df["horas_estudio"].max(), b_1, m_1)), size=1.5, show_legend=True)
+    + scale_color_manual(
+        values={
+            "Modelo 0": "#0074D9",
+            "Modelo 1": "#42b85e",
+        },
+        name="Modelos",
+    ) + theme(
+        figure_size=(4, 4),
+        legend_position='top' # Opciones: 'right', 'left', 'top', 'bottom'
+    )
+) 
+
+p
+
+```
+
+:::
+
+Ninguno de los dos modelos parece particularmente bueno, pero, ¿cuál de los dos es mejor? Para responder a esta pregunta, vamos a calcular el error que comete cada modelo en cada punto de entrenamiento:
+
+```{python}
+df["prediccion_modelo_0"] = df.apply(lambda row: linear_model(row["horas_estudio"], b_0, m_0), axis=1)
+df["prediccion_modelo_1"] = df.apply(lambda row: linear_model(row["horas_estudio"], b_1, m_1), axis=1)
+df["error_modelo_0"] = df["notas"] - df["prediccion_modelo_0"]
+df["error_modelo_1"] = df["notas"] - df["prediccion_modelo_1"]
+
+df
+```
+
+Para obtener el error total de cada modelo, podríamos sumar el error de cada punto. Sin embargo, como el error puede ser positivo o negativo, los errores de algunos puntos podrían anularse con los errores de otros puntos. Podemos evitar este problema con dos estrategias:
+
+1.- **Error absoluto**: En este caso, el error total de cada modelo se calcula sumando el valor absoluto del error de cada punto.
+
+2.- **Error cuadrático**: En este caso, el error total de cada modelo se calcula sumando el cuadrado del error de cada punto.
+
+```{python}
+df["error_absoluto_modelo_0"] = df["error_modelo_0"].abs()
+df["error_absoluto_modelo_1"] = df["error_modelo_1"].abs()
+df["error_cuadratico_modelo_0"] = df["error_modelo_0"] ** 2
+df["error_cuadratico_modelo_1"] = df["error_modelo_1"] ** 2
+df[["error_absoluto_modelo_0", "error_absoluto_modelo_1", "error_cuadratico_modelo_0", "error_cuadratico_modelo_1"]]
+```
+
+Calculamos el error total de cada modelo con cada métrica:
+
+```{python}
+df_errores = pd.DataFrame({
+    "modelo": ["Modelo 0", "Modelo 1"],
+    "error_absoluto": [df["error_absoluto_modelo_0"].sum(), df["error_absoluto_modelo_1"].sum()],
+    "error_cuadratico": [df["error_cuadratico_modelo_0"].sum(), df["error_cuadratico_modelo_1"].sum()]
+})
+df_errores
+```
+ 
+ Observe que cada modelo es mejor con una métrica diferente. Elevar los errores al cuadrado penaliza más los errores grandes. En la práctica, el error cuadrático es la métrica más utilizada para evaluar modelos de regresión. La razón es que tiene propiedades matemáticas y que facilitan la optimización del modelo. A la suma de los errores cuadrados se le llama **suma de los errores cuadrados** o **SSR** (por sus siglas en inglés) y matemáticamente se define:
+
+$$
+SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+$$
+
+Donde $y_i$ es el valor real de la variable objetivo para el punto $i$ e $\hat{y}_i$ es el valor predicho por el modelo para el punto $i$.
+
+La esta función que mide los errores que ha cometido el modelo se llama **función de pérdida**. El objetivo de del entrenamiento es encontrar los parámetros del modelo (en este caso, $b$ y $m$) que minimicen la función de pérdida (en este caso, la suma de los errores cuadrados).
+
+## Cálculo del mínimo de la función de pérdida
+
+Podemos representar gráficamente la función de pérdida en función de los parámetros del modelo para entender mejor la forma de la función de pérdida. La dificultad es que la función de pérdida depende de dos parámetros ($b$ y $m$), con lo que no se puede representar en un gráfico bidimensional. Podemos representar la función de pérdida en un gráfico tridimensional, en el que los ejes $x$ e $y$ representen los parámetros del modelo ($b$ y $m$) y el eje $z$ represente el valor de la función de pérdida:
+
+```{python}
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+b_vals = np.linspace(0, 5, 50)
+m_vals = np.linspace(0, 2, 50)
+
+B, M = np.meshgrid(b_vals, m_vals)
+
+
+SSR = np.zeros(B.shape)
+for i in range(B.shape[0]):
+    for j in range(B.shape[1]):
+        predicciones = B[i, j] + M[i, j] * df["horas_estudio"]
+        SSR[i, j] = np.sum((df["notas"] - predicciones) ** 2)
+
+```
+
+```{python}
+#| warning: false
+
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111, projection='3d')
+
+superficie = ax.plot_surface(B, M, SSR, cmap='viridis', edgecolor='none', alpha=0.8)
+ax.set_xlabel('Intercepto (b)', labelpad=10)
+ax.set_ylabel('Pendiente (m)', labelpad=10)
+ax.set_zlabel('SSR (Error)', labelpad=10)
+ax.set_title('Forma de la función de pérdida SSR', fontsize=14, pad=20)
+
+fig.colorbar(superficie, ax=ax, shrink=0.5, aspect=10, label='Valor de SSR')
+ax.legend()
+
+ax.view_init(elev=30, azim=180)
+plt.show()
+```
+
+En el gráfico anterior, se observa que la función de pérdida tiene forma parabólica y, por lo tanto, tiene un único mínimo global. Esto mismo lo podríamos haber deducido sin necesidad de representar la función de pérdida ya que, al ser cuadrática y siempre positiva, tiene que tener un único mínimo global.
+
+Para obtener el mínimo global, como se explica en el [apéndice de derivadas](../90_apendices/10_derivadas.qmd), podemos calcular las derivadas parciales de la función de pérdida con respecto a cada uno de los parámetros del modelo, igualarlas a cero y resolver el sistema de ecuaciones resultante. En este caso, las derivadas parciales de la función de pérdida con respecto a $b$ y $m$ son:
+
+$$
+\begin{aligned}
+\frac{\partial SSR}{\partial b} &= -2 \sum_{i=1}^{n} (y_i - (b + m x_i)) = 0 \\
+\frac{\partial SSR}{\partial m} &= -2 \sum_{i=1}^{n} x_i (y_i - (b + m x_i)) = 0
+\end{aligned}
+$$
+
+Con un poco de cacharreo matemático, se puede demostrar que la solución de este sistema de ecuaciones es:
+
+$$
+\begin{aligned}
+b &= \bar{y} - m \bar{x} \\
+m &= \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n} (x_i - \bar{x})^2}
+\end{aligned}
+$$
+
+Donde $\bar{x}$ y $\bar{y}$ son la media de las variables $x$ e $y$, respectivamente. En nuestro ejemplo $x$ es son las horas de estudio e $y$ es la nota. Por lo tanto, el modelo lineal que minimiza la función de pérdida es:
+
+El resultado de aplicar esta fórmula a nuestro `dataset` es:
+
+```{python}
+x = df["horas_estudio"]
+y = df["notas"]
+m_hat = np.sum((x - x.mean()) * (y - y.mean())) / np.sum((x - x.mean()) ** 2)
+b_hat = y.mean() - m_hat * x.mean()
+print(f"b: {b_hat:.2f}, m: {m_hat:.2f}")
+print(f"SSR: {np.sum((y - (b_hat + m_hat * x)) ** 2):.2f}")
+```
+
+Como cabría esperar, vemos que la función de pérdida es menor para el modelo que hemos calculado que para los modelos anteriores. Podemos representar el modelo que hemos calculado en el gráfico para ver cómo se ajusta a los datos:
+
+```{python}
+#| warning: false
+p + geom_segment(aes(color='"Modelo óptimo"', x=df["horas_estudio"].min(), xend=df["horas_estudio"].max(), y=b_hat + m_hat * df["horas_estudio"].min(), yend=b_hat + m_hat * df["horas_estudio"].max()), size=1.5, show_legend=True) + theme(
+        figure_size=(6, 8),
+        legend_position='top' # Opciones: 'right', 'left', 'top', 'bottom'
+    )
+```
+
+## Algoritmo de descenso de gradiente
+
+Aunque el método de las derivadas es el método más directo para encontrar el mínimo de la función de pérdida, en algunos casos no es posible resolver el sistema de ecuaciones resultante. Esto puede ocurrir, por ejemplo, cuando la función de pérdida es muy compleja o cuando el número de parámetros del modelo es muy grande. En estos casos, podemos utilizar un método numérico llamado **descenso de gradiente** para encontrar una aproximación al mínimo de la función de pérdida.
+
+En primer lugar tenemos definir que el **gradiente** de un función:
+
+> El gradiente de una función es un vector que contiene las derivadas parciales de la función con respecto a cada uno de sus parámetros. El gradiente indica la dirección en la que la función aumenta más rápidamente. Por lo tanto, si queremos minimizar la función, debemos movernos en la dirección opuesta al gradiente.
+
+El algoritmo de descenso de gradiente consiste en iterativamente actualizar los parámetros del modelo en la dirección opuesta al gradiente de la función de pérdida con respecto a los parámetros del modelo. La actualización se realiza con la siguiente fórmula:
+
+$$
+\boldsymbol{\theta} = \boldsymbol{\theta} - \alpha \nabla L(\boldsymbol{\theta})
+$$
+
+Donde:
+
+- $\boldsymbol{\theta}$ es el vector de parámetros del modelo (en nuestro caso, $\boldsymbol{\theta} = (b, m)$).
+- $\alpha$ es la tasa de aprendizaje, que es un hiperparámetro que controla el tamaño de los pasos que damos en cada iteración (más adelante se explicará cómo elegir un valor adecuado para $\alpha$).
+- $\nabla L(\boldsymbol{\theta})$ es el gradiente de la función de pérdida con respecto a los parámetros del modelo, que se calcula como:
+$$
+\nabla L(\boldsymbol{\theta}) = \left( \frac{\partial L}{\partial b}, \frac{\partial L}{\partial m} \right)
+$$
+
+::: {.callout-tip}
+## ¿Qué es un hiperparámetro?
+Un hiperparámetro es un parámetro del modelo que no se aprende durante el proceso de entrenamiento, sino que se establece antes de comenzar el entrenamiento. La tasa de aprendizaje $\alpha$ es un ejemplo de hiperparámetro. La elección de un valor adecuado para $\alpha$ es crucial para el éxito del algoritmo de descenso de gradiente. Si $\alpha$ es demasiado pequeño, el algoritmo puede tardar mucho tiempo en converger al mínimo de la función de pérdida. Si $\alpha$ es demasiado grande, el algoritmo puede divergir y no encontrar el mínimo de la función de pérdida.
+:::
+
+El **algoritmo de descenso de gradiente** se puede resumir en los siguientes pasos:
+
+* 1.- Inicializar los parámetros del modelo con valores aleatorios.
+* 2.- Calcular el gradiente de la función de pérdida con respecto a los parámetros del modelo.
+* 3.- Actualizar los parámetros del modelo utilizando la fórmula de actualización.
+* 4.- Repetir los pasos 2 y 3 hasta que se alcance un criterio de parada (por ejemplo, un número máximo de iteraciones o una mejora mínima en la función de pérdida).
+
+```{python}
+def  linear_grad(b, m, x = df["horas_estudio"], y = df["notas"]):
+    y_pred = b + m * x
+    error = y - y_pred
+    grad_b = -2 * np.sum(error)
+    grad_m = -2 * np.sum(x * error)
+    return grad_b, grad_m
+```
+
+Vamos a explicar el algoritmo de descenso de gradiente paso a paso. Supongamos que arbitrariamente inicializamos los parámetros del modelo con los valores b=`{python} b_0` y m=`{python} m_0`. Representamos el modelo con estos parámetros en el gráfico:
+
+```{python}
+#| warning: false
+p = (
+      ggplot(df, aes(x="horas_estudio", y="notas")) 
+    + custom_points()
+    + clean_theme(xrange=(0, 10), yrange=(0, 10), xlabel="horas_estudio", ylabel="notas", xintercept=0, yintercept=0)
+    + geom_segment(aes( x=df["horas_estudio"].min(), xend=df["horas_estudio"].max(), y=linear_model(df["horas_estudio"].min(), b_0, m_0), yend=linear_model(df["horas_estudio"].max(), b_0, m_0)), size=1.5, color='#84a7c5')
+)
+
+p
+```
+
+```{python}
+def ssr(b, m, x = df["horas_estudio"], y = df["notas"]):
+    y_pred = b + m * x
+    return np.sum((y - y_pred) ** 2)
+```
+
+La función de pérdida para el modelo con los parámetros iniciales es:
+
+```{python}
+print(f"SSR: {ssr(b_0, m_0):.4f}")
+```
+
+
+El primer paso del algoritmo es calcular el gradiente de la función de pérdida con respecto a los parámetros del modelo. Para ello, usamos las derivadas parciales de la función de pérdida con respecto a $b$ y $m$ mostradas anteriormente:
+
+```{python}
+grad_b, grad_m = linear_grad(b_0, m_0)
+print(f"Gradiente con respecto a b: {grad_b:.2f}")
+print(f"Gradiente con respecto a m: {grad_m:.2f}")
+```
+
+```{python}
+alpha = 0.001  # tasa de aprendizaje
+```
+
+Definimos una tasa de aprendizaje $\alpha$ (por ejemplo `{python} alpha`) y actualizamos los parámetros del modelo utilizando la fórmula de actualización.
+
+```{python}
+b_1 = b_0 - alpha * grad_b
+m_1 = m_0 - alpha * grad_m
+print(f"b actualizado: {b_1:.2f}, m actualizado : {m_1:.2f}")
+```
+
+Mostramos el modelo con los parámetros actualizados en el gráfico:
+
+```{python}
+#| warning: false
+p = p + geom_segment(aes( x=df["horas_estudio"].min(), xend=df["horas_estudio"].max(), y=linear_model(df["horas_estudio"].min(), b_1, m_1), yend=linear_model(df["horas_estudio"].max(), b_1, m_1)), size=1.5, color='#4878a2')
+
+p
+```
+
+Vemos que el modelo con los parámetros actualizados se ajusta mejor a los datos que el modelo con los parámetros iniciales. Calculamos la función de pérdida para el modelo con los parámetros actualizados y comprobamos que es menor que la anterior:
+
+```{python}
+print(f"SSR actualizado: {ssr(b_1, m_1):.4f}")
+```
+
+Hagamos una segunda iteración del algoritmo de descenso de gradiente para ver cómo se va ajustando el modelo a los datos:
+
+```{python}
+grad_b, grad_m = linear_grad(b_1, m_1)
+b_2 = b_1 - alpha * grad_b
+m_2 = m_1 - alpha * grad_m
+print(f"b actualizado: {b_2:.2f}, m actualizado : {m_2:.2f}")
+```
+
+Mostramos el modelo con los parámetros actualizados en el gráfico:
+```{python}
+#| warning: false
+p = p + geom_segment(aes( x=df["horas_estudio"].min(), xend=df["horas_estudio"].max(), y=linear_model(df["horas_estudio"].min(), b_2, m_2), yend=linear_model(df["horas_estudio"].max(), b_2, m_2)), size=1.5, color='#1d496f')
+
+p
+```
+
+Calculamos nuevamente la función de pérdida:
+```{python}
+print(f"SSR actualizado: {ssr(b_2, m_2):.4f}")
+```
+
+Podemos programar un bucle para iterar el algoritmo de descenso de gradiente hasta que se alcance un criterio de parada:
+
+```{python}
+loss_values = []
+b = b_0
+m = m_0
+for i in range(0, 1001):
+    grad_b, grad_m = linear_grad(b, m)
+    b = b - alpha * grad_b
+    m = m - alpha * grad_m
+    if i % 100 == 0:
+        print(f"Iteración {i}: b={b:.2f}, m={m:.2f}, SSR={ssr(b, m):.4f}")
+    if i < 100:
+        loss_values.append(ssr(b, m))
+```
+
+
+Observamos que el algoritmo de descenso de gradiente prácticamente ha convergido y que los parámetros están casi en los valores óptimos que habíamos calculado analíticamente.
+
+
+Podemos mostrar gráficamente cómo ha evolucionado la función de pérdida a lo largo de las iteraciones:
+
+```{python}
+p = (
+      ggplot(pd.DataFrame({"iteracion": range(len(loss_values)), "loss": loss_values}), aes(x="iteracion", y="loss")) 
+    + geom_line(color='#0074D9', size=1.5)
+    + clean_theme(xrange=(0, len(loss_values)), yrange=(0, max(loss_values)), xlabel="Iteración", ylabel="Loss", xintercept=0, yintercept=0)
+)
+
+p
+```
+
+```{python}
+alpha = 0.0001
+```
+
+El valor de la tasa de aprendizaje $\alpha$ que hemos utilizado ha permitido converger al algoritmo. Pero comprobemos qué ocurre si utilizamos un valor de $\alpha$ más pequeño:
+
+```{python}
+b = b_0
+m = m_0
+loss_values = []
+for i in range(0, 1001):
+    grad_b, grad_m = linear_grad(b, m)
+    b = b - alpha * grad_b
+    m = m - alpha * grad_m
+    if i % 100 == 0:
+        print(f"Iteración {i}: b={b:.2f}, m={m:.2f}, SSR={ssr(b, m):.4f}")
+    if i < 100:
+        loss_values.append(ssr(b, m))
+```
+
+En este caso, el algoritmo de descenso de gradiente tarda mucho más en converger al mínimo de la función de pérdida. De hecho, después de 1000 iteraciones, el valor de la función de pérdida sigue siendo muy alto.
+
+```{python}
+alpha = 0.00775
+```
+
+
+Podríamos tener la tentación de aumentar el valor de $\alpha$ para acelerar la convergencia, pero si lo hacemos, corremos el riesgo de que el algoritmo diverja y no encuentre el mínimo de la función de pérdida. Por ejemplo, si utilizamos un valor de $\alpha$ demasiado grande:
+
+
+```{python}
+b = b_0
+m = m_0
+loss_values = []
+for i in range(0, 1001):
+    grad_b, grad_m = linear_grad(b, m)
+    b = b - alpha * grad_b
+    m = m - alpha * grad_m
+    if i % 100 == 0:
+        print(f"Iteración {i}: b={b:.2f}, m={m:.2f}, SSR={ssr(b, m):.4f}")
+    if i < 100:
+        loss_values.append(ssr(b, m))
+```
+
+En este caso, el algoritmo de descenso de gradiente diverge y no encuentra el mínimo de la función de pérdida. De hecho, después de 1000 iteraciones, el valor de la función de pérdida es extremadamente alto.
+
+Gráficamente:
+
+```{python}
+p = (
+      ggplot(pd.DataFrame({"iteracion": range(len(loss_values)), "loss": loss_values}), aes(x="iteracion", y="loss")) 
+    + geom_line(color='#b11616', size=1.5)
+    + clean_theme(xrange=(0, len(loss_values)), yrange=(0, max(loss_values)), xlabel="Iteración", ylabel="Loss", xintercept=0, yintercept=0)
+)
+p
+```
+
+### Descenso de gradiente con Pytorch
+
+El siguiente código muestra cómo implementar el algoritmo de descenso de gradiente utilizando la librería Pytorch. En este caso, utilizamos tensores de Pytorch para representar los parámetros del modelo y los datos de entrenamiento, y utilizamos la función `backward()` para calcular el gradiente de la función de pérdida con respecto a los parámetros del modelo. Observamos que el resultado es similar al que hemos obtenido con la implementación manual del algoritmo de descenso de gradiente.
+
+```{python}
+#| echo: true
+import torch
+b = torch.tensor(float(b_0), requires_grad=True)
+m = torch.tensor(float(m_0), requires_grad=True)
+x = torch.tensor(df["horas_estudio"].values, dtype=torch.float32)
+y = torch.tensor(df["notas"].values, dtype=torch.float32)
+def ssr_torch(b, m, x, y):
+    y_pred = b + m * x
+    return torch.sum((y - y_pred) ** 2)
+alpha = 0.001
+for i in range(0, 1001):
+    loss = ssr_torch(b, m, x, y)
+    loss.backward()
+    with torch.no_grad():
+        b -= alpha * b.grad
+        m -= alpha * m.grad
+        b.grad.zero_()
+        m.grad.zero_()
+    if i % 100 == 0:
+        print(f"Iteración {i}: b={b.item():.2f}, m={m.item():.2f}, SSR={loss.item():.4f}")
+```
+
+
+En Pytorch, también podemos utilizar optimizadores predefinidos para realizar el descenso de gradiente de manera más sencilla. Por ejemplo, podemos utilizar el optimizador `SGD` (Stochastic Gradient Descent) de Pytorch para actualizar los parámetros del modelo:
+
+```{python}
+#| echo: true
+import torch
+import torch.optim as optim
+b = torch.tensor(float(b_0), requires_grad=True)
+m = torch.tensor(float(m_0), requires_grad=True)
+x = torch.tensor(df["horas_estudio"].values, dtype=torch.float32)
+y = torch.tensor(df["notas"].values, dtype=torch.float32)
+def ssr_torch(b, m, x, y):
+    y_pred = b + m * x
+    return torch.sum((y - y_pred) ** 2)
+optimizer = optim.SGD([b, m], lr=alpha)
+for i in range(0, 1001):
+    optimizer.zero_grad()
+    loss = ssr_torch(b, m, x, y)
+    loss.backward()
+    optimizer.step()
+    if i % 100 == 0:
+        print(f"Iteración {i}: b={b.item():.2f}, m={m.item():.2f}, SSR={loss.item():.4f}")
+```
+
+Pytorch tiene funciones de pérdida predefinidas que podemos utilizar para calcular la función de pérdida de manera más sencilla. Por ejemplo, podemos utilizar la función `MSELoss` (Mean Squared Error Loss) de Pytorch para calcular la función de pérdida de regresión:
+
+
+::: {.callout-tip}
+## ¿Qué función de pérdida es MSELoss?
+
+La función `MSELoss` de Pytorch calcula el error cuadrático medio entre las predicciones del modelo y los valores reales. Es decir, calcula la media de los errores cuadrados de cada punto de entrenamiento. La fórmula matemática de la función `MSELoss` es:
+
+$$
+MSE = \frac{SSR}{N}
+$$
+
+Donde $N$ es el número de puntos de entrenamiento.
+:::
+
+Podemos usar la librería `tqdm` para mostrar una barra de progreso durante el entrenamiento del modelo si lo ejecutamos en un entorno que lo soporte (como Jupyter Notebook o Google Colab):
+
+```{python}
+#| echo: true
+#| label: entrenamiento-modelo
+#| warning: false
+#| message: false
+
+import torch
+import torch.optim as optim
+import torch.nn as nn
+from tqdm.notebook import tqdm 
+
+b = torch.tensor(float(b_0), requires_grad=True)
+m = torch.tensor(float(m_0), requires_grad=True)
+x = torch.tensor(df["horas_estudio"].values, dtype=torch.float32)
+y = torch.tensor(df["notas"].values, dtype=torch.float32)
+
+def linear_model_torch(b, m, x):
+    return b + m * x
+
+criterion = nn.MSELoss()
+optimizer = optim.SGD([b, m], lr=alpha)
+
+# El resto del código se queda exactamente igual
+pbar = tqdm(range(0, 1000), desc="Entrenando Modelo")
+
+for i in pbar:
+    optimizer.zero_grad()
+    y_pred = linear_model_torch(b, m, x)
+    loss = criterion(y_pred, y) # Calculamos la función de pérdida utilizando la función MSELoss de Pytorch
+    loss.backward() # Calculamos el gradiente de la función de pérdida con respecto a los parámetros del modelo
+    optimizer.step() # Actualizamos los parámetros del modelo utilizando el optimizador
+    
+    pbar.set_postfix({
+        "b": f"{b.item():.2f}", 
+        "m": f"{m.item():.2f}", 
+        "MSE": f"{loss.item():.4f}"
+    })
+```
+
+
+En Pytorch, también podemos crear modelos de manera más sencilla utilizando la clase `nn.Module`. Por ejemplo, podríamos crear una clase `LinearRegression` que herede de `nn.Module` y que tenga un método `forward` que calcule las predicciones del modelo:
+
+```{python}
+#| echo: true
+import torch
+import torch.nn as nn
+class LinearRegression(nn.Module):
+    def __init__(self):
+        super(LinearRegression, self).__init__()
+        self.b = nn.Parameter(torch.tensor(float(b_0)))
+        self.m = nn.Parameter(torch.tensor(float(m_0)))
+    
+    def forward(self, x):
+        return self.b + self.m * x
+```
+
+Para entrenar el modelo, simplemente tenemos que crear una instancia de la clase `LinearRegression` y utilizar el mismo código que hemos utilizado anteriormente para entrenar el modelo:
+
+```{python}
+#| echo: true
+model = LinearRegression()
+criterion = nn.MSELoss()
+optimizer = optim.SGD(model.parameters(), lr=alpha)
+
+for i in range(0, 1001):
+    optimizer.zero_grad()
+    y_pred = model(x)
+    loss = criterion(y_pred, y)
+    loss.backward()
+    optimizer.step()
+    if i % 100 == 0:
+        print(f"Iteración {i}: b={model.b.item():.2f}, m={model.m.item():.2f}, MSE={loss.item():.4f}")
+```

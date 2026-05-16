@@ -8,4 +8,5 @@ dependencies = [
     "pandas>=3.0.3",
     "plotnine>=0.15.4",
     "torch>=2.12.0",
+    "tqdm>=4.67.3",
 ]

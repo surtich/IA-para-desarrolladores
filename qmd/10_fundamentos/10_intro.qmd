@@ -248,7 +248,7 @@ En este caso, $\theta_1$ representa el cambio en la altura por cada unidad de ca
 
 3.- **Generación**: El objetivo es construir un modelo que pueda generar nuevos datos que sean similares a los datos de entrenamiento.
 
-## ¿Qué modelo modelo lineal es mejor?
+## ¿Qué modelo modelo lineal es mejor? {#best_model}
 
 Aunque hemos visto que el modelo lineal en el caso planteado es más interpretable, no todos los modelos son igual de buenos. Por ejemplo, en la figura siguiente se muestra el modelo lineal (línea verde) y un modelo con curvatura (línea azul) ajustados a los datos. ¿Cuál de los dos modelos es mejor?
 

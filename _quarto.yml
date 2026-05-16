@@ -14,6 +14,7 @@ website:
         - section: "Fundamentos"
           contents:
             - qmd/10_fundamentos/10_intro.qmd
+            - qmd/10_fundamentos/20_linear_regression.qmd
         - section: "Apéndices"
           contents:
               - qmd/90_apendices/10_derivadas.qmd
