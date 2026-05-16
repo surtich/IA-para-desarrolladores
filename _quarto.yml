@@ -16,6 +16,11 @@ website:
             - qmd/10_fundamentos/10_intro.qmd
             - qmd/10_fundamentos/20_linear_regression.qmd
             - qmd/10_fundamentos/30_linear_regression2.qmd
+            - qmd/10_fundamentos/40_logistic_regression.qmd
+            - qmd/10_fundamentos/50_neural_networks.qmd
+        - section: "LLM"
+          contents:
+            - qmd/20_LLM/10_word_embeddings.qmd
         - section: "Apéndices"
           contents:
               - qmd/90_apendices/10_derivadas.qmd

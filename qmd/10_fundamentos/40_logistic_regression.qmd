@@ -238,7 +238,9 @@ m = model.linear.weight.item()
 
 Con este modelo, podemos predecir la probabilidad de que una persona sea hombre a partir de sus notas:
 ```{python}
-#! echo: true
+#| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
 nota_pred = 6
 logit_pred = b + m * nota_pred
 prob_pred = 1 / (1 + np.exp(-logit_pred))
@@ -251,6 +253,8 @@ También podríamos poner el modelo en modo evaluación y predecir directamente 
 
 ```{python}
 #| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
 model.eval()
 notas = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 with torch.no_grad():
@@ -272,3 +276,190 @@ $$
 $$
 
 Donde $K$ es el número de categorías posibles. Este modelo se conoce como **regresión logística multinomial** o **regresión softmax**. El proceso de ajuste del modelo es similar al que hemos visto para la regresión logística binaria, pero utilizando la función de pérdida de entropía cruzada para múltiples clases (cross-entropy loss for multiple classes) en lugar de la función de pérdida de entropía cruzada para dos clases (binary cross-entropy loss).
+
+## Clasificación de imágenes con regresión multinomial
+
+Vamos a ver un ejemplo de cómo utilizar la regresión logística multinomial para clasificar imágenes. Para ello, vamos a utilizar el dataset de dígitos manuscritos (MNIST), que es un dataset muy utilizado en el ámbito del aprendizaje automático para la clasificación de imágenes. Este dataset contiene 70.000 imágenes de dígitos manuscritos (del 0 al 9) con una resolución de 28x28 píxeles. El objetivo es predecir el dígito que representa cada imagen a partir de los píxeles que la componen. El paquete `torchvision` de Pytorch proporciona una forma sencilla de cargar este dataset y preprocesarlo para su uso en modelos de aprendizaje automático.
+
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
+from torchvision import datasets, transforms
+transform = transforms.Compose([transforms.ToTensor()])
+train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+
+imagen, etiqueta = train_dataset[0]
+```
+
+El dataset de MNIST ya está dividido en un conjunto de entrenamiento y un conjunto de test. El conjunto de entrenamiento contiene `{python} len(train_dataset)` imágenes, mientras que el conjunto de test contiene `{python} len(test_dataset)` imágenes. Cada imagen es un tensor de `{python} f"{imagen.shape[1]}x{imagen.shape[2]}"` píxeles, y cada píxel es un valor entre `{python} imagen.min().item()` y `{python} imagen.max().item()` que representa la intensidad del píxel (0 para negro y 1 para blanco).
+
+Podemos mostrar algunas imágenes aleatoriamente:
+
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(2, 5, figsize=(10, 4))
+for i in range(10):
+    row = i // 5
+    col = i % 5
+    axes[row, col].imshow(train_dataset[i][0].squeeze(), cmap='gray')
+    axes[row, col].set_title(f'Etiqueta: {train_dataset[i][1]}')
+    axes[row, col].axis('off')
+plt.show()
+``` 
+
+Los `{python} f"{imagen.shape[1]}x{imagen.shape[2]}"` píxeles de cada imagen no dan información del número de que se trata. Así que podemos calcular el parámetro asociado a cada pixel. Así, este modelo tendrá `{python} f"{1 + imagen.shape[1] * imagen.shape[2]}"` parámetros. Se suma un parámetro para incluir el sesgo.
+
+Hasta ahora, hemos calculado el valor de la función de pérdida usando todos los datos de entrenamiento. En este caso, tenemos muchos datos d eentrenamiento y muchos parámetros, por lo que el proceso de entrenamiento sería muy lento. Para solucionar este problema, se suele utilizar el método de descenso de gradiente estocástico (stochastic gradient descent), que consiste en calcular la función de pérdida y actualizar los parámetros utilizando solo un subconjunto aleatorio de los datos de entrenamiento en cada iteración. Este subconjunto se llama mini-batch, y el tamaño del mini-batch es un hiperparámetro que se debe elegir adecuadamente para obtener buenos resultados. Ahora habrá dos iteraciones anidadas: una iteración sobre los mini-batches y otra iteración sobre las épocas. Una época es un ciclo completo a través de todo el conjunto de entrenamiento, mientras que un mini-batch es un subconjunto aleatorio de los datos de entrenamiento que se utiliza para calcular la función de pérdida y actualizar los parámetros en cada iteración.
+
+Además, ahora vamo a poner los datos en un dataloader, que es un objeto que nos permite iterar sobre los datos de entrenamiento en mini-batches de forma sencilla.
+
+Otra cuestión a tner en cuenta es que las imágenes tienen una forma de `(1, 28, 28)`, es decir, tienen un canal de color (en este caso, el canal de intensidad) y una resolución de 28x28 píxeles. Para poder utilizar estas imágenes en un modelo de regresión logística multinomial, es necesario aplanar las imágenes para que cada imagen se convierta en un vector de 784 píxeles (28x28). Esto se puede hacer utilizando la función `view` de Pytorch.
+
+El proceso de entrenamiento del modelo de regresión logística multinomial con descenso de gradiente estocástico se puede implementar de la siguiente manera:
+
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
+from torch.utils.data import DataLoader
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+
+class MultinomialLogisticRegression(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super(MultinomialLogisticRegression, self).__init__()
+        self.linear = nn.Linear(input_dim, output_dim)
+    
+    def forward(self, x):
+        return torch.softmax(self.linear(x), dim=1)
+
+input_dim = imagen.shape[1] * imagen.shape[2]
+output_dim = 10
+model = MultinomialLogisticRegression(input_dim, output_dim)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+num_epochs = 5
+for epoch in range(num_epochs):
+    for images, labels in train_loader:
+        images = images.view(-1, input_dim)
+        optimizer.zero_grad()
+        outputs = model(images)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+```
+
+Una vez que el modelo está entrenado, podemos evaluar su rendimiento en el conjunto de test:
+
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
+
+test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+all_labels = []
+all_preds = []
+
+model.eval()
+with torch.no_grad():
+    correct = 0
+    total = 0
+    for images, labels in test_loader:
+        images = images.view(-1, input_dim)
+        outputs = model(images)
+        
+        _, predicted = torch.max(outputs.data, 1)
+        
+        total += labels.size(0)
+        
+        correct += (predicted == labels).sum().item()
+        accuracy = 100 * correct / total
+
+        all_labels.extend(labels.cpu().numpy())
+        all_preds.extend(predicted.cpu().numpy())
+    print(f'Accuracy: {accuracy:.2f}%')
+```
+
+En este caso, el modelo de regresión logística multinomial obtiene una precisión del `{python} f"{accuracy:.2f}%"` en el conjunto de test, lo que indica que es capaz de clasificar correctamente la mayoría de las imágenes de dígitos manuscritos. Sin embargo, es importante tener en cuenta que este modelo es un modelo lineal, por lo que no es capaz de capturar relaciones no lineales entre los píxeles de las imágenes y las etiquetas. Para mejorar el rendimiento del modelo, se podrían utilizar modelos más complejos, como redes neuronales convolucionales (CNN), que son capaces de capturar relaciones no lineales entre los píxeles de las imágenes y las etiquetas.
+
+Podemos mostrar la matriz de confusión para ver qué dígitos se confunden más:
+
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
+
+from sklearn.metrics import confusion_matrix
+
+class_labels = [str(i) for i in range(10)]
+
+# Calculamos la matriz de confusión clásica
+cm = confusion_matrix(all_labels, all_preds)
+
+df_cm = pd.DataFrame(cm, index=class_labels, columns=class_labels)
+
+# --- 3. TU CÓDIGO DE PLOTNINE ADAPTADO ---
+
+# Transformamos la matriz a formato largo (long/tidy format)
+df_cm_long = df_cm.reset_index().melt(id_vars='index')
+df_cm_long.columns = ['Actual', 'Predicted', 'Count']
+
+# Convertir Actual a categoría con niveles invertidos para invertir eje y
+df_cm_long['Actual'] = pd.Categorical(df_cm_long['Actual'], categories=class_labels[::-1], ordered=True)
+df_cm_long['Predicted'] = pd.Categorical(df_cm_long['Predicted'], categories=class_labels, ordered=True)
+
+# Poner a 0 la diagonal para el gradiente de color (para resaltar los errores)
+diag_mask = df_cm_long['Actual'].astype(str) == df_cm_long['Predicted'].astype(str)
+df_cm_long.loc[diag_mask, 'Count'] = 0
+
+# Quitar ceros del texto para que no se muestren e清ensucien el gráfico
+df_cm_long['label_text'] = df_cm_long['Count'].apply(lambda x: '' if x == 0 else str(x))
+
+# Dataframe sólo con ceros para el overlay blanco
+df_zeros = df_cm_long[df_cm_long['Count'] == 0]
+
+p = (ggplot(df_cm_long, aes(x='Predicted', y='Actual', fill='Count'))
+     + geom_tile(aes(fill='Count'))
+     # Overlay blanco para ceros
+     + geom_tile(data=df_zeros, fill='white')
+     + geom_text(aes(label='label_text'), color='black', size=10, show_legend=False) # Cambiado a 'black' para que el texto del error se vea bien sobre azul claro
+     + scale_fill_gradient(low='lightblue', high='darkblue')
+     + scale_y_discrete(expand=(0,0))
+     + labs(title='Matriz de Confusión (Errores destacados)', x='Predicción', y='Etiqueta Real')
+     + theme(
+          legend_position='none',
+     )
+)
+
+p
+```
+
+Vemos que la mayoría de los errores son 5s que se predicen como 3s y 8s. Veamos algunas de estas imágenes para entender por qué el modelo se ha confundido:
+
+```{python}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Haz clic para ver el código"
+import numpy as np
+# Filtrar las imágenes que son 5s predichos como 3s
+misclassified_5_as_3 = [(img, label) for img, label, pred in zip(test_dataset.data, test_dataset.targets, all_preds) if label == 5 and pred == 3]
+# Mostrar algunas de estas imágenes
+fig, axes = plt.subplots(2, 5, figsize=(10, 4))
+for i in range(10):
+    row = i // 5
+    col = i % 5
+    if i < len(misclassified_5_as_3):
+        img, label = misclassified_5_as_3[i]
+        axes[row, col].imshow(img.numpy(), cmap='gray')
+    else:
+        axes[row, col].axis('off')
+plt.show()
+```   

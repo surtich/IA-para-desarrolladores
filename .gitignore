@@ -1,4 +1,9 @@
 /.quarto/
-**/*.quarto_ipynb
+**/*.quarto_ipynb*
 .venv
 _site
+**/*.ckpt
+.ipynb_checkpoints
+__pycache__/
+**/lightning_logs
+**/**ubyte**
