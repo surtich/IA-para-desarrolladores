@@ -1,0 +1,345 @@
+---
+title: Regresión lineal múltiple
+execute:
+  echo: false
+---
+
+## Introducción
+
+En la [lección anterior](20_linear_regression.qmd), vimos cómo la regresión lineal puede ser utilizada para modelar la relación entre una variable dependiente y una variable explicativa. Este es el tipo de regresión más sencillo y por eso se le denomina regresión lineal simple (SLR). En esta lección, vamos a ver algunos casos especiales de regresión lineal, como la regresión lineal sin variables explicativas, la regresión lineal con una sola variable de tipo categórico y la regresión lineal con múltiples variables explicativas.
+
+## Regresión lineal sin variables explicativas
+
+
+```{python}
+%run ../common/data_science_imports.py
+%run ../common/data_science_plots.py
+%run ../common/data_science_df.py
+```
+
+Partiendo del `dataset` de notas de alumnos:
+
+```{python}
+df = people_df.copy()
+
+df
+```
+
+Supongamos que estamos interesados en conocer qué tal lo han hecho en conjunto. Una forma de hacerlo es calcular la media de las notas (`{python} f"{df['notas'].mean().item():.1f}"`). 
+
+Habríamos obtenido exactamente este resultado si hubiéramos utilizado un modelo de regresión lineal sin variables explicativas, es decir, un modelo que solo tiene un término constante:
+
+$$y = b$$
+
+La demostración matemática es sencilla. El valor de SSR en este caso es:
+
+$$
+SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - b)^2
+$$
+
+Tenemos que encontrar el valor de $b$ que minimice esta función. Para ello, derivamos la función con respecto a $b$ y la igualamos a cero:
+
+$$
+\frac{dSSR}{db} = \frac{d}{db} \sum_{i=1}^{n} (y_i - b)^2 = \sum_{i=1}^{n} \frac{d}{db} (y_i - b)^2 = \sum_{i=1}^{n} 2(y_i - b)(-1) = -2 \sum_{i=1}^{n} (y_i - b) = 0
+$$
+
+Aplicando el sumatorio a cada término:
+
+$$
+-2 \sum_{i=1}^{n} (y_i - b) = -2 \left( \sum_{i=1}^{n} y_i - \sum_{i=1}^{n} b \right) = -2 \left( \sum_{i=1}^{n} y_i - nb \right) = 0
+$$
+
+Despejando $b$ obtenemos:
+
+$$
+\hat{b} = \frac{1}{n} \sum_{i=1}^{n} y_i = \bar{y}
+$$
+
+Es decir, el valor de $b$ que minimiza la función de pérdida es la media de las notas
+
+## Regresión lineal con una sola variable explicativa de tipo categórico
+
+Supongamos que estamos interesados en conocer si hay diferencias en las notas de los alumnos en función de su sexo. Una forma de hacerlo es comparar la media de las notas para cada sexo. En este ejemplo la media de la nota de los hombres es `{python} f"{df[df['sexo'] == 'M']['notas'].mean().item():.1f}"` y media la nota de las mujeres `{python} f"{df[df['sexo'] == 'F']['notas'].mean().item():.1f}"`. Es decir, que para este `dataset` las mujeres han obtenido mejores notas que los hombres. Concretamente, la diferencia entre las medias es de `{python} f"{df[df['sexo'] == 'F']['notas'].mean().item() - df[df['sexo'] == 'M']['notas'].mean().item():.1f}"` puntos.
+
+
+Podemos obtener esta misma información utilizando un modelo de regresión lineal. El problema es que la variable `sexo` no es numérica, sino que es de tipo categórico. Tenemos que convertirla a una variable numérica para poder utilizarla en un modelo de regresión lineal. Podríamos, por ejemplo, asignar el valor 0 a las mujeres y el valor 1 a los hombres:
+
+```{python}
+df['sexo_num'] = df['sexo'].apply(lambda x: 0 if x == 'F' else 1)
+
+df
+```
+
+Este tipo de variables se denominan `variables dummy`. Ahora sí podemos ajustar un modelo de regresión lineal utilizando la variable `sexo_num` como variable explicativa. Para ello usamos la fórmula que minimiza los parámetros $b$ y $m$ que vimos en el capítulo anterior:
+
+$$
+\begin{aligned}
+b &= \bar{y} - m \bar{x} \\
+m &= \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n} (x_i - \bar{x})^2}
+\end{aligned}
+$$
+
+Si resolvemos esta fórmula para nuestro `dataset`, obtenemos que el modelo de regresión lineal que mejor se ajusta a los datos es:
+
+```{python}
+x = df['sexo_num']
+y = df['notas']
+m = ((x - x.mean()) * (y - y.mean())).sum() / ((x - x.mean()) ** 2).sum()
+b = y.mean() - m * x.mean()
+print(f"b: {b:.2f}, m: {m:.2f}")
+```
+
+Vemos que $b$ se corresponde con la media de las notas de las mujeres y que $m$ se corresponde con la diferencia entre la media de las notas de los hombres y la media de las notas de las mujeres. Cuando usamos variables dummy, el término $b$ se corresponde con la media de la categoría que se ha usado como referencia (en este caso, las mujeres) y el término $m$ se corresponde con la diferencia entre la media de la categoría que se ha usado como referencia y la media de la otra categoría (en este caso, los hombres).
+
+Si la variables categórica tiene más de dos categorías (por ejemplo, si tuviéramos una variable `asignatura` con las categorías `matemáticas`, `lengua` y `historia`), tendríamos que elegir una categoría como referencia (por ejemplo, `matemáticas`) y crear una variable dummy para cada una de las otras categorías (por ejemplo, `lengua_dummy` y `historia_dummy`).
+
+En nuestro `dataset` podríamos crear la variable `asignatura` y sus correspondientes variables dummy:
+
+```{python}
+df['asignatura'] = ['matemáticas', 'lengua', 'historia', 'matemáticas', 'lengua']
+df['lengua_dummy'] = df['asignatura'].apply(lambda x: 1 if x == 'lengua' else 0)
+df['historia_dummy'] = df['asignatura'].apply(lambda x: 1 if x == 'historia' else 0)
+df
+```
+
+La ecuación del modelo de regresión lineal sería:
+
+$$
+y = b + m_1 \cdot lengua\_dummy + m_2 \cdot historia\_dummy
+$$
+
+El modelo ajustado nos diría que $b$ se corresponde con la media de las notas de matemáticas, $m_1$ se corresponde con la diferencia entre la media de las notas de lengua y la media de las notas de matemáticas y $m_2$ se corresponde con la diferencia entre la media de las notas de historia y la media de las notas de matemáticas.
+
+## Regresión lineal múltiple
+
+Es posible que queramos ajustar un modelo de regresión lineal con varias variables explicativas. Por ejemplo, si la nota de un examen depende de las horas de estudio y del sexo del alumno simultáneamente. En este caso el modelo tendría tres parámetros: el término constante $b$, el coeficiente de la variable `horas_estudio` y el coeficiente de la variable `sexo`.
+
+Los modelos que tienen varias variables explicativas se denominan modelos de regresión lineal múltiple y son una generalización del modelo de regresión lineal simple. Si tenemos $p$ variables explicativas, el modelo de regresión lineal múltiple se puede escribir de la siguiente forma:
+
+$$
+y = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_{p} x_p
+$$
+
+Observe que este modelo tiene $p+1$ parámetros: el término constante $\theta_0$ y los $p$ coeficientes de las variables explicativas. Para calcular analíticamente los parámetros de un modelo de regresión lineal múltiple se necesita resolver un sistema de $p+1$ ecuaciones. Es mucho más sencillo derivar la fórmula de calculo de los parámetros estimados usando notación matricial.
+
+Supongamos que tenemos $n$ individuos en el `dataset` y la observación del individuo $i$ en para el parámetro $j$ se denota por $x_{ij}$. Para calcular la predicción $\hat{y}_i$ del modelo para el individuo $i$, tenemos que multiplicar la estimación de cada parámetro por su correspondiente observación y sumar el término constante:
+
+$$
+\hat{y}_i = \hat{\theta_0} + \hat{\theta_1} x_{i1} + \hat{\theta_2} x_{i2} + \ldots + \hat{\theta_p} x_{ip}
+$$
+
+
+Para los $n$ individuos del `dataset`, podemos escribir la predicción del modelo de la siguiente forma:
+
+$$
+\begin{aligned}
+\hat{y}_1 &= \hat{\theta_0} + \hat{\theta_1} x_{11} + \hat{\theta_2} x_{12} + \ldots + \hat{\theta_p} x_{1p} \\
+\hat{y}_2 &= \hat{\theta_0} + \hat{\theta_1} x_{21} + \hat{\theta_2} x_{22} + \ldots + \hat{\theta_p} x_{2p} \\
+\hat{y}_3 &= \hat{\theta_0} + \hat{\theta_1} x_{31} + \hat{\theta_2} x_{32} + \ldots + \hat{\theta_p} x_{3p} \\
+& \vdots \\
+\hat{y}_n &= \hat{\theta_0} + \hat{\theta_1} x_{n1} + \hat{\theta_2} x_{n2} + \ldots + \hat{\theta_p} x_{np}
+\end{aligned}
+$$
+
+En notación matricial, podemos escribir lo mismo de la siguiente forma:
+
+
+
+
+
+$$\begin{bmatrix}
+\hat{y}_1 \\
+\hat{y}_2 \\
+\hat{y}_3 \\
+\vdots \\
+\hat{y}_n
+\end{bmatrix} =
+\begin{bmatrix}1 & x_{11} & x_{12} & \ldots & x_{1p} \\
+1 & x_{21} & x_{22} & \ldots & x_{2p} \\
+1 & x_{31} & x_{32} & \ldots & x_{3p} \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & x_{n1} & x_{n2} & \ldots & x_{np} \end{bmatrix}
+\begin{bmatrix}\hat{\theta_0} \\
+\hat{\theta_1} \\
+\hat{\theta_2} \\
+\vdots \\
+\hat{\theta_p} \end{bmatrix}
+$$
+
+
+Podemos definir el vector de predicciones $\boldsymbol{\hat{y}}$, la matriz de observaciones $\mathbf{X}$ y el vector de parámetros estimados $\boldsymbol{\hat{\theta}}$ de la siguiente forma:
+
+$$
+\boldsymbol{\hat{y}} = \begin{bmatrix}\hat{y}_1 \\
+\hat{y}_2 \\
+\hat{y}_3 \\
+\vdots \\
+\hat{y}_n \end{bmatrix}
+$$
+
+$$
+\mathbf{X} = \begin{bmatrix}1 & x_{11} & x_{12} & \ldots & x_{1p} \\
+1 & x_{21} & x_{22} & \ldots & x_{2p} \\
+1 & x_{31} & x_{32} & \ldots & x_{3p} \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & x_{n1} & x_{n2} & \ldots & x_{np} \end{bmatrix}
+$$
+
+
+$$
+\boldsymbol{\hat{\theta}} = \begin{bmatrix}\hat{\theta_0} \\
+\hat{\theta_1} \\
+\hat{\theta_2} \\
+\vdots \\
+\hat{\theta_p} \end{bmatrix}
+$$
+
+Así que una forma más compacta de escribir la ecuación del modelo de regresión lineal múltiple es:
+
+$$
+\boldsymbol{\hat{y}} = \mathbf{X} \boldsymbol{\hat{\theta}}
+$$
+
+La función SSR que queremos minimizar es:
+
+$$
+SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 
+$$
+
+Que en notación matricial se puede escribir de la siguiente forma:
+
+$$
+SSR = (\mathbf{y} - \boldsymbol{\hat{y}})^T (\mathbf{y} - \boldsymbol{\hat{y}}) = (\mathbf{y} - \mathbf{X} \boldsymbol{\hat{\theta}})^T (\mathbf{y} - \mathbf{X} \boldsymbol{\hat{\theta}})
+$$
+
+La derivada parcial de la función SSR con respecto a los parámetros $\boldsymbol{\hat{\theta}}$ es:
+
+$$
+\nabla_{\boldsymbol{\hat{\theta}}} SSR = \frac{\partial SSR}{\partial \boldsymbol{\hat{\theta}}} = \frac{\partial}{\partial \boldsymbol{\hat{\theta}}} (\mathbf{y} - \mathbf{X} \boldsymbol{\hat{\theta}})^T (\mathbf{y} - \mathbf{X} \boldsymbol{\hat{\theta}}) = -2 \mathbf{X}^T (\mathbf{y} - \mathbf{X} \boldsymbol{\hat{\theta}})
+$$
+
+Igualando a cero y resolviendo:
+
+$$
+\begin{aligned}
+-2 \mathbf{X}^T (\mathbf{y} - \mathbf{X} \boldsymbol{\hat{\theta}}) &= 0 \\
+\mathbf{X}^T \mathbf{y} - \mathbf{X}^T \mathbf{X} \boldsymbol{\hat{\theta}} &= 0 \\
+\mathbf{X}^T \mathbf{X} \boldsymbol{\hat{\theta}} &= \mathbf{X}^T \mathbf{y} \\
+(\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{X} \boldsymbol{\hat{\theta}} &= (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
+\boldsymbol{\hat{\theta}} &= (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}
+\end{aligned}
+$$
+
+### Ejemplo práctico (solución analítica)
+
+```{python}
+tetha0 = 3
+tetha1 = 1.1
+tetha2 = -0.05
+n = 1000
+```
+
+Vamos ha hacer un ejemplo práctico: Supongamos que generamos un `dataset` con `{python} n` individuos, donde la variable objetivo `y` (nota del examen) depende de dos variables explicativas `x1` (horas de estudio) y `x2` (duración del examen) de la siguiente forma:
+
+```{python}
+#| warning: false
+Markdown(f"""
+$$
+y = {tetha0} + {tetha1} \cdot x_1 {tetha2} \cdot x_2 + \epsilon
+$$  
+""")
+```
+
+Es decir, que estamos diciendo que por cada hora de estudio adicional, la nota del examen aumenta en `{python} tetha1` puntos y que por cada minuto adicional de duración del examen, la nota del examen disminuye en `{python} -tetha2` puntos. La variable $\epsilon$ es un término de error que representa la variabilidad de las notas que no se explica por las horas de estudio y la duración del examen. Para generar el `dataset`, vamos a suponer que las horas de estudio siguen una distribución normal centrada en 5 con desviación estándar 1, que la duración del examen sigue una distribución uniforme entre 30 y 120 y que el término de error sigue una distribución normal con media 0 y desviación estándar 1:
+
+```{python}
+x1 = np.around(np.random.normal(5, 1, n), decimals=1)
+x2 = np.around(np.random.uniform(30, 120, n), decimals=1)
+epsilon = np.random.normal(0, 1, n)
+y = np.around(np.minimum(np.maximum(tetha0 + tetha1 * x1 + tetha2 * x2 + epsilon, 0), 10), decimals=1)
+
+df = pd.DataFrame({
+    'y': y,
+    'x1': x1,
+    'x2': x2
+})  
+
+df.sort_values(by="y")
+```
+
+Si ajustamos un modelo de regresión lineal múltiple a este `dataset`, obtenemos los siguientes parámetros estimados, que son similares a los parámetros que hemos utilizado para generar el `dataset`:
+
+```{python}
+X = np.column_stack((np.ones(n), df['x1'], df['x2']))
+
+theta_hat = np.linalg.inv(X.T @ X) @ X.T @ df['y']
+theta_hat
+```
+
+### Ejemplo práctico (con Pytorch)
+
+Podemos ajustar el mismo modelo utilizando el algoritmo de descenso de gradiente y la librería pytorch:
+
+```{python}
+#| echo: true
+import torch 
+import torch.nn as nn
+
+X = torch.tensor(X, dtype=torch.float32)
+y = torch.tensor(df['y'].values, dtype=torch.float32).view(-1,1)
+theta = torch.zeros((3,1), requires_grad=True)
+alpha = 0.00015
+n_iterations = 1000
+criterion = nn.MSELoss()
+for i in range(n_iterations):
+    y_hat = X @ theta
+    loss = criterion(y_hat, y)
+    loss.backward()
+    with torch.no_grad():
+        theta -= alpha * theta.grad
+        if i % 100 == 0:
+            print(f"Iteración {i}, pérdida: {loss.item():.4f}")
+        theta.grad.zero_()
+theta
+```
+
+Vemos que después de 1000 iteraciones, el algoritmo todavía no ha convergido. Si aumentamos el valor de `alpha`, para que el entrenamiento vaya más rápido, se produce desbordamiento. Esto es un problema común en el entrenamiento de modelos de regresión lineal múltiple con descenso de gradiente. El valor de `alpha` tiene que ser lo suficientemente pequeño para que el algoritmo converja, pero no tan pequeño como para que el entrenamiento sea muy lento. El problema es que la forma de la función de pérdida en el espacio de los parámetros es muy compleja y tiene zones en que es muy plana y otras en que es muy empinada. Lo mejor es utilizar un algoritmo de optimización más avanzado, como el algoritmo de descenso de gradiente algoritmo de Adam, que adaptan el valor de `alpha` durante el entrenamiento para evitar estos problemas:
+
+```{python}
+#| echo: true
+theta = torch.zeros((3,1), requires_grad=True)
+optimizer = torch.optim.Adam([theta], lr=0.01)
+n_iterations = 2000
+for i in range(n_iterations):
+    y_hat = X @ theta
+    loss = criterion(y_hat, y)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    if i % 100 == 0:
+        print(f"Iteración {i}, pérdida: {loss.item():.4f}")
+theta
+```
+
+Comprobamos que la función de pérdida disminuya muy rápidamente y converge en pocas iteraciones. Además, los parámetros estimados son muy similares a los parámetros que hemos utilizado para generar el `dataset`.
+
+
+Como hicimos en el capítulo anterior, podemos simplificar el entrenamiento utilizando los modelos de regresión lineal incluidos en Pytorch:
+
+```{python}
+from torch import nn 
+model = nn.Linear(2, 1) # el primer parámetro es el número de variables explicativas y el segundo parámetro es el número de variables objetivo
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
+X = np.column_stack((df['x1'], df['x2'])) # no incluimos el término constante porque el modelo de regresión lineal de Pytorch lo incluye automáticamente
+X = torch.tensor(X, dtype=torch.float32) 
+y = torch.tensor(df['y'].values, dtype=torch.float32).view(-1, 1)
+n_iterations = 10000
+for i in range(n_iterations):
+    y_hat = model(X)
+    loss = criterion(y_hat, y)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+model.weight, model.bias
+```

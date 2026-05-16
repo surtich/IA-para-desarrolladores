@@ -1,12 +1,12 @@
 ---
-title: Regresión lineal
+title: Regresión lineal simple
 execute:
   echo: false
 ---
 
 ## Introducción
 
-En la [lección anterior](10_intro.qmd), vimos que podemos utilizar distintos modelos para ajustar una función a un conjunto de datos. Se justificó que el modelo más sencillo es el lineal, ya que tiene menos parámetros y, por ello, es más fácil de interpretar. En esta lección, vamos a ver cómo se puede ajustar un modelo lineal a un conjunto de datos utilizando el método de mínimos cuadrados, que es el método más utilizado para ajustar modelos de regresión lineal.
+En la [lección anterior](10_intro.qmd), vimos que podemos utilizar distintos modelos para ajustar una función a un conjunto de datos. Se justificó que el modelo más sencillo es el lineal, ya que tiene menos parámetros y, por ello, es más fácil de interpretar. En esta lección, vamos a ver cómo se puede ajustar un modelo lineal a un conjunto de datos utilizando el método de mínimos cuadrados, que es el método más utilizado para ajustar modelos de regresión lineal. En este capítulo, nos centramos en modelos con una única variable explicativa estos modelos son conocidos como de **regresión lineal simple**. En el siguiente capítulo, veremos cómo ajustar modelos lineales con varias variables explicativas, conocidos como **regresión lineal múltiple**.
 
 ## Función de pérdida
 
@@ -571,4 +571,28 @@ for i in range(0, 1001):
     optimizer.step()
     if i % 100 == 0:
         print(f"Iteración {i}: b={model.b.item():.2f}, m={model.m.item():.2f}, MSE={loss.item():.4f}")
+```
+
+Todavía se puede simplificar aún más el código utilizando la clase `nn.Linear` de Pytorch, que implementa una capa lineal con un solo nodo de salida. En este caso, no necesitamos definir los parámetros del modelo manualmente, ya que la clase `nn.Linear` se encarga de ello automáticamente:
+
+```{python}
+#| echo: true
+import torch
+import torch.nn as nn
+import torch.optim as optim
+model = nn.Linear(1, 1) # Capa lineal con 1 nodo de entrada y 1 nodo de salida
+criterion = nn.MSELoss()
+optimizer = optim.SGD(model.parameters(), lr=alpha)
+x = x.view(-1, 1) # Reshape de x para que tenga la forma (n_samples, n_features)
+y = y.view(-1, 1) # Reshape de y para que tenga la forma (n_samples, n_targets)
+for i in range(0, 1001):
+    optimizer.zero_grad()
+    y_pred = model(x)
+    loss = criterion(y_pred, y)
+    loss.backward()
+    optimizer.step()
+    if i % 100 == 0:
+        b = model.bias.item()
+        m = model.weight.item()
+        print(f"Iteración {i}: b={b:.2f}, m={m:.2f}, MSE={loss.item():.4f}")
 ```
