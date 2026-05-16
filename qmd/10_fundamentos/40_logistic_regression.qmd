@@ -1,0 +1,274 @@
+---
+title: Regresión logística
+execute:
+  echo: false
+---
+
+
+```{python}
+%run ../common/data_science_imports.py
+%run ../common/data_science_plots.py
+%run ../common/data_science_df.py
+```
+
+## Introducción
+
+Supongamos que pretendemos explicar el sexo de una persona a partir de las notas obtenidas en un examen. En principio, puede parecer extraño este que queremos el sexo, ya que es algo que se determina por la biología y no por las notas obtenidas en un examen. Pero como se ha explicado anteriormente la modelización estadística trata de buscar correlaciones y no causalidades. Así que puede tener sentido saber si conocer la nota en un examen nos puede dar alguna indicación de su sexo. De hecho, en el capítulo anterior ya habíamos visto que las mujeres habían obtenido mejores notas que los hombres. Pero eso no responde a la pregunta que estamos formulando ahora: lo que queremos saber es si por ejemplo, sabemos que una persona ha obtenido una nota de 6, ¿qué es más probable que sea hombre o mujer?
+
+Como primer intento de responder a esta pregunta, podríamos intentar ajustar un modelo de regresión lineal a los datos: Es decir, podríamos crear una `variable dummy` dependiente que represente el sexo de la persona (por ejemplo, 0 para mujeres y 1 para hombres) y realizar un ajuste de mínimos cuadrados usando cómo variable independiente las notas obtenidas en el examen:
+
+
+```{python}
+df = people_df.copy()
+
+df["sexo_dummy"] = df['sexo'].apply(lambda x: 0 if x == 'F' else 1)
+
+df
+```
+
+Podemos representar gráficamente los datos de entrenamiento:
+
+```{python}
+#| warning: false
+p = (
+    ggplot(df, aes(x='notas', y='sexo_dummy', color='sexo', fill="sexo"))
+    + geom_point(size=5, stroke=1.5)
+    + scale_color_manual(values={"M": "#0074D9", "F": "#FF4136"})
+    + scale_fill_manual(values={"M": "#749dc1", "F": "#FF851B"})
+    + clean_theme(xrange=(-0.1, 10), yrange=(-0.1, 1.1), xlabel="nota", ylabel="sexo", xintercept=-0.1, yintercept=-0.1)
+    + scale_y_continuous(
+        breaks=[0, 1],                         # Dónde quieres las líneas/marcas
+        labels=["Mujer", "Hombre"] # El texto exacto que quieres mostrar
+    )
+) 
+
+p
+```
+
+Aplicando el método de mínimos cuadrados, obtenemos el siguiente modelo:
+
+```{python}
+x = df['notas'].values
+y = df['sexo_dummy'].values
+m_hat = np.sum((x - x.mean()) * (y - y.mean())) / np.sum((x - x.mean()) ** 2)
+b_hat = y.mean() - m_hat * x.mean()
+print(f"b: {b_hat:.2f}, m: {m_hat:.2f}")
+```
+
+Podemos representar gráficamente el modelo ajustado:
+
+```{python}
+p + geom_abline(intercept=b_hat, slope=m_hat, color="black", linetype="dashed", size=1.5)
+```
+
+```{python}
+nota_pred = 6
+sexo_pred =b_hat + m_hat * nota_pred
+```
+
+Pero, ¿qué significa esa línea?. Para comprenderlo vamos a suponer que tenemos una persona que ha obtenido una nota de `{python} nota_pred`. Según el modelo ajustado, el sexo para esa persona sería:
+
+```{python}
+Markdown(f"""
+{b_hat:.2f} + {m_hat:.2f} * {nota_pred} = {sexo_pred:.2f}
+""")
+``` 
+
+¿Pero qué significa exactamente que el sexo de esa persona sea `{python} f"{sexo_pred:.2f}"`?. Recordemos que el sexo es una variable dummy que toma el valor de 0 para mujeres y 1 para hombres. Por lo tanto, el valor de `{python} f"{sexo_pred:.2f}"` no tiene un significado claro, ya que no es ni 0 ni 1. Arbitrariamente podríamos decir que si el valor es mayor o igual a 0.5, entonces la persona es hombre, y si es menor a 0.5, entonces la persona es mujer.
+
+Podríamos calcular cuál es el valor de la nota para el que el modelo predice que la persona es hombre o mujer:
+
+$$
+\begin{aligned}
+&\hat{y} = b + m \cdot x \\
+&0.5 = b + m \cdot x \\
+&x = \frac{0.5 - b}{m}
+\end{aligned}
+$$
+
+Aplicando esta fórmula, obtenemos que el valor de la nota de corte para el que el modelo predice que la persona es hombre o mujer es:
+
+```{python}
+nota_corte = (0.5 - b_hat) / m_hat
+Markdown(f"""
+{nota_corte:.2f}
+""")
+```
+
+Para notas inferiores a `{python} f"{nota_corte:.2f}"`, el modelo predice que la persona es hombre, y para notas superiores el modelo predice que la persona es mujer.
+
+Este tipo de modelos es conocido como *modelo de clasificación*. En los modelos de clasificación, la variable dependiente es una variable categórica (en este caso, el sexo) y el objetivo es predecir a qué categoría pertenece una observación a partir de las variables independientes (en este caso, las notas). Estos modelos se diferencian de los modelos de regresión, en los que la variable dependiente es una variable numérica y el objetivo es predecir un valor numérico a partir de las variables independientes.
+
+Este capítulo podría finalizar aquí, sin embargo hay algo en este modelo que no es muy satisfactorio. Por ejemplo, el modelo predice con la misma seguridad que una persona con una nota de 0 es hombre que una persona con una nota ligeramente inferior a la nota de corte. Esto no tiene mucho sentido, ya que es más razonable pensar que una persona con una nota de 0 es más probable que sea hombre que una persona con una nota de 4.9. Nos gustaría construir un modelo que nos permita predecir la probabilidad de que una persona sea hombre o mujer a partir de sus notas, en lugar de predecir directamente el sexo. Para ello, vamos a introducir el modelo de regresión logística.
+
+## Modelado de probabilidades con regresión logística
+
+En la regresión logística, en lugar de predecir directamente el sexo de una persona a partir de sus notas, lo que hacemos es predecir la probabilidad de que una tenga la categoría positiva (en este caso, que sea hombre). La categoría positiva es aquella que se codifica con el valor de 1 en la variable dummy.
+
+:::{.callout-note}
+Se habla de la categoría positiva sin animus iniuriandi, es simplemente una convención que se utiliza en estadística para referirse a la categoría que se codifica con el valor de 1 en la variable dummy. En este caso, hemos decidido que la categoría positiva es la de hombre, pero podríamos haber decidido que la categoría positiva es la de mujer, y entonces el modelo predeciría la probabilidad de que una persona sea mujer a partir de sus notas. Los resultados serían equivalentes, ya que la probabilidad de que una persona sea hombre es igual a 1 menos la probabilidad de que sea mujer.
+
+Los paquetes estádisticos suelen ordenar las categoría alfabéticamente, por lo que la categoría positiva normalmente es la que va alfabéticamente después. En este caso, como "M" va después de "F", la categoría positiva es la de hombre. Sin embargo, esto no es una regla estricta, y se puede cambiar.
+:::
+
+Una primera aproximación sería lo que hicimos en la sección anterior. Es decir, podríamos especificar el modelo así:
+
+$$
+Prob(y = 1 | x) = b + m \cdot x
+$$
+
+El problema de este modelo es que la probabilidad es una variable que toma valores entre 0 y 1, mientras que un modelo lineal anterior, al ser una recta, puede tomar cualquier valor real (es decir entre $-\infty$ y $\infty$).
+
+Podemos empezar a abordar este problema si en lugar de predecir directamente la probabilidad, predecimos la razón de probabilidades (odds ratio) de que una persona sea hombre a partir de sus notas:
+
+$$
+\frac{Prob(y = 1 | x)}{Prob(y = 0 | x)} = b + m \cdot x
+$$
+
+Esto se puede simplificar dado que $Prob(y = 0 | x) = 1 - Prob(y = 1 | x)$, por lo que el modelo se puede reescribir como:
+
+$$
+\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)} = b + m \cdot x
+$$
+
+Algo hemos avanzado, ya que la razón de probabilidades es una variable que toma valores entre 0 y $\infty$, pero todavía no es un modelo adecuado, ya que, como hemos dicho, los modelos lineales pueden tomar valores entre $-\infty$ y $\infty$. Para solucionar este problema, podemos usar el logaritmo de la razón de probabilidades. La función logarítmica toma valores positivos y los transforma en valores reales, por lo que el modelo se puede reescribir como:
+
+$$
+\log\left(\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)}\right) = b + m \cdot x
+$$
+
+:::{.callout-warning}
+La razón de probabilidades toma valores entre $[0 y \infty]$, Será 0 cuando la categoría positiva tenga probabilidad 0. El logaritmo de 0 es $-\infty$. Si se produce este valor, el modelo no se podrá ajustar, ya que cualquier operación con $-\infty$ produce resultados no definidos. En la práctica, esto no suele ser un gran problema, ya que normalmente no se producen probabilidades en los extremos (0 y 1) pero sin llegar a ellos. Si se piensa detenidamente, en el ejemplo que estamos utilizando, siempre existirá una cierta probabilidad de que una persona con una nota de 0 sea mujer y de que una persona con una nota de 10 sea hombre, aunque esa probabilidad sea baja.
+:::
+
+
+:::{.callout-note}
+No hemos discutido la base del logaritmo a utilizar. En la práctica se suele utilizar el logaritmo natural, aunque también se podrían utilizar otras bases. La elección de la base del logaritmo no afecta a los resultados del modelo, ya que los logaritmos de una determinada base son transformaciones de escala de los logaritmos de otra base.
+:::
+
+Con las transformaciones anteriores, hemos definido una la función que se llama logística. La **función logística** es lineal en los parámetros. Aunque ya no estamos prediciendo directamente la probabilidad, sino el logaritmo de la razón de probabilidades (`logit`). Ahora el problema es interpretar los resultados. Supongamos que en el modelo ajustado, el valor de $b$ es -2 y el valor de $m$ es 0.5. Si queremos predecir el sexo de una persona que ha estudiado 7 horas, obtenemos un `logit` de $-2 + 0.5 \cdot 7 = 1.5$. Pero, ¿qué significa ese valor?. Para interpretarlo, podemos transformar el `logit` a una probabilidad. Para ello, podemos aplicar l, ¿el modelo predice que es hombre o que es mujer? Para ello, podemos aplicar las transformaciones inversas a las que hemos aplicado para definir el modelo. Es decir, podemos aplicar la función logística inversa, llamada más comúnmente **funcion sigmoide**, para obtener la probabilidad de que una persona sea hombre a partir del `logit`:
+
+$$
+\begin{aligned}
+&\log\left(\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)}\right) = b + m \cdot x \\
+&\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)} = e^{b + m \cdot x} \\
+&Prob(y = 1 | x) = e^{b + m \cdot x} - e^{b + m \cdot x} \cdot Prob(y = 1 | x) \\
+&Prob(y = 1 | x) = \frac{e^{b + m \cdot x}}{1 + e^{b + m \cdot x}} \\
+&Prob(y = 1 | x) = \frac{1}{1 + e^{-(b + m \cdot x)}}
+\end{aligned}
+$$
+
+Obsérvese que la función sigmoide ya no es lineal en los parámetros y que toma valores entre 0 y 1.
+
+## Función de pérdida de la regresión logística
+
+Podríamos tratar de utilizar como función de pérdida la suma cuadrática de los errores (SSR) que habíamos utilizado para la regresión lineal, pero esta función de pérdida no es adecuada para la regresión logística. En su lugar, se suele utilizar la función de pérdida de entropía cruzada (cross-entropy loss), que es una función convexa y que tiene un único mínimo global. Sin embargo, para entender la función de pérdida de entropía cruzada, vamos a empezar por intentar utilizar la suma cuadrática de los errores (SSR) pero aplicada a la probabilidad predicha por el modelo en lugar de al `logit`:
+
+$$
+\begin{aligned}
+&SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 \\
+&SSR = \sum_{i=1}^{n} \left(y_i - \frac{1}{1 + e^{-(b + m \cdot x_i)}}\right)^2
+\end{aligned}
+$$
+
+Esta función de pérdida tiene un problema, y es que no penaliza lo suficiente las predicciones incorrectas. Por ejemplo, si el modelo predice una probabilidad de 0.99 para una persona que es mujer (es decir, que la categoría positiva es hombre), el error cuadrático será de $(0 - 0.99)^2 = 0.981$, Por el contrario, si el modelo acierta y predice una probabilidad de 0.01, el error cuadrático será de $(0 - 0.01)^2 = 0.0001$. La diferencia entre lo que aporta a la función de pérdida una predicción muy incorrecta y muy correcta no es apenas apreciable. Para solucionar este problema, se utiliza la **función de pérdida de entropía cruzada**, que penaliza mucho más las predicciones incorrectas. La función de pérdida de entropía cruzada se define de la siguiente manera:
+
+$$
+\begin{aligned}
+&CE = -\sum_{i=1}^{n} \left(y_i \cdot \log(\hat{y}_i) + (1 - y_i) \cdot \log(1 - \hat{y}_i)\right) \\
+&CE = -\sum_{i=1}^{n} \left(y_i \cdot \log\left(\frac{1}{1 + e^{-(b + m \cdot x_i)}}\right) + (1 - y_i) \cdot \log\left(1 - \frac{1}{1 + e^{-(b + m \cdot x_i)}}\right  )\right)
+\end{aligned}
+$$
+
+Obsérvese que siempre uno de los términos del sumatorio será 0, ya que $y_i$ solo puede tomar los valores de 0 o 1. Por ejemplo, si $y_i$ es 1, entonces el término $(1 - y_i) \cdot \log(1 - \hat{y}_i)$ será 0, y si $y_i$ es 0, entonces el término $y_i \cdot \log(\hat{y}_i)$ será 0.
+
+Veamos qué valores toma la función de pérdida de entropía cruzada para las predicciones correctas e incorrectas:
+
+* Supongamos que el modelo predice una probabilidad de 0.99 para una persona que es hombre (es decir, que la categoría positiva es hombre), entonces el error de entropía cruzada será de $- (1 \cdot \log(0.99) + 0 \cdot \log(1 - 0.99)) = -\log(0.99) \approx 0.010$.
+
+* Supongamos que el modelo predice una probabilidad de 0.01 para una persona que es hombre (es decir, que la categoría positiva es hombre), entonces el error de entropía cruzada será de $- (1 \cdot \log(0.01) + 0 \cdot \log(1 - 0.01)) = -\log(0.01) \approx 4.605$.
+
+Ahora la contribución a la función de pérdida es mucho mayor. El mismo razonamiento se puede aplicar para una persona que es mujer.
+
+Esta razón y otras de índole estadística y matemática hacen que la función de pérdida de entropía cruzada sea la función de pérdida más adecuada para la regresión logística.
+
+## Ajuste del modelo de regresión logística con Pytorch
+
+A diferencia de la regresión lineal, el modelo de regresión logística no tiene una solución analítica, por lo que es necesario utilizar un método numérico para ajustar el modelo a los datos, como el descenso de gradiente. Para evitar que tener que calcular las derivadas podemos recurrir a Pytorch para hacer el entrenamiento. El proceso es muy similar al que habíamos visto para la regresión lineal:
+
+```{python}
+#| echo: true
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+y = torch.tensor(df['sexo_dummy'].values, dtype=torch.float32).view(-1, 1)
+X = torch.tensor(df['notas'].values, dtype=torch.float32).view(-1, 1)
+
+# Definir el modelo de regresión logística
+class LogisticRegression(nn.Module):
+    def __init__(self, input_dim):
+        super(LogisticRegression, self).__init__()
+        self.linear = nn.Linear(input_dim, 1)
+    
+    def forward(self, x):
+        return torch.sigmoid(self.linear(x))
+
+# Inicializar el modelo, la función de pérdida y el optimizador
+model = LogisticRegression(input_dim=1)
+criterion = nn.BCELoss()
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+
+# Entrenamiento del modelo
+for epoch in range(3000):
+    optimizer.zero_grad()
+    outputs = model(X)
+    loss = criterion(outputs, y)
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print(f"{name}: {param.data}")
+
+b = model.linear.bias.item()
+m = model.linear.weight.item()
+```
+
+Con este modelo, podemos predecir la probabilidad de que una persona sea hombre a partir de sus notas:
+```{python}
+#! echo: true
+nota_pred = 6
+logit_pred = b + m * nota_pred
+prob_pred = 1 / (1 + np.exp(-logit_pred))
+Markdown(f"""
+La probabilidad de que una persona con una nota de {nota_pred} sea hombre es de {prob_pred:.2f}
+""")
+```
+
+También podríamos poner el modelo en modo evaluación y predecir directamente la probabilidad:
+
+```{python}
+#| echo: true
+model.eval()
+notas = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+with torch.no_grad():
+    prob_pred = model(torch.tensor(notas, dtype=torch.float32).view(-1, 1))
+
+for nota, prob in zip(notas, prob_pred):
+    print(f"Nota: {nota}, Probabilidad de ser hombre: {prob.item():.2f}")
+```
+
+## Regresión multinomial
+
+En el caso de que la variable dependiente tenga más de dos niveles, el modelo de regresión logística se puede generalizar utilizando la función softmax en lugar de la función sigmoide. La **función softmax** es una generalización de la función sigmoide que permite predecir la probabilidad de que una observación pertenezca a cada una de las categorías posibles. En este caso, el modelo se puede escribir de la siguiente manera:
+
+$$
+\begin{aligned}
+&Prob(y = k | x) = \frac{e^{b_k + m_k \cdot x}}{\sum_{j=1}^{K} e^{b_j + m_j \cdot x}} \\
+&\text{para } k = 1, 2, \ldots, K
+\end{aligned}
+$$
+
+Donde $K$ es el número de categorías posibles. Este modelo se conoce como **regresión logística multinomial** o **regresión softmax**. El proceso de ajuste del modelo es similar al que hemos visto para la regresión logística binaria, pero utilizando la función de pérdida de entropía cruzada para múltiples clases (cross-entropy loss for multiple classes) en lugar de la función de pérdida de entropía cruzada para dos clases (binary cross-entropy loss).
