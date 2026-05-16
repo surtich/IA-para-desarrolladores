@@ -211,6 +211,18 @@ window.Quarto = {
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generalización de la regresión lineal</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -250,7 +262,7 @@ window.Quarto = {
   <li><a href="#aprendizaje-automático" id="toc-aprendizaje-automático" class="nav-link" data-scroll-target="#aprendizaje-automático">Aprendizaje Automático</a></li>
   <li><a href="#qué-es-un-modelo" id="toc-qué-es-un-modelo" class="nav-link" data-scroll-target="#qué-es-un-modelo">¿Qué es un modelo?</a></li>
   <li><a href="#qué-modelo-se-ajusta-mejor-a-los-datos" id="toc-qué-modelo-se-ajusta-mejor-a-los-datos" class="nav-link" data-scroll-target="#qué-modelo-se-ajusta-mejor-a-los-datos">¿Qué modelo se ajusta mejor a los datos?</a></li>
-  <li><a href="#qué-modelo-modelo-lineal-es-mejor" id="toc-qué-modelo-modelo-lineal-es-mejor" class="nav-link" data-scroll-target="#qué-modelo-modelo-lineal-es-mejor">¿Qué modelo modelo lineal es mejor?</a></li>
+  <li><a href="#best_model" id="toc-best_model" class="nav-link" data-scroll-target="#best_model">¿Qué modelo modelo lineal es mejor?</a></li>
   </ul>
 </nav>
     </div>
@@ -331,7 +343,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="qué-es-un-modelo">¿Qué es un modelo?</h2>
 <p>Un modelo en el contexto del aprendizaje automático es una representación matemática o computacional de un proceso o fenómeno que se utiliza para hacer predicciones o tomar decisiones basadas en datos. Los modelos pueden variar en complejidad, desde simples ecuaciones lineales hasta redes neuronales profundas. La elección del modelo depende de la naturaleza del problema, la cantidad y calidad de los datos disponibles, y los objetivos específicos del análisis.</p>
 <p>Por ejemplo, supongamos que preguntamos a varias personas adultas sobre su peso y altura, obteniendo los siguientes datos:</p>
-<div id="29fd7f65" class="cell" data-execution_count="1">
+<div id="8c591453" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> <span class="op">*</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -391,7 +403,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div id="782a7679" class="cell" data-execution_count="2">
+<div id="3fc5475c" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ggplot(df, aes(x<span class="op">=</span><span class="st">'peso'</span>, y<span class="op">=</span><span class="st">'altura'</span>))</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(color<span class="op">=</span><span class="st">'#FF4136'</span>, fill<span class="op">=</span><span class="st">'#FF851B'</span>, size<span class="op">=</span><span class="dv">5</span>, stroke<span class="op">=</span><span class="fl">1.5</span>) </span>
@@ -417,7 +429,7 @@ window.Quarto = {
 </div>
 <p>En este ejemplo vemos claramente que:</p>
 <p><span class="math display">\[ \text{altura} = 100 + 0,9 \cdot \text{peso} \]</span></p>
-<div id="7b0b034c" class="cell" data-execution_count="3">
+<div id="f4bcd6c7" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">+</span> geom_abline(intercept<span class="op">=</span><span class="dv">100</span>, slope<span class="op">=</span><span class="fl">0.9</span>, color<span class="op">=</span><span class="st">'#04101b'</span>, size<span class="op">=</span><span class="fl">1.5</span>, linetype<span class="op">=</span><span class="st">'dashed'</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
@@ -430,7 +442,7 @@ window.Quarto = {
 <p>El problema es que normalmente la relación entre peso y altura no es tan perfecta.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div id="36821988" class="cell" data-execution_count="4">
+<div id="2bd504cc" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.altura <span class="op">=</span> [</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fl">180.0</span>,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fl">160.0</span>,</span>
@@ -440,7 +452,7 @@ window.Quarto = {
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column" style="width:50%;">
-<div id="a15d4423" class="cell" data-fig-height="6" data-fig-width="4" data-execution_count="5">
+<div id="34e2fe22" class="cell" data-fig-height="6" data-fig-width="4" data-execution_count="5">
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -456,7 +468,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="qué-modelo-se-ajusta-mejor-a-los-datos">¿Qué modelo se ajusta mejor a los datos?</h2>
 <div class="quarto-layout-panel" data-layout-ncol="3">
 <div class="quarto-layout-row">
-<div id="dc0f4111" class="cell quarto-layout-cell" data-execution_count="6" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="cffdb134" class="cell quarto-layout-cell" data-execution_count="6" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 <figure class="figure">
@@ -465,7 +477,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div id="afe47be9" class="cell quarto-layout-cell" data-execution_count="7" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="224ee812" class="cell quarto-layout-cell" data-execution_count="7" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 <figure class="figure">
@@ -474,7 +486,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div id="a47354af" class="cell quarto-layout-cell" data-execution_count="8" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="8e890072" class="cell quarto-layout-cell" data-execution_count="8" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div>
 <figure class="figure">
@@ -492,7 +504,7 @@ window.Quarto = {
 </ol>
 <p><span class="math display">\[ altura = b + m \cdot peso \]</span></p>
 <p>El parámetro <span class="math inline">\(b\)</span> representa la altura cuando el peso es cero, lo cual no tiene sentido en este contexto y no es interpretable directamente, pero es necesario para ajustar la línea a los datos. Por otro lado, el parámetro <span class="math inline">\(m\)</span> representa la pendiente de la línea, es decir, el cambio en la altura por cada unidad de cambio en el peso. Los valores de <span class="math inline">\(b\)</span> y <span class="math inline">\(m\)</span> ajustados son:</p>
-<div id="00991aad" class="cell" data-execution_count="9">
+<div id="861903c5" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-stdout">
 <pre><code>Pendiente (m): 0.6757
 Sesgo (b): 116.3514
@@ -500,14 +512,14 @@ La ecuación es: altura = 116.35 + 0.68 * peso</code></pre>
 </div>
 </div>
 <p>En este caso, con valor de <span class="math inline">\(m\)</span> igual a 0.68 indica que por cada kilogramo adicional de peso, se espera que la altura aumente en 0.68 centímetros.</p>
-<p>Si quisieramos utilizar este modelo para predecir la altura de una persona que pesa 85.0 kg, simplemente sustituimos el valor del peso en la ecuación:</p>
-<div id="22110a06" class="cell" data-execution_count="10">
+<p>Si quisiéramos utilizar este modelo para predecir la altura de una persona que pesa 85.0 kg, simplemente sustituimos el valor del peso en la ecuación:</p>
+<div id="8b380bf0" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display cell-output-markdown" data-execution_count="10">
 <p><span class="math display">\[altura =  116.35 +0.68 \cdot  85 = 174 \text{ cm}\]</span></p>
 </div>
 </div>
 <p>Lo podemos mostrar gráficamente:</p>
-<div id="3606671a" class="cell" data-execution_count="11">
+<div id="568ece73" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display" data-execution_count="11">
 <div>
 <figure class="figure">
@@ -516,16 +528,16 @@ La ecuación es: altura = 116.35 + 0.68 * peso</code></pre>
 </div>
 </div>
 </div>
-<p>El que el peso y la altura estén correlacionados no implica que el peso cause la altura. Esta correlación lo que indica es que si conozco el peso de una persona puedo decir algo sobre su altura, ya que normalmente las personas más altas suelen pesar más. Es importante tener en cuenta que la <strong>correlación no implica causalidad</strong>. La cuasalidad es una hipótesis del investigador que se puede probar con experimentos controlados, pero no se puede inferir directamente a partir de la correlación observada en los datos. Por ejemplo, un modelo en que la variable explicativa y explicada están correlacionadas con causalidad es las horas de estudio y la nota obtenida en un examen. En este caso, es razonable suponer que estudiar más horas causa una mejor nota en el examen, aunque también podría haber otros factores que influyan en la nota, como la calidad del estudio o el nivel de dificultad del examen. En ocasiones, la correlación entre dos variables puede ser causada por una tercera <strong>variable oculta</strong>. Por ejemplo, la correlación entre el consumo de helados y el número de ahogamientos podría ser causada por la variable oculta “temperatura”, ya que en los meses más cálidos se consume más helado y también hay más personas nadando, lo que aumenta el riesgo de ahogamiento. Por último, en ocasiones, la <strong>correlación</strong> entre dos variables puede ser <strong>negativa</strong>, lo que significa que a medida que una variable aumenta, la otra disminuye. Por ejemplo, existe una correlación negativa entre los goles que recibe un equipo y sus puntos en la clasificación, ya que a medida que un equipo recibe más goles, es probable que pierda más partidos y, por lo tanto, tenga menos puntos en la clasificación.</p>
+<p>El que el peso y la altura estén correlacionados no implica que el peso cause la altura. Esta correlación lo que indica es que si conozco el peso de una persona puedo decir algo sobre su altura, ya que normalmente las personas más altas suelen pesar más. Es importante tener en cuenta que la <strong>correlación no implica causalidad</strong>. La causalidad es una hipótesis del investigador que se puede probar con experimentos controlados, pero no se puede inferir directamente a partir de la correlación observada en los datos. Por ejemplo, un modelo en que la variable explicativa y explicada están correlacionadas con causalidad es las horas de estudio y la nota obtenida en un examen. En este caso, es razonable suponer que estudiar más horas causa una mejor nota en el examen, aunque también podría haber otros factores que influyan en la nota, como la calidad del estudio o el nivel de dificultad del examen. En ocasiones, la correlación entre dos variables puede ser causada por una tercera <strong>variable oculta</strong>. Por ejemplo, la correlación entre el consumo de helados y el número de ahogamientos podría ser causada por la variable oculta “temperatura”, ya que en los meses más cálidos se consume más helado y también hay más personas nadando, lo que aumenta el riesgo de ahogamiento. Por último, en ocasiones, la <strong>correlación</strong> entre dos variables puede ser <strong>negativa</strong>, lo que significa que a medida que una variable aumenta, la otra disminuye. Por ejemplo, existe una correlación negativa entre los goles que recibe un equipo y sus puntos en la clasificación, ya que a medida que un equipo recibe más goles, es probable que pierda más partidos y, por lo tanto, tenga menos puntos en la clasificación.</p>
 <p>El segundo modelo, aunque es mejor para predecir, introduce una relación cuadrática, lo que complica la interpretación ya que tiene un tercer parámetro que no es fácil de interpretar:</p>
 <p><span class="math display">\[ altura = \theta_0 + \theta_1 \cdot peso + \theta_2 \cdot peso^2 \]</span></p>
 <p>En este caso, <span class="math inline">\(\theta_1\)</span> representa el cambio en la altura por cada unidad de cambio en el peso (lo mismo que <span class="math inline">\(m\)</span> en el modelo lineal), pero este efecto no es constante debido al término cuadrático. El parámetro <span class="math inline">\(\theta_2\)</span> representa la curvatura de la relación entre el peso y la altura, lo que hace que la interpretación sea más compleja.</p>
 <p>3.- <strong>Generación</strong>: El objetivo es construir un modelo que pueda generar nuevos datos que sean similares a los datos de entrenamiento.</p>
 </section>
-<section id="qué-modelo-modelo-lineal-es-mejor" class="level2">
-<h2 class="anchored" data-anchor-id="qué-modelo-modelo-lineal-es-mejor">¿Qué modelo modelo lineal es mejor?</h2>
+<section id="best_model" class="level2">
+<h2 class="anchored" data-anchor-id="best_model">¿Qué modelo modelo lineal es mejor?</h2>
 <p>Aunque hemos visto que el modelo lineal en el caso planteado es más interpretable, no todos los modelos son igual de buenos. Por ejemplo, en la figura siguiente se muestra el modelo lineal (línea verde) y un modelo con curvatura (línea azul) ajustados a los datos. ¿Cuál de los dos modelos es mejor?</p>
-<div id="e00bac42" class="cell" data-execution_count="12">
+<div id="534e3155" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-display" data-execution_count="12">
 <div>
 <figure class="figure">
@@ -536,7 +548,7 @@ La ecuación es: altura = 116.35 + 0.68 * peso</code></pre>
 </div>
 <p>Obviamente la línea verde es mejor que la azul, pero ¿por qué? Para responder a esta pregunta, necesitamos entender el concepto de <strong>error</strong>. El error es la diferencia entre las predicciones del modelo y los valores reales de los datos. En este caso, el error se puede calcular como la distancia vertical entre cada punto de datos y la línea verde (modelo lineal). El modelo que minimiza el error total es el que mejor se ajusta a los datos. En este caso, el modelo lineal (línea verde) tiene un error total menor que el modelo con curvatura (línea azul), lo que indica que el modelo lineal es una mejor representación de la relación entre el peso y la altura en este conjunto de datos específico.</p>
 <p>Por ejemplo, para uno de los puntos con los que hemos ajustado los modelos, vemos que la línea verde tiene un error menor que la línea azul, lo que indica que el modelo lineal representado en verde se ajusta mejor a ese punto específico. Si tuviéramos en cuenta todos los puntos, podríamos calcular el error total para cada modelo y comparar cuál tiene el menor error total para determinar cuál es el mejor modelo en términos de ajuste a los datos.</p>
-<div id="60d00721" class="cell" data-execution_count="13">
+<div id="9f5ae6a2" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display" data-execution_count="13">
 <div>
 <figure class="figure">
