@@ -7,3 +7,9 @@ _site
 __pycache__/
 **/lightning_logs
 **/**ubyte**
+
+**/*.quarto_ipynb
+_freeze
+site_libs
+.jupyter_cache
+*_files

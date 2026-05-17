@@ -1,7 +1,14 @@
 ---
 title: Regresión lineal simple
 execute:
-  echo: false
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
 ---
 
 ## Introducción
@@ -273,6 +280,8 @@ p
 ```
 
 ```{python}
+#| echo: true
+#| 
 def ssr(b, m, x = df["horas_estudio"], y = df["notas"]):
     y_pred = b + m * x
     return np.sum((y - y_pred) ** 2)

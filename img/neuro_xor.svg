@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="100%" height="100%" style="background-color: #ffffff; font-family: system-ui, -apple-system, sans-serif;">
+  
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1E40AF" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#166534" />
+    </marker>
+  </defs>
+
+  <g id="input-block">
+    <text x="90" y="175" text-anchor="middle" font-size="14" font-weight="600" fill="#64748B">Input</text>
+    <rect x="50" y="190" width="80" height="80" rx="12" fill="#F8FAFC" stroke="#1E40AF" stroke-width="2.5" stroke-dasharray="4 4" />
+    <text x="90" y="240" text-anchor="middle" font-size="28" font-weight="bold" fill="#1E293B">X</text>
+  </g>
+
+  <path d="M 130 220 L 175 220" stroke="#1E40AF" stroke-width="2.5" fill="none" />
+  <path d="M 130 245 L 175 270" stroke="#1E40AF" stroke-width="2.5" fill="none" />
+
+  <text x="155" y="210" font-size="15" font-weight="bold" fill="#1E293B">x₁</text>
+  <text x="155" y="260" font-size="15" font-weight="bold" fill="#1E293B">x₂</text>
+
+  <g stroke="#1E40AF" stroke-width="2" fill="none">
+    <path d="M 175 220 L 220 121" marker-end="url(#arrow-blue)" />
+    <path d="M 175 220 L 220 341" marker-end="url(#arrow-blue)" />
+    <path d="M 175 270 L 220 181" marker-end="url(#arrow-blue)" />
+    <path d="M 175 270 L 220 401" marker-end="url(#arrow-blue)" />
+  </g>
+
+  <g id="layer1-top-params">
+    <text x="257.5" y="38" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">b₁</text>
+    <rect x="220" y="45" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="257.5" y="66" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">+ -3.0</text>
+
+    <text x="257.5" y="98" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">w₁</text>
+    <rect x="220" y="105" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="257.5" y="126" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">× 6.0</text>
+
+    <text x="257.5" y="158" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">w₂</text>
+    <rect x="220" y="165" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="257.5" y="186" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">× 6.0</text>
+  </g>
+
+  <g id="layer1-bottom-params">
+    <text x="257.5" y="258" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">b₂</text>
+    <rect x="220" y="265" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="257.5" y="286" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">+ -9.0</text>
+
+    <text x="257.5" y="318" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">w₃</text>
+    <rect x="220" y="325" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="257.5" y="346" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">× 6.0</text>
+
+    <text x="257.5" y="378" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">w₄</text>
+    <rect x="220" y="385" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="257.5" y="406" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">× 6.0</text>
+  </g>
+
+  <g stroke="#1E40AF" stroke-width="2" fill="none">
+    <path d="M 295 61 L 362 115" marker-end="url(#arrow-blue)" />
+    <path d="M 295 121 L 362 130" marker-end="url(#arrow-blue)" />
+    <path d="M 295 181 L 362 145" marker-end="url(#arrow-blue)" />
+    
+    <path d="M 295 281 L 362 325" marker-end="url(#arrow-blue)" />
+    <path d="M 295 341 L 362 340" marker-end="url(#arrow-blue)" />
+    <path d="M 295 401 L 362 355" marker-end="url(#arrow-blue)" />
+  </g>
+
+  <g id="neuron-or">
+    <text x="410" y="62" text-anchor="middle" font-size="14" font-weight="600" fill="#64748B">neuron</text>
+    <text x="410" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#1E293B">(OR)</text>
+    <rect x="370" y="90" width="80" height="80" rx="12" fill="#EFF6FF" stroke="#1E40AF" stroke-width="2.5" />
+    <line x1="380" y1="130" x2="440" y2="130" stroke="#DBEAFE" stroke-width="2" />
+    <path d="M 385 155 C 405 155, 415 105, 435 105" fill="none" stroke="#1E293B" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <g id="neuron-and">
+    <text x="410" y="272" text-anchor="middle" font-size="14" font-weight="600" fill="#64748B">neuron</text>
+    <text x="410" y="290" text-anchor="middle" font-size="14" font-weight="bold" fill="#1E293B">(AND)</text>
+    <rect x="370" y="300" width="80" height="80" rx="12" fill="#EFF6FF" stroke="#1E40AF" stroke-width="2.5" />
+    <line x1="380" y1="340" x2="440" y2="340" stroke="#DBEAFE" stroke-width="2" />
+    <path d="M 385 365 C 405 365, 415 315, 435 315" fill="none" stroke="#1E293B" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <g stroke="#1E40AF" stroke-width="2" fill="none">
+    <path d="M 450 130 L 552 215" marker-end="url(#arrow-blue)" />
+    <path d="M 450 340 L 552 301" marker-end="url(#arrow-blue)" />
+  </g>
+
+  <text x="485" y="122" font-size="16" font-weight="bold" fill="#1E293B">y_or</text>
+  <text x="485" y="365" font-size="16" font-weight="bold" fill="#1E293B">y_and</text>
+
+  <g id="layer2-output-params">
+    <text x="597.5" y="118" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">b₃</text>
+    <rect x="560" y="125" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="597.5" y="146" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">+ -5.0</text>
+
+    <text x="597.5" y="198" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">w₅</text>
+    <rect x="560" y="205" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="597.5" y="226" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">× 10.0</text>
+
+    <text x="597.5" y="278" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">w₆</text>
+    <rect x="560" y="285" width="75" height="32" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+    <text x="597.5" y="306" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">× -10.0</text>
+  </g>
+
+  <g stroke="#1E40AF" stroke-width="2" fill="none">
+    <path d="M 635 141 L 702 225" marker-end="url(#arrow-blue)" />
+    <path d="M 635 221 L 702 240" marker-end="url(#arrow-blue)" />
+    <path d="M 635 301 L 702 255" marker-end="url(#arrow-blue)" />
+  </g>
+
+  <g id="neuron-difference">
+    <text x="750" y="172" text-anchor="middle" font-size="14" font-weight="600" fill="#64748B">neuron</text>
+    <text x="750" y="190" text-anchor="middle" font-size="14" font-weight="bold" fill="#1E293B">(Difference)</text>
+    <rect x="710" y="200" width="80" height="80" rx="12" fill="#EFF6FF" stroke="#1E40AF" stroke-width="2.5" />
+    <line x1="720" y1="240" x2="780" y2="240" stroke="#DBEAFE" stroke-width="2" />
+    <path d="M 725 265 C 745 265, 755 215, 775 215" fill="none" stroke="#1E293B" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <g id="connections-final-output" stroke="#166534" stroke-width="2.5" fill="none">
+    <path d="M 790 240 L 1030 240" marker-end="url(#arrow-green)" />
+  </g>
+
+  <g text-anchor="middle">
+    <text x="845" y="225" font-size="16" font-weight="bold" fill="#1E293B">y_pred</text>
+    <text x="910" y="262" font-size="14" font-weight="500" fill="#475569">σ(w5*y_or + w6*y_and + b3)</text>
+  </g>
+
+  <g id="output-block">
+    <text x="1080" y="172" text-anchor="middle" font-size="15" font-weight="600" fill="#1E293B">Output</text>
+    <text x="1080" y="188" text-anchor="middle" font-size="12" font-weight="500" fill="#94A3B8">(Prediction)</text>
+    <rect x="1040" y="200" width="80" height="80" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2.5" />
+    <text x="1080" y="248" text-anchor="middle" font-size="24" font-weight="bold" fill="#166534">XOR</text>
+  </g>
+
+</svg>
