@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Generalización de la regresión lineal – IA para desarrolladores</title>
+<title>Regresión lineal múltiple – IA para desarrolladores</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -173,7 +173,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/30_linear_regression2.html">Generalización de la regresión lineal</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/30_linear_regression2.html">Regresión lineal múltiple</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
@@ -211,13 +211,25 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Regresión lineal</span></a>
+ <span class="menu-text">Regresión lineal simple</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Generalización de la regresión lineal</span></a>
+ <span class="menu-text">Regresión lineal múltiple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/40_logistic_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/50_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Redes neuronales</span></a>
   </div>
 </li>
       </ul>
@@ -225,12 +237,29 @@ window.Quarto = {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Apéndices</span></a>
+ <span class="menu-text">LLM</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Apéndices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../qmd/90_apendices/10_derivadas.html" class="sidebar-item-text sidebar-link">
@@ -257,7 +286,7 @@ window.Quarto = {
   <ul>
   <li><a href="#introducción" id="toc-introducción" class="nav-link active" data-scroll-target="#introducción">Introducción</a></li>
   <li><a href="#regresión-lineal-sin-variables-explicativas" id="toc-regresión-lineal-sin-variables-explicativas" class="nav-link" data-scroll-target="#regresión-lineal-sin-variables-explicativas">Regresión lineal sin variables explicativas</a></li>
-  <li><a href="#regresión-lineal-con-una-sola-variable-de-tipo-categórico" id="toc-regresión-lineal-con-una-sola-variable-de-tipo-categórico" class="nav-link" data-scroll-target="#regresión-lineal-con-una-sola-variable-de-tipo-categórico">Regresión lineal con una sola variable de tipo categórico</a></li>
+  <li><a href="#regresión-lineal-con-una-sola-variable-explicativa-de-tipo-categórico" id="toc-regresión-lineal-con-una-sola-variable-explicativa-de-tipo-categórico" class="nav-link" data-scroll-target="#regresión-lineal-con-una-sola-variable-explicativa-de-tipo-categórico">Regresión lineal con una sola variable explicativa de tipo categórico</a></li>
   <li><a href="#regresión-lineal-múltiple" id="toc-regresión-lineal-múltiple" class="nav-link" data-scroll-target="#regresión-lineal-múltiple">Regresión lineal múltiple</a>
   <ul class="collapse">
   <li><a href="#ejemplo-práctico-solución-analítica" id="toc-ejemplo-práctico-solución-analítica" class="nav-link" data-scroll-target="#ejemplo-práctico-solución-analítica">Ejemplo práctico (solución analítica)</a></li>
@@ -269,9 +298,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/30_linear_regression2.html">Generalización de la regresión lineal</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/30_linear_regression2.html">Regresión lineal múltiple</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Generalización de la regresión lineal</h1>
+<h1 class="title">Regresión lineal múltiple</h1>
 </div>
 
 
@@ -295,7 +324,7 @@ window.Quarto = {
 <section id="regresión-lineal-sin-variables-explicativas" class="level2">
 <h2 class="anchored" data-anchor-id="regresión-lineal-sin-variables-explicativas">Regresión lineal sin variables explicativas</h2>
 <p>Partiendo del <code>dataset</code> de notas de alumnos:</p>
-<div id="e3eff147" class="cell" data-execution_count="2">
+<div id="79ef2f44" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display" data-execution_count="2">
 <div>
 
@@ -329,10 +358,10 @@ window.Quarto = {
 <td>F</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">Marta</th>
+<th data-quarto-table-cell-role="th">Javier</th>
 <td>4</td>
 <td>6</td>
-<td>F</td>
+<td>M</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">Elena</th>
@@ -341,10 +370,10 @@ window.Quarto = {
 <td>F</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">Javier</th>
+<th data-quarto-table-cell-role="th">Marta</th>
 <td>7</td>
 <td>7</td>
-<td>M</td>
+<td>F</td>
 </tr>
 </tbody>
 </table>
@@ -373,11 +402,11 @@ SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - b)^2
 \]</span></p>
 <p>Es decir, el valor de <span class="math inline">\(b\)</span> que minimiza la función de pérdida es la media de las notas</p>
 </section>
-<section id="regresión-lineal-con-una-sola-variable-de-tipo-categórico" class="level2">
-<h2 class="anchored" data-anchor-id="regresión-lineal-con-una-sola-variable-de-tipo-categórico">Regresión lineal con una sola variable de tipo categórico</h2>
-<p>Supongamos que estamos interesados en conocer si hay diferencias en las notas de los alumnos en función de su sexo. Una forma de hacerlo es comparar la media de las notas para cada sexo. En este ejemplo la media de la nota de los hombres es 4.5 y media la nota de las mujeres 6.0. Es decir, que para este <code>dataset</code> las mujeres han obtenido mejores notas que los hombres. Concretamente, la diferencia entre las medias es de 1.5 puntos.</p>
+<section id="regresión-lineal-con-una-sola-variable-explicativa-de-tipo-categórico" class="level2">
+<h2 class="anchored" data-anchor-id="regresión-lineal-con-una-sola-variable-explicativa-de-tipo-categórico">Regresión lineal con una sola variable explicativa de tipo categórico</h2>
+<p>Supongamos que estamos interesados en conocer si hay diferencias en las notas de los alumnos en función de su sexo. Una forma de hacerlo es comparar la media de las notas para cada sexo. En este ejemplo la media de la nota de los hombres es 4.0 y media la nota de las mujeres 6.3. Es decir, que para este <code>dataset</code> las mujeres han obtenido mejores notas que los hombres. Concretamente, la diferencia entre las medias es de 2.3 puntos.</p>
 <p>Podemos obtener esta misma información utilizando un modelo de regresión lineal. El problema es que la variable <code>sexo</code> no es numérica, sino que es de tipo categórico. Tenemos que convertirla a una variable numérica para poder utilizarla en un modelo de regresión lineal. Podríamos, por ejemplo, asignar el valor 0 a las mujeres y el valor 1 a los hombres:</p>
-<div id="2db6b7d1" class="cell" data-execution_count="3">
+<div id="d1f32df2" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
@@ -415,11 +444,11 @@ SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - b)^2
 <td>0</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">Marta</th>
+<th data-quarto-table-cell-role="th">Javier</th>
 <td>4</td>
 <td>6</td>
-<td>F</td>
-<td>0</td>
+<td>M</td>
+<td>1</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">Elena</th>
@@ -429,11 +458,11 @@ SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - b)^2
 <td>0</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">Javier</th>
+<th data-quarto-table-cell-role="th">Marta</th>
 <td>7</td>
 <td>7</td>
-<td>M</td>
-<td>1</td>
+<td>F</td>
+<td>0</td>
 </tr>
 </tbody>
 </table>
@@ -449,15 +478,15 @@ m &amp;= \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n} (x_
 \end{aligned}
 \]</span></p>
 <p>Si resolvemos esta fórmula para nuestro <code>dataset</code>, obtenemos que el modelo de regresión lineal que mejor se ajusta a los datos es:</p>
-<div id="5ab82a89" class="cell" data-execution_count="4">
+<div id="ee10aa65" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-stdout">
-<pre><code>b: 6.00, m: -1.50</code></pre>
+<pre><code>b: 6.33, m: -2.33</code></pre>
 </div>
 </div>
 <p>Vemos que <span class="math inline">\(b\)</span> se corresponde con la media de las notas de las mujeres y que <span class="math inline">\(m\)</span> se corresponde con la diferencia entre la media de las notas de los hombres y la media de las notas de las mujeres. Cuando usamos variables dummy, el término <span class="math inline">\(b\)</span> se corresponde con la media de la categoría que se ha usado como referencia (en este caso, las mujeres) y el término <span class="math inline">\(m\)</span> se corresponde con la diferencia entre la media de la categoría que se ha usado como referencia y la media de la otra categoría (en este caso, los hombres).</p>
 <p>Si la variables categórica tiene más de dos categorías (por ejemplo, si tuviéramos una variable <code>asignatura</code> con las categorías <code>matemáticas</code>, <code>lengua</code> y <code>historia</code>), tendríamos que elegir una categoría como referencia (por ejemplo, <code>matemáticas</code>) y crear una variable dummy para cada una de las otras categorías (por ejemplo, <code>lengua_dummy</code> y <code>historia_dummy</code>).</p>
 <p>En nuestro <code>dataset</code> podríamos crear la variable <code>asignatura</code> y sus correspondientes variables dummy:</p>
-<div id="323c7f4c" class="cell" data-execution_count="5">
+<div id="b9bfb5cd" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 
@@ -507,11 +536,11 @@ m &amp;= \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n} (x_
 <td>0</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">Marta</th>
+<th data-quarto-table-cell-role="th">Javier</th>
 <td>4</td>
 <td>6</td>
-<td>F</td>
-<td>0</td>
+<td>M</td>
+<td>1</td>
 <td>historia</td>
 <td>0</td>
 <td>1</td>
@@ -527,11 +556,11 @@ m &amp;= \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n} (x_
 <td>0</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">Javier</th>
+<th data-quarto-table-cell-role="th">Marta</th>
 <td>7</td>
 <td>7</td>
-<td>M</td>
-<td>1</td>
+<td>F</td>
+<td>0</td>
 <td>lengua</td>
 <td>1</td>
 <td>0</td>
@@ -640,7 +669,7 @@ SSR = (\mathbf{y} - \boldsymbol{\hat{y}})^T (\mathbf{y} - \boldsymbol{\hat{y}}) 
 <section id="ejemplo-práctico-solución-analítica" class="level3">
 <h3 class="anchored" data-anchor-id="ejemplo-práctico-solución-analítica">Ejemplo práctico (solución analítica)</h3>
 <p>Vamos ha hacer un ejemplo práctico: Supongamos que generamos un <code>dataset</code> con 1000 individuos, donde la variable objetivo <code>y</code> (nota del examen) depende de dos variables explicativas <code>x1</code> (horas de estudio) y <code>x2</code> (duración del examen) de la siguiente forma:</p>
-<div id="635c48d1" class="cell" data-execution_count="7">
+<div id="6cde8af8" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display cell-output-markdown" data-execution_count="7">
 <p><span class="math display">\[
 y = 3 + 1.1 \cdot x_1 -0.05 \cdot x_2 + \epsilon
@@ -648,7 +677,7 @@ y = 3 + 1.1 \cdot x_1 -0.05 \cdot x_2 + \epsilon
 </div>
 </div>
 <p>Es decir, que estamos diciendo que por cada hora de estudio adicional, la nota del examen aumenta en 1.1 puntos y que por cada minuto adicional de duración del examen, la nota del examen disminuye en 0.05 puntos. La variable <span class="math inline">\(\epsilon\)</span> es un término de error que representa la variabilidad de las notas que no se explica por las horas de estudio y la duración del examen. Para generar el <code>dataset</code>, vamos a suponer que las horas de estudio siguen una distribución normal centrada en 5 con desviación estándar 1, que la duración del examen sigue una distribución uniforme entre 30 y 120 y que el término de error sigue una distribución normal con media 0 y desviación estándar 1:</p>
-<div id="39a802ac" class="cell" data-execution_count="8">
+<div id="f2688d16" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div>
 
@@ -664,34 +693,34 @@ y = 3 + 1.1 \cdot x_1 -0.05 \cdot x_2 + \epsilon
 </thead>
 <tbody>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">392</th>
+<th data-quarto-table-cell-role="th">653</th>
 <td>0.0</td>
-<td>1.8</td>
-<td>113.6</td>
+<td>1.6</td>
+<td>87.9</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">403</th>
+<th data-quarto-table-cell-role="th">142</th>
 <td>0.0</td>
-<td>2.6</td>
-<td>107.0</td>
+<td>2.1</td>
+<td>109.2</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">415</th>
+<th data-quarto-table-cell-role="th">968</th>
 <td>0.0</td>
-<td>3.2</td>
-<td>108.3</td>
+<td>3.5</td>
+<td>119.5</td>
 </tr>
 <tr class="even">
-<th data-quarto-table-cell-role="th">550</th>
+<th data-quarto-table-cell-role="th">252</th>
 <td>0.0</td>
-<td>2.6</td>
-<td>112.3</td>
+<td>4.0</td>
+<td>119.9</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">849</th>
+<th data-quarto-table-cell-role="th">31</th>
 <td>0.0</td>
-<td>2.8</td>
-<td>119.8</td>
+<td>3.5</td>
+<td>113.2</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">...</th>
@@ -700,34 +729,34 @@ y = 3 + 1.1 \cdot x_1 -0.05 \cdot x_2 + \epsilon
 <td>...</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">321</th>
-<td>9.6</td>
-<td>6.5</td>
-<td>51.7</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">160</th>
-<td>9.7</td>
-<td>7.0</td>
-<td>45.7</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">915</th>
-<td>9.7</td>
-<td>6.6</td>
-<td>50.5</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">643</th>
+<th data-quarto-table-cell-role="th">488</th>
 <td>10.0</td>
-<td>7.5</td>
-<td>52.4</td>
+<td>7.8</td>
+<td>36.1</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">782</th>
+<td>10.0</td>
+<td>6.8</td>
+<td>33.9</td>
 </tr>
 <tr class="odd">
-<th data-quarto-table-cell-role="th">899</th>
+<th data-quarto-table-cell-role="th">15</th>
+<td>10.0</td>
+<td>7.9</td>
+<td>46.2</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">483</th>
 <td>10.0</td>
 <td>7.3</td>
-<td>33.9</td>
+<td>31.8</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">658</th>
+<td>10.0</td>
+<td>5.9</td>
+<td>33.0</td>
 </tr>
 </tbody>
 </table>
@@ -737,16 +766,16 @@ y = 3 + 1.1 \cdot x_1 -0.05 \cdot x_2 + \epsilon
 </div>
 </div>
 <p>Si ajustamos un modelo de regresión lineal múltiple a este <code>dataset</code>, obtenemos los siguientes parámetros estimados, que son similares a los parámetros que hemos utilizado para generar el <code>dataset</code>:</p>
-<div id="48e65a2f" class="cell" data-execution_count="9">
+<div id="e9d9c210" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display" data-execution_count="9">
-<pre><code>array([ 2.56536966,  1.16515997, -0.04862942])</code></pre>
+<pre><code>array([ 2.9727548 ,  1.08723613, -0.0488478 ])</code></pre>
 </div>
 </div>
 </section>
 <section id="ejemplo-práctico-con-pytorch" class="level3">
 <h3 class="anchored" data-anchor-id="ejemplo-práctico-con-pytorch">Ejemplo práctico (con Pytorch)</h3>
 <p>Podemos ajustar el mismo modelo utilizando el algoritmo de descenso de gradiente y la librería pytorch:</p>
-<div id="99cc7a3d" class="cell" data-execution_count="10">
+<div id="d58d77be" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -767,28 +796,28 @@ y = 3 + 1.1 \cdot x_1 -0.05 \cdot x_2 + \epsilon
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        theta.grad.zero_()</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>theta</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Iteración 0, pérdida: 26.3325
-Iteración 100, pérdida: 7.8600
-Iteración 200, pérdida: 6.5287
-Iteración 300, pérdida: 5.4580
-Iteración 400, pérdida: 4.5969
-Iteración 500, pérdida: 3.9044
-Iteración 600, pérdida: 3.3474
-Iteración 700, pérdida: 2.8995
-Iteración 800, pérdida: 2.5392
-Iteración 900, pérdida: 2.2494</code></pre>
+<pre><code>Iteración 0, pérdida: 26.7972
+Iteración 100, pérdida: 8.1442
+Iteración 200, pérdida: 6.7109
+Iteración 300, pérdida: 5.5741
+Iteración 400, pérdida: 4.6724
+Iteración 500, pérdida: 3.9573
+Iteración 600, pérdida: 3.3900
+Iteración 700, pérdida: 2.9400
+Iteración 800, pérdida: 2.5831
+Iteración 900, pérdida: 2.2999</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>tensor([[ 0.1676],
-        [ 1.0002],
-        [-0.0099]], requires_grad=True)</code></pre>
+<pre><code>tensor([[ 0.1737],
+        [ 1.0187],
+        [-0.0114]], requires_grad=True)</code></pre>
 </div>
 </div>
 <p>Vemos que después de 1000 iteraciones, el algoritmo todavía no ha convergido. Si aumentamos el valor de <code>alpha</code>, para que el entrenamiento vaya más rápido, se produce desbordamiento. Esto es un problema común en el entrenamiento de modelos de regresión lineal múltiple con descenso de gradiente. El valor de <code>alpha</code> tiene que ser lo suficientemente pequeño para que el algoritmo converja, pero no tan pequeño como para que el entrenamiento sea muy lento. El problema es que la forma de la función de pérdida en el espacio de los parámetros es muy compleja y tiene zones en que es muy plana y otras en que es muy empinada. Lo mejor es utilizar un algoritmo de optimización más avanzado, como el algoritmo de descenso de gradiente algoritmo de Adam, que adaptan el valor de <code>alpha</code> durante el entrenamiento para evitar estos problemas:</p>
-<div id="e6534742" class="cell" data-execution_count="11">
+<div id="b0866345" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> torch.zeros((<span class="dv">3</span>,<span class="dv">1</span>), requires_grad<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam([theta], lr<span class="op">=</span><span class="fl">0.01</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>n_iterations <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>n_iterations <span class="op">=</span> <span class="dv">2000</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_iterations):</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> X <span class="op">@</span> theta</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> criterion(y_hat, y)</span>
@@ -799,24 +828,43 @@ Iteración 900, pérdida: 2.2494</code></pre>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Iteración </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">, pérdida: </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>theta</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Iteración 0, pérdida: 26.3325
-Iteración 100, pérdida: 3.8335
-Iteración 200, pérdida: 1.4670
-Iteración 300, pérdida: 1.0029
-Iteración 400, pérdida: 0.9497
-Iteración 500, pérdida: 0.9423
-Iteración 600, pérdida: 0.9375
-Iteración 700, pérdida: 0.9330
-Iteración 800, pérdida: 0.9286
-Iteración 900, pérdida: 0.9246</code></pre>
+<pre><code>Iteración 0, pérdida: 26.7972
+Iteración 100, pérdida: 3.9412
+Iteración 200, pérdida: 1.5539
+Iteración 300, pérdida: 1.1156
+Iteración 400, pérdida: 1.0661
+Iteración 500, pérdida: 1.0555
+Iteración 600, pérdida: 1.0469
+Iteración 700, pérdida: 1.0385
+Iteración 800, pérdida: 1.0306
+Iteración 900, pérdida: 1.0232
+Iteración 1000, pérdida: 1.0166
+Iteración 1100, pérdida: 1.0107
+Iteración 1200, pérdida: 1.0055
+Iteración 1300, pérdida: 1.0011
+Iteración 1400, pérdida: 0.9974
+Iteración 1500, pérdida: 0.9944
+Iteración 1600, pérdida: 0.9920
+Iteración 1700, pérdida: 0.9901
+Iteración 1800, pérdida: 0.9886
+Iteración 1900, pérdida: 0.9875</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>tensor([[ 1.7739],
-        [ 1.2856],
-        [-0.0463]], requires_grad=True)</code></pre>
+<pre><code>tensor([[ 2.7297],
+        [ 1.1238],
+        [-0.0481]], requires_grad=True)</code></pre>
 </div>
 </div>
 <p>Comprobamos que la función de pérdida disminuya muy rápidamente y converge en pocas iteraciones. Además, los parámetros estimados son muy similares a los parámetros que hemos utilizado para generar el <code>dataset</code>.</p>
+<p>Como hicimos en el capítulo anterior, podemos simplificar el entrenamiento utilizando los modelos de regresión lineal incluidos en Pytorch:</p>
+<div id="ed351ece" class="cell" data-execution_count="12">
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>(Parameter containing:
+ tensor([[ 1.0872, -0.0488]], requires_grad=True),
+ Parameter containing:
+ tensor([2.9728], requires_grad=True))</code></pre>
+</div>
+</div>
 
 
 </section>
@@ -896,7 +944,7 @@ Iteración 900, pérdida: 0.9246</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/surtich\.github\.io\/IA-para-desarrolladores\/");
+        var filterRegex = new RegExp('/' + window.location.host + '/');
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

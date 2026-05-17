@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Regresión logística – IA para desarrolladores</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5c7b0344403fcc0d3486fe5a6450fa50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">IA para desarrolladores</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../qmd/index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/40_logistic_regression.html">Regresión logística</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Buscar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal simple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal múltiple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/40_logistic_regression.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/50_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Redes neuronales</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">LLM</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Apéndices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/10_derivadas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derivadas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../presentacion_2025.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Presentación 2025</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#introducción" id="toc-introducción" class="nav-link active" data-scroll-target="#introducción">Introducción</a></li>
+  <li><a href="#modelado-de-probabilidades-con-regresión-logística" id="toc-modelado-de-probabilidades-con-regresión-logística" class="nav-link" data-scroll-target="#modelado-de-probabilidades-con-regresión-logística">Modelado de probabilidades con regresión logística</a></li>
+  <li><a href="#función-de-pérdida-de-la-regresión-logística" id="toc-función-de-pérdida-de-la-regresión-logística" class="nav-link" data-scroll-target="#función-de-pérdida-de-la-regresión-logística">Función de pérdida de la regresión logística</a></li>
+  <li><a href="#ajuste-del-modelo-de-regresión-logística-con-pytorch" id="toc-ajuste-del-modelo-de-regresión-logística-con-pytorch" class="nav-link" data-scroll-target="#ajuste-del-modelo-de-regresión-logística-con-pytorch">Ajuste del modelo de regresión logística con Pytorch</a></li>
+  <li><a href="#regresión-multinomial" id="toc-regresión-multinomial" class="nav-link" data-scroll-target="#regresión-multinomial">Regresión multinomial</a></li>
+  <li><a href="#clasificación-de-imágenes-con-regresión-multinomial" id="toc-clasificación-de-imágenes-con-regresión-multinomial" class="nav-link" data-scroll-target="#clasificación-de-imágenes-con-regresión-multinomial">Clasificación de imágenes con regresión multinomial</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/40_logistic_regression.html">Regresión logística</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Regresión logística</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introducción" class="level2">
+<h2 class="anchored" data-anchor-id="introducción">Introducción</h2>
+<p>Supongamos que pretendemos explicar el sexo de una persona a partir de las notas obtenidas en un examen. En principio, puede parecer extraño este que queremos el sexo, ya que es algo que se determina por la biología y no por las notas obtenidas en un examen. Pero como se ha explicado anteriormente la modelización estadística trata de buscar correlaciones y no causalidades. Así que puede tener sentido saber si conocer la nota en un examen nos puede dar alguna indicación de su sexo. De hecho, en el capítulo anterior ya habíamos visto que las mujeres habían obtenido mejores notas que los hombres. Pero eso no responde a la pregunta que estamos formulando ahora: lo que queremos saber es si por ejemplo, sabemos que una persona ha obtenido una nota de 6, ¿qué es más probable que sea hombre o mujer?</p>
+<p>Como primer intento de responder a esta pregunta, podríamos intentar ajustar un modelo de regresión lineal a los datos: Es decir, podríamos crear una <code>variable dummy</code> dependiente que represente el sexo de la persona (por ejemplo, 0 para mujeres y 1 para hombres) y realizar un ajuste de mínimos cuadrados usando cómo variable independiente las notas obtenidas en el examen:</p>
+<div id="ab2ddd21" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">horas_estudio</th>
+<th data-quarto-table-cell-role="th">notas</th>
+<th data-quarto-table-cell-role="th">sexo</th>
+<th data-quarto-table-cell-role="th">sexo_dummy</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">nombre</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Leo</th>
+<td>0</td>
+<td>2</td>
+<td>M</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Sara</th>
+<td>5</td>
+<td>4</td>
+<td>F</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Javier</th>
+<td>4</td>
+<td>6</td>
+<td>M</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Elena</th>
+<td>6</td>
+<td>8</td>
+<td>F</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Marta</th>
+<td>7</td>
+<td>7</td>
+<td>F</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Podemos representar gráficamente los datos de entrenamiento:</p>
+<div id="4c5885f5" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+<figure class="figure">
+<p><img src="40_logistic_regression_files/figure-html/cell-4-output-1.png" width="672" height="480" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Aplicando el método de mínimos cuadrados, obtenemos el siguiente modelo:</p>
+<div id="f79cb0aa" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-stdout">
+<pre><code>b: 1.05, m: -0.12</code></pre>
+</div>
+</div>
+<p>Podemos representar gráficamente el modelo ajustado:</p>
+<div id="19f74e3d" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+<figure class="figure">
+<p><img src="40_logistic_regression_files/figure-html/cell-6-output-1.png" width="672" height="480" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Pero, ¿qué significa esa línea?. Para comprenderlo vamos a suponer que tenemos una persona que ha obtenido una nota de 6. Según el modelo ajustado, el sexo para esa persona sería:</p>
+<div id="d1dbca95" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="7">
+<p>1.05 + -0.12 * 6 = 0.33</p>
+</div>
+</div>
+<p>¿Pero qué significa exactamente que el sexo de esa persona sea 0.33?. Recordemos que el sexo es una variable dummy que toma el valor de 0 para mujeres y 1 para hombres. Por lo tanto, el valor de 0.33 no tiene un significado claro, ya que no es ni 0 ni 1. Arbitrariamente podríamos decir que si el valor es mayor o igual a 0.5, entonces la persona es hombre, y si es menor a 0.5, entonces la persona es mujer.</p>
+<p>Podríamos calcular cuál es el valor de la nota para el que el modelo predice que la persona es hombre o mujer:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\hat{y} = b + m \cdot x \\
+&amp;0.5 = b + m \cdot x \\
+&amp;x = \frac{0.5 - b}{m}
+\end{aligned}
+\]</span></p>
+<p>Aplicando esta fórmula, obtenemos que el valor de la nota de corte para el que el modelo predice que la persona es hombre o mujer es:</p>
+<div id="da0e1b62" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="8">
+<p>4.57</p>
+</div>
+</div>
+<p>Para notas inferiores a 4.57, el modelo predice que la persona es hombre, y para notas superiores el modelo predice que la persona es mujer.</p>
+<p>Este tipo de modelos es conocido como <em>modelo de clasificación</em>. En los modelos de clasificación, la variable dependiente es una variable categórica (en este caso, el sexo) y el objetivo es predecir a qué categoría pertenece una observación a partir de las variables independientes (en este caso, las notas). Estos modelos se diferencian de los modelos de regresión, en los que la variable dependiente es una variable numérica y el objetivo es predecir un valor numérico a partir de las variables independientes.</p>
+<p>Este capítulo podría finalizar aquí, sin embargo hay algo en este modelo que no es muy satisfactorio. Por ejemplo, el modelo predice con la misma seguridad que una persona con una nota de 0 es hombre que una persona con una nota ligeramente inferior a la nota de corte. Esto no tiene mucho sentido, ya que es más razonable pensar que una persona con una nota de 0 es más probable que sea hombre que una persona con una nota de 4.9. Nos gustaría construir un modelo que nos permita predecir la probabilidad de que una persona sea hombre o mujer a partir de sus notas, en lugar de predecir directamente el sexo. Para ello, vamos a introducir el modelo de regresión logística.</p>
+</section>
+<section id="modelado-de-probabilidades-con-regresión-logística" class="level2">
+<h2 class="anchored" data-anchor-id="modelado-de-probabilidades-con-regresión-logística">Modelado de probabilidades con regresión logística</h2>
+<p>En la regresión logística, en lugar de predecir directamente el sexo de una persona a partir de sus notas, lo que hacemos es predecir la probabilidad de que una tenga la categoría positiva (en este caso, que sea hombre). La categoría positiva es aquella que se codifica con el valor de 1 en la variable dummy.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Nota
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Se habla de la categoría positiva sin animus iniuriandi, es simplemente una convención que se utiliza en estadística para referirse a la categoría que se codifica con el valor de 1 en la variable dummy. En este caso, hemos decidido que la categoría positiva es la de hombre, pero podríamos haber decidido que la categoría positiva es la de mujer, y entonces el modelo predeciría la probabilidad de que una persona sea mujer a partir de sus notas. Los resultados serían equivalentes, ya que la probabilidad de que una persona sea hombre es igual a 1 menos la probabilidad de que sea mujer.</p>
+<p>Los paquetes estádisticos suelen ordenar las categoría alfabéticamente, por lo que la categoría positiva normalmente es la que va alfabéticamente después. En este caso, como “M” va después de “F”, la categoría positiva es la de hombre. Sin embargo, esto no es una regla estricta, y se puede cambiar.</p>
+</div>
+</div>
+<p>Una primera aproximación sería lo que hicimos en la sección anterior. Es decir, podríamos especificar el modelo así:</p>
+<p><span class="math display">\[
+Prob(y = 1 | x) = b + m \cdot x
+\]</span></p>
+<p>El problema de este modelo es que la probabilidad es una variable que toma valores entre 0 y 1, mientras que un modelo lineal anterior, al ser una recta, puede tomar cualquier valor real (es decir entre <span class="math inline">\(-\infty\)</span> y <span class="math inline">\(\infty\)</span>).</p>
+<p>Podemos empezar a abordar este problema si en lugar de predecir directamente la probabilidad, predecimos la razón de probabilidades (odds ratio) de que una persona sea hombre a partir de sus notas:</p>
+<p><span class="math display">\[
+\frac{Prob(y = 1 | x)}{Prob(y = 0 | x)} = b + m \cdot x
+\]</span></p>
+<p>Esto se puede simplificar dado que <span class="math inline">\(Prob(y = 0 | x) = 1 - Prob(y = 1 | x)\)</span>, por lo que el modelo se puede reescribir como:</p>
+<p><span class="math display">\[
+\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)} = b + m \cdot x
+\]</span></p>
+<p>Algo hemos avanzado, ya que la razón de probabilidades es una variable que toma valores entre 0 y <span class="math inline">\(\infty\)</span>, pero todavía no es un modelo adecuado, ya que, como hemos dicho, los modelos lineales pueden tomar valores entre <span class="math inline">\(-\infty\)</span> y <span class="math inline">\(\infty\)</span>. Para solucionar este problema, podemos usar el logaritmo de la razón de probabilidades. La función logarítmica toma valores positivos y los transforma en valores reales, por lo que el modelo se puede reescribir como:</p>
+<p><span class="math display">\[
+\log\left(\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)}\right) = b + m \cdot x
+\]</span></p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La razón de probabilidades toma valores entre <span class="math inline">\([0 y \infty]\)</span>, Será 0 cuando la categoría positiva tenga probabilidad 0. El logaritmo de 0 es <span class="math inline">\(-\infty\)</span>. Si se produce este valor, el modelo no se podrá ajustar, ya que cualquier operación con <span class="math inline">\(-\infty\)</span> produce resultados no definidos. En la práctica, esto no suele ser un gran problema, ya que normalmente no se producen probabilidades en los extremos (0 y 1) pero sin llegar a ellos. Si se piensa detenidamente, en el ejemplo que estamos utilizando, siempre existirá una cierta probabilidad de que una persona con una nota de 0 sea mujer y de que una persona con una nota de 10 sea hombre, aunque esa probabilidad sea baja.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Nota
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No hemos discutido la base del logaritmo a utilizar. En la práctica se suele utilizar el logaritmo natural, aunque también se podrían utilizar otras bases. La elección de la base del logaritmo no afecta a los resultados del modelo, ya que los logaritmos de una determinada base son transformaciones de escala de los logaritmos de otra base.</p>
+</div>
+</div>
+<p>Con las transformaciones anteriores, hemos definido una la función que se llama logística. La <strong>función logística</strong> es lineal en los parámetros. Aunque ya no estamos prediciendo directamente la probabilidad, sino el logaritmo de la razón de probabilidades (<code>logit</code>). Ahora el problema es interpretar los resultados. Supongamos que en el modelo ajustado, el valor de <span class="math inline">\(b\)</span> es -2 y el valor de <span class="math inline">\(m\)</span> es 0.5. Si queremos predecir el sexo de una persona que ha estudiado 7 horas, obtenemos un <code>logit</code> de <span class="math inline">\(-2 + 0.5 \cdot 7 = 1.5\)</span>. Pero, ¿qué significa ese valor?. Para interpretarlo, podemos transformar el <code>logit</code> a una probabilidad. Para ello, podemos aplicar l, ¿el modelo predice que es hombre o que es mujer? Para ello, podemos aplicar las transformaciones inversas a las que hemos aplicado para definir el modelo. Es decir, podemos aplicar la función logística inversa, llamada más comúnmente <strong>funcion sigmoide</strong>, para obtener la probabilidad de que una persona sea hombre a partir del <code>logit</code>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\log\left(\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)}\right) = b + m \cdot x \\
+&amp;\frac{Prob(y = 1 | x)}{1 - Prob(y = 1 | x)} = e^{b + m \cdot x} \\
+&amp;Prob(y = 1 | x) = e^{b + m \cdot x} - e^{b + m \cdot x} \cdot Prob(y = 1 | x) \\
+&amp;Prob(y = 1 | x) = \frac{e^{b + m \cdot x}}{1 + e^{b + m \cdot x}} \\
+&amp;Prob(y = 1 | x) = \frac{1}{1 + e^{-(b + m \cdot x)}}
+\end{aligned}
+\]</span></p>
+<p>Obsérvese que la función sigmoide ya no es lineal en los parámetros y que toma valores entre 0 y 1.</p>
+</section>
+<section id="función-de-pérdida-de-la-regresión-logística" class="level2">
+<h2 class="anchored" data-anchor-id="función-de-pérdida-de-la-regresión-logística">Función de pérdida de la regresión logística</h2>
+<p>Podríamos tratar de utilizar como función de pérdida la suma cuadrática de los errores (SSR) que habíamos utilizado para la regresión lineal, pero esta función de pérdida no es adecuada para la regresión logística. En su lugar, se suele utilizar la función de pérdida de entropía cruzada (cross-entropy loss), que es una función convexa y que tiene un único mínimo global. Sin embargo, para entender la función de pérdida de entropía cruzada, vamos a empezar por intentar utilizar la suma cuadrática de los errores (SSR) pero aplicada a la probabilidad predicha por el modelo en lugar de al <code>logit</code>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;SSR = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 \\
+&amp;SSR = \sum_{i=1}^{n} \left(y_i - \frac{1}{1 + e^{-(b + m \cdot x_i)}}\right)^2
+\end{aligned}
+\]</span></p>
+<p>Esta función de pérdida tiene un problema, y es que no penaliza lo suficiente las predicciones incorrectas. Por ejemplo, si el modelo predice una probabilidad de 0.99 para una persona que es mujer (es decir, que la categoría positiva es hombre), el error cuadrático será de <span class="math inline">\((0 - 0.99)^2 = 0.981\)</span>, Por el contrario, si el modelo acierta y predice una probabilidad de 0.01, el error cuadrático será de <span class="math inline">\((0 - 0.01)^2 = 0.0001\)</span>. La diferencia entre lo que aporta a la función de pérdida una predicción muy incorrecta y muy correcta no es apenas apreciable. Para solucionar este problema, se utiliza la <strong>función de pérdida de entropía cruzada</strong>, que penaliza mucho más las predicciones incorrectas. La función de pérdida de entropía cruzada se define de la siguiente manera:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;CE = -\sum_{i=1}^{n} \left(y_i \cdot \log(\hat{y}_i) + (1 - y_i) \cdot \log(1 - \hat{y}_i)\right) \\
+&amp;CE = -\sum_{i=1}^{n} \left(y_i \cdot \log\left(\frac{1}{1 + e^{-(b + m \cdot x_i)}}\right) + (1 - y_i) \cdot \log\left(1 - \frac{1}{1 + e^{-(b + m \cdot x_i)}}\right  )\right)
+\end{aligned}
+\]</span></p>
+<p>Obsérvese que siempre uno de los términos del sumatorio será 0, ya que <span class="math inline">\(y_i\)</span> solo puede tomar los valores de 0 o 1. Por ejemplo, si <span class="math inline">\(y_i\)</span> es 1, entonces el término <span class="math inline">\((1 - y_i) \cdot \log(1 - \hat{y}_i)\)</span> será 0, y si <span class="math inline">\(y_i\)</span> es 0, entonces el término <span class="math inline">\(y_i \cdot \log(\hat{y}_i)\)</span> será 0.</p>
+<p>Veamos qué valores toma la función de pérdida de entropía cruzada para las predicciones correctas e incorrectas:</p>
+<ul>
+<li><p>Supongamos que el modelo predice una probabilidad de 0.99 para una persona que es hombre (es decir, que la categoría positiva es hombre), entonces el error de entropía cruzada será de <span class="math inline">\(- (1 \cdot \log(0.99) + 0 \cdot \log(1 - 0.99)) = -\log(0.99) \approx 0.010\)</span>.</p></li>
+<li><p>Supongamos que el modelo predice una probabilidad de 0.01 para una persona que es hombre (es decir, que la categoría positiva es hombre), entonces el error de entropía cruzada será de <span class="math inline">\(- (1 \cdot \log(0.01) + 0 \cdot \log(1 - 0.01)) = -\log(0.01) \approx 4.605\)</span>.</p></li>
+</ul>
+<p>Ahora la contribución a la función de pérdida es mucho mayor. El mismo razonamiento se puede aplicar para una persona que es mujer.</p>
+<p>Esta razón y otras de índole estadística y matemática hacen que la función de pérdida de entropía cruzada sea la función de pérdida más adecuada para la regresión logística.</p>
+</section>
+<section id="ajuste-del-modelo-de-regresión-logística-con-pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="ajuste-del-modelo-de-regresión-logística-con-pytorch">Ajuste del modelo de regresión logística con Pytorch</h2>
+<p>A diferencia de la regresión lineal, el modelo de regresión logística no tiene una solución analítica, por lo que es necesario utilizar un método numérico para ajustar el modelo a los datos, como el descenso de gradiente. Para evitar que tener que calcular las derivadas podemos recurrir a Pytorch para hacer el entrenamiento. El proceso es muy similar al que habíamos visto para la regresión lineal:</p>
+<div id="e4046764" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor(df[<span class="st">'sexo_dummy'</span>].values, dtype<span class="op">=</span>torch.float32).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.tensor(df[<span class="st">'notas'</span>].values, dtype<span class="op">=</span>torch.float32).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Definir el modelo de regresión logística</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LogisticRegression(nn.Module):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim):</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(LogisticRegression, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear <span class="op">=</span> nn.Linear(input_dim, <span class="dv">1</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.sigmoid(<span class="va">self</span>.linear(x))</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Inicializar el modelo, la función de pérdida y el optimizador</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(input_dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> nn.BCELoss()</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Entrenamiento del modelo</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3000</span>):</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    outputs <span class="op">=</span> model(X)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> criterion(outputs, y)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, param <span class="kw">in</span> model.named_parameters():</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> param.requires_grad:</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>param<span class="sc">.</span>data<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> model.linear.bias.item()</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> model.linear.weight.item()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>linear.weight: tensor([[-0.3808]])
+linear.bias: tensor([1.4506])</code></pre>
+</div>
+</div>
+<p>Con este modelo, podemos predecir la probabilidad de que una persona sea hombre a partir de sus notas:</p>
+<div id="9798a2a2" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nota_pred <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>logit_pred <span class="op">=</span> b <span class="op">+</span> m <span class="op">*</span> nota_pred</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>prob_pred <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span>logit_pred))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>Markdown(<span class="ss">f"""</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ss">La probabilidad de que una persona con una nota de </span><span class="sc">{</span>nota_pred<span class="sc">}</span><span class="ss"> sea hombre es de </span><span class="sc">{</span>prob_pred<span class="sc">:.2f}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="10">
+<p>La probabilidad de que una persona con una nota de 6 sea hombre es de 0.30</p>
+</div>
+</div>
+<p>También podríamos poner el modelo en modo evaluación y predecir directamente la probabilidad:</p>
+<div id="7661e539" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>notas <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">10</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    prob_pred <span class="op">=</span> model(torch.tensor(notas, dtype<span class="op">=</span>torch.float32).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nota, prob <span class="kw">in</span> <span class="bu">zip</span>(notas, prob_pred):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Nota: </span><span class="sc">{</span>nota<span class="sc">}</span><span class="ss">, Probabilidad de ser hombre: </span><span class="sc">{</span>prob<span class="sc">.</span>item()<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Nota: 0, Probabilidad de ser hombre: 0.81
+Nota: 1, Probabilidad de ser hombre: 0.74
+Nota: 2, Probabilidad de ser hombre: 0.67
+Nota: 3, Probabilidad de ser hombre: 0.58
+Nota: 4, Probabilidad de ser hombre: 0.48
+Nota: 5, Probabilidad de ser hombre: 0.39
+Nota: 6, Probabilidad de ser hombre: 0.30
+Nota: 7, Probabilidad de ser hombre: 0.23
+Nota: 8, Probabilidad de ser hombre: 0.17
+Nota: 9, Probabilidad de ser hombre: 0.12
+Nota: 10, Probabilidad de ser hombre: 0.09</code></pre>
+</div>
+</div>
+</section>
+<section id="regresión-multinomial" class="level2">
+<h2 class="anchored" data-anchor-id="regresión-multinomial">Regresión multinomial</h2>
+<p>En el caso de que la variable dependiente tenga más de dos niveles, el modelo de regresión logística se puede generalizar utilizando la función softmax en lugar de la función sigmoide. La <strong>función softmax</strong> es una generalización de la función sigmoide que permite predecir la probabilidad de que una observación pertenezca a cada una de las categorías posibles. En este caso, el modelo se puede escribir de la siguiente manera:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;Prob(y = k | x) = \frac{e^{b_k + m_k \cdot x}}{\sum_{j=1}^{K} e^{b_j + m_j \cdot x}} \\
+&amp;\text{para } k = 1, 2, \ldots, K
+\end{aligned}
+\]</span></p>
+<p>Donde <span class="math inline">\(K\)</span> es el número de categorías posibles. Este modelo se conoce como <strong>regresión logística multinomial</strong> o <strong>regresión softmax</strong>. El proceso de ajuste del modelo es similar al que hemos visto para la regresión logística binaria, pero utilizando la función de pérdida de entropía cruzada para múltiples clases (cross-entropy loss for multiple classes) en lugar de la función de pérdida de entropía cruzada para dos clases (binary cross-entropy loss).</p>
+</section>
+<section id="clasificación-de-imágenes-con-regresión-multinomial" class="level2">
+<h2 class="anchored" data-anchor-id="clasificación-de-imágenes-con-regresión-multinomial">Clasificación de imágenes con regresión multinomial</h2>
+<p>Vamos a ver un ejemplo de cómo utilizar la regresión logística multinomial para clasificar imágenes. Para ello, vamos a utilizar el dataset de dígitos manuscritos (MNIST), que es un dataset muy utilizado en el ámbito del aprendizaje automático para la clasificación de imágenes. Este dataset contiene 70.000 imágenes de dígitos manuscritos (del 0 al 9) con una resolución de 28x28 píxeles. El objetivo es predecir el dígito que representa cada imagen a partir de los píxeles que la componen. El paquete <code>torchvision</code> de Pytorch proporciona una forma sencilla de cargar este dataset y preprocesarlo para su uso en modelos de aprendizaje automático.</p>
+<div id="fb2d78d7" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([transforms.ToTensor()])</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.MNIST(root<span class="op">=</span><span class="st">'./data'</span>, train<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform, download<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>test_dataset <span class="op">=</span> datasets.MNIST(root<span class="op">=</span><span class="st">'./data'</span>, train<span class="op">=</span><span class="va">False</span>, transform<span class="op">=</span>transform, download<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>imagen, etiqueta <span class="op">=</span> train_dataset[<span class="dv">0</span>]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>El dataset de MNIST ya está dividido en un conjunto de entrenamiento y un conjunto de test. El conjunto de entrenamiento contiene 60000 imágenes, mientras que el conjunto de test contiene 10000 imágenes. Cada imagen es un tensor de 28x28 píxeles, y cada píxel es un valor entre 0.0 y 1.0 que representa la intensidad del píxel (0 para negro y 1 para blanco).</p>
+<p>Podemos mostrar algunas imágenes aleatoriamente:</p>
+<div id="810a3a60" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">5</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> i <span class="op">//</span> <span class="dv">5</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    col <span class="op">=</span> i <span class="op">%</span> <span class="dv">5</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    axes[row, col].imshow(train_dataset[i][<span class="dv">0</span>].squeeze(), cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    axes[row, col].set_title(<span class="ss">f'Etiqueta: </span><span class="sc">{</span>train_dataset[i][<span class="dv">1</span>]<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    axes[row, col].axis(<span class="st">'off'</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="40_logistic_regression_files/figure-html/cell-14-output-1.png" width="763" height="329" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Los 28x28 píxeles de cada imagen no dan información del número de que se trata. Así que podemos calcular el parámetro asociado a cada pixel. Así, este modelo tendrá 785 parámetros. Se suma un parámetro para incluir el sesgo.</p>
+<p>Hasta ahora, hemos calculado el valor de la función de pérdida usando todos los datos de entrenamiento. En este caso, tenemos muchos datos d eentrenamiento y muchos parámetros, por lo que el proceso de entrenamiento sería muy lento. Para solucionar este problema, se suele utilizar el método de descenso de gradiente estocástico (stochastic gradient descent), que consiste en calcular la función de pérdida y actualizar los parámetros utilizando solo un subconjunto aleatorio de los datos de entrenamiento en cada iteración. Este subconjunto se llama mini-batch, y el tamaño del mini-batch es un hiperparámetro que se debe elegir adecuadamente para obtener buenos resultados. Ahora habrá dos iteraciones anidadas: una iteración sobre los mini-batches y otra iteración sobre las épocas. Una época es un ciclo completo a través de todo el conjunto de entrenamiento, mientras que un mini-batch es un subconjunto aleatorio de los datos de entrenamiento que se utiliza para calcular la función de pérdida y actualizar los parámetros en cada iteración.</p>
+<p>Además, ahora vamo a poner los datos en un dataloader, que es un objeto que nos permite iterar sobre los datos de entrenamiento en mini-batches de forma sencilla.</p>
+<p>Otra cuestión a tner en cuenta es que las imágenes tienen una forma de <code>(1, 28, 28)</code>, es decir, tienen un canal de color (en este caso, el canal de intensidad) y una resolución de 28x28 píxeles. Para poder utilizar estas imágenes en un modelo de regresión logística multinomial, es necesario aplanar las imágenes para que cada imagen se convierta en un vector de 784 píxeles (28x28). Esto se puede hacer utilizando la función <code>view</code> de Pytorch.</p>
+<p>El proceso de entrenamiento del modelo de regresión logística multinomial con descenso de gradiente estocástico se puede implementar de la siguiente manera:</p>
+<div id="641f7d19" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span><span class="dv">64</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MultinomialLogisticRegression(nn.Module):</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim, output_dim):</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(MultinomialLogisticRegression, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear <span class="op">=</span> nn.Linear(input_dim, output_dim)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.softmax(<span class="va">self</span>.linear(x), dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>input_dim <span class="op">=</span> imagen.shape[<span class="dv">1</span>] <span class="op">*</span> imagen.shape[<span class="dv">2</span>]</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>output_dim <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> MultinomialLogisticRegression(input_dim, output_dim)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>num_epochs <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs):</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> images, labels <span class="kw">in</span> train_loader:</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        images <span class="op">=</span> images.view(<span class="op">-</span><span class="dv">1</span>, input_dim)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        outputs <span class="op">=</span> model(images)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(outputs, labels)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'Epoch [</span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>num_epochs<span class="sc">}</span><span class="ss">], Loss: </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch [1/5], Loss: 2.0181
+Epoch [2/5], Loss: 1.9205
+Epoch [3/5], Loss: 1.7709
+Epoch [4/5], Loss: 1.7740
+Epoch [5/5], Loss: 1.8322</code></pre>
+</div>
+</div>
+<p>Una vez que el modelo está entrenado, podemos evaluar su rendimiento en el conjunto de test:</p>
+<div id="ddbcccee" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>test_loader <span class="op">=</span> DataLoader(test_dataset, batch_size<span class="op">=</span><span class="dv">64</span>, shuffle<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>all_labels <span class="op">=</span> []</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>all_preds <span class="op">=</span> []</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    correct <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> images, labels <span class="kw">in</span> test_loader:</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        images <span class="op">=</span> images.view(<span class="op">-</span><span class="dv">1</span>, input_dim)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        outputs <span class="op">=</span> model(images)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        _, predicted <span class="op">=</span> torch.<span class="bu">max</span>(outputs.data, <span class="dv">1</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> labels.size(<span class="dv">0</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        correct <span class="op">+=</span> (predicted <span class="op">==</span> labels).<span class="bu">sum</span>().item()</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        accuracy <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> correct <span class="op">/</span> total</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        all_labels.extend(labels.cpu().numpy())</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        all_preds.extend(predicted.cpu().numpy())</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'Accuracy: </span><span class="sc">{</span>accuracy<span class="sc">:.2f}</span><span class="ss">%'</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy: 80.09%</code></pre>
+</div>
+</div>
+<p>En este caso, el modelo de regresión logística multinomial obtiene una precisión del 80.09% en el conjunto de test, lo que indica que es capaz de clasificar correctamente la mayoría de las imágenes de dígitos manuscritos. Sin embargo, es importante tener en cuenta que este modelo es un modelo lineal, por lo que no es capaz de capturar relaciones no lineales entre los píxeles de las imágenes y las etiquetas. Para mejorar el rendimiento del modelo, se podrían utilizar modelos más complejos, como redes neuronales convolucionales (CNN), que son capaces de capturar relaciones no lineales entre los píxeles de las imágenes y las etiquetas.</p>
+<p>Podemos mostrar la matriz de confusión para ver qué dígitos se confunden más:</p>
+<div id="6adfa12d" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>class_labels <span class="op">=</span> [<span class="bu">str</span>(i) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculamos la matriz de confusión clásica</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(all_labels, all_preds)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>df_cm <span class="op">=</span> pd.DataFrame(cm, index<span class="op">=</span>class_labels, columns<span class="op">=</span>class_labels)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 3. TU CÓDIGO DE PLOTNINE ADAPTADO ---</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Transformamos la matriz a formato largo (long/tidy format)</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>df_cm_long <span class="op">=</span> df_cm.reset_index().melt(id_vars<span class="op">=</span><span class="st">'index'</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>df_cm_long.columns <span class="op">=</span> [<span class="st">'Actual'</span>, <span class="st">'Predicted'</span>, <span class="st">'Count'</span>]</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertir Actual a categoría con niveles invertidos para invertir eje y</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>df_cm_long[<span class="st">'Actual'</span>] <span class="op">=</span> pd.Categorical(df_cm_long[<span class="st">'Actual'</span>], categories<span class="op">=</span>class_labels[::<span class="op">-</span><span class="dv">1</span>], ordered<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>df_cm_long[<span class="st">'Predicted'</span>] <span class="op">=</span> pd.Categorical(df_cm_long[<span class="st">'Predicted'</span>], categories<span class="op">=</span>class_labels, ordered<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Poner a 0 la diagonal para el gradiente de color (para resaltar los errores)</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>diag_mask <span class="op">=</span> df_cm_long[<span class="st">'Actual'</span>].astype(<span class="bu">str</span>) <span class="op">==</span> df_cm_long[<span class="st">'Predicted'</span>].astype(<span class="bu">str</span>)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>df_cm_long.loc[diag_mask, <span class="st">'Count'</span>] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Quitar ceros del texto para que no se muestren e清ensucien el gráfico</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>df_cm_long[<span class="st">'label_text'</span>] <span class="op">=</span> df_cm_long[<span class="st">'Count'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="st">''</span> <span class="cf">if</span> x <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="bu">str</span>(x))</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Dataframe sólo con ceros para el overlay blanco</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>df_zeros <span class="op">=</span> df_cm_long[df_cm_long[<span class="st">'Count'</span>] <span class="op">==</span> <span class="dv">0</span>]</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (ggplot(df_cm_long, aes(x<span class="op">=</span><span class="st">'Predicted'</span>, y<span class="op">=</span><span class="st">'Actual'</span>, fill<span class="op">=</span><span class="st">'Count'</span>))</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>     <span class="op">+</span> geom_tile(aes(fill<span class="op">=</span><span class="st">'Count'</span>))</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>     <span class="co"># Overlay blanco para ceros</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>     <span class="op">+</span> geom_tile(data<span class="op">=</span>df_zeros, fill<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>     <span class="op">+</span> geom_text(aes(label<span class="op">=</span><span class="st">'label_text'</span>), color<span class="op">=</span><span class="st">'black'</span>, size<span class="op">=</span><span class="dv">10</span>, show_legend<span class="op">=</span><span class="va">False</span>) <span class="co"># Cambiado a 'black' para que el texto del error se vea bien sobre azul claro</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>     <span class="op">+</span> scale_fill_gradient(low<span class="op">=</span><span class="st">'lightblue'</span>, high<span class="op">=</span><span class="st">'darkblue'</span>)</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>     <span class="op">+</span> scale_y_discrete(expand<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>     <span class="op">+</span> labs(title<span class="op">=</span><span class="st">'Matriz de Confusión (Errores destacados)'</span>, x<span class="op">=</span><span class="st">'Predicción'</span>, y<span class="op">=</span><span class="st">'Etiqueta Real'</span>)</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>     <span class="op">+</span> theme(</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>          legend_position<span class="op">=</span><span class="st">'none'</span>,</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>     )</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div>
+<figure class="figure">
+<p><img src="40_logistic_regression_files/figure-html/cell-17-output-1.png" width="672" height="480" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Vemos que la mayoría de los errores son 5s que se predicen como 3s y 8s. Veamos algunas de estas imágenes para entender por qué el modelo se ha confundido:</p>
+<div id="1ba69244" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrar las imágenes que son 5s predichos como 3s</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>misclassified_5_as_3 <span class="op">=</span> [(img, label) <span class="cf">for</span> img, label, pred <span class="kw">in</span> <span class="bu">zip</span>(test_dataset.data, test_dataset.targets, all_preds) <span class="cf">if</span> label <span class="op">==</span> <span class="dv">5</span> <span class="kw">and</span> pred <span class="op">==</span> <span class="dv">3</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Mostrar algunas de estas imágenes</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">5</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> i <span class="op">//</span> <span class="dv">5</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    col <span class="op">=</span> i <span class="op">%</span> <span class="dv">5</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">&lt;</span> <span class="bu">len</span>(misclassified_5_as_3):</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        img, label <span class="op">=</span> misclassified_5_as_3[i]</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        axes[row, col].imshow(img.numpy(), cmap<span class="op">=</span><span class="st">'gray'</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        axes[row, col].axis(<span class="st">'off'</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="40_logistic_regression_files/figure-html/cell-18-output-1.png" width="789" height="334" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
