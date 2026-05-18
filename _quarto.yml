@@ -23,6 +23,7 @@ website:
             - qmd/10_fundamentos/50_neural_networks.qmd
         - section: "LLM"
           contents:
+            - qmd/20_LLM/00_introduction.qmd
             - qmd/20_LLM/10_word_embeddings.qmd
         - section: "Apéndices"
           contents:

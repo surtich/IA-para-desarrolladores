@@ -10,60 +10,70 @@ format:
     code-fold: true
     code-summary: "Haz clic para ver el código"
 ---
-
 ## Introducción
 
-Las redes neuronales funcionan con números, no con palabras.
+En la lección anterior se explicó que los modelos de lenguaje representan las palabras con números, y que esos vectores numéricos son los llamados embeddings. Estos vectores se aprenden durante el entrenamiento, y se espera que las palabras que se usan de manera similar tengan embeddings similares. Es la forma que tiene el modelo de lenguaje de almacenar el "significado" de las palabras. 
 
-* **Por lo tanto,** si queremos introducir palabras en una red neuronal, necesitamos una forma de convertirlas en números.
-* **En teoría,** podríamos simplemente asignar números aleatorios a las palabras...
+Los embeddings de palabras se fundamentan en la hipótesis distribucional, que habitualmente se resume con una famosa frase del lingüista John Rupert Firth (1957):
+
+> "Conocerás a una palabra por las compañías que mantiene".
+
+El concepto se ilustra mejor con un ejemplo. Supongamos que un amigo chileno le dice:
+
+> "A mis hijos les encantan las cabritas dulces; el olor a caramelo cuando las haces en la sartén inunda toda la casa".
+
+Si no es usted chileno, es posible que no sepa qué son las "cabritas". Pero por el contexto ya sabe muchas cosas: es algo dulce, que les gusta a los niños y que se hace en una sartén. Supongamos que la conversación continúa y su amigo dice:
+
+> "Compramos un cubo gigante de cabritas saladas en el mostrador del cine antes de que empezara la película".
+
+¡Vaya! También se pueden comprar cabritas saladas, y se venden en el cine dentro de un cubo. Seguramente ahora tiene claro que las "cabritas" son lo que en otros países llamamos palomitas de maíz. ¿Cómo lo supo si su amigo nunca lo aclaró? Porque las palabras "cabritas" y "palomitas" se usan exactamente en los mismos contextos.
+
+Un modelo de lenguaje aprende a asignar números a las palabras de tal manera que las palabras que se usan en contextos similares tengan números similares. En esta lección explicaremos cómo se crean estos números.
+
+## Un ejemplo sencillo
+
+### Datos de entrenamiento
+
+Los modelos de lenguaje se entrenan con grandes cantidades de texto. Puede ser tan grande como toda la Wikipedia, o incluso mayores. Pero para entender cómo se crean los embeddings de palabras, vamos a imaginar que solo tenemos dos frases para entrenar nuestro modelo de lenguaje:
+
+1. Javier es bueno.
+2. Carlos es bueno.
+
+Aunque este ejemplo no tenga interés práctico, es útil para entender cómo se crean los embeddings de palabras.
+
+En este caso, nuestro vocabulario solo tiene cuatro palabras: **Javier**, **Carlos**, **es** y **bueno**. Para cada una de estas palabras, el modelo de lenguaje un vector de números que representa su significado. ¿Cuántos números debería asignar el modelo a cada palabra? Bueno, eso depende de la complejidad del modelo. Cuántos más números asigne a cada palabra, más compleja será la red neuronal que se necesitará para aprender a asignar esos números correctamente, pero, también permitirá que el modelo capture más matices del significado de cada palabra.
+
+Para entender por qué los embeddings necesitan ser listas de números (vectores) y no un único dígito, supón que tenemos estas palabras en nuestro vocabulario: **España**, **Francia**, **perro** y **gato**. Si solo pudiéramos asignar un número a cada palabra, podríamos intentar organizarlas de la siguiente manera:
+
+Podríamos asignar el número 1 a "España", el 1.2 a "Francia", el 9 a "perro" y el 9.2 a "gato". A simple vista funciona: los países están a un lado y los animales al otro. El problema llega cuando queremos añadir matices:
+
+* ¿Dónde colocamos "Madrid"? Debería estar cerca de España por ser su capital, pero si la ponemos en el 1.1, ¿cómo indicamos que es una ciudad y no un país como Francia? La ponemos en 0.9, pero surgen nuevos problemas: ¿Dónde colocamos "Barcelona"? Es una ciudad, así que va por la zona del 0.9, pero al ser una ciudad española debería estar pegada a "Madrid", aunque "Madrid" a su vez necesita estar pegada a "España" por ser la capital de ese país.
+
+* ¿Dónde colocamos "tigre"? Es un animal, así que va por la zona del 9. Pero al ser un felino debería estar pegado a "gato" (9.2), aunque "gato" a su vez necesita estar pegado a "perro" (9) por ser las dos mascotas.
+
+Supongo que se entiende la idea. Lo anterior es un ejemplo obvio de las complicaciones: España tiene que estar cerca de Francia por estar próximas, pero cerca de Argentina por idioma, y así podríamos seguir razonando sobre todas los distintos ámbitos en los que se puede usar una misma palabra. Y aquí ni siquiera hemos abordado el tema de que una misma palabra puede tener diferentes significados dependiendo del contexto.
+
+Para resolver este rompecabezas los modelos de lenguaje reales utilizan embeddings de tamaños colosales, como 768, 1024 o incluso más dimensiones por palabra.
+
+Pero volvamos al ejemplo de las dos frases. Con sólo 4 palabras, no  tenemos las complicaciones anteriores y podemos limitarnos a usar un único número. Por ejemplo::
 
 ::: {.card .border .border-primary .p-3}
-### Números aleatorios
 
-* Troll 2 -> 12
-* is -> -3.05
-* great -> 4.2
-* awesome -> -32.1
+* Javier -> 12
+* Carlos -> 13
+* es -> 6
+* bueno -> 2 
 :::
 
-* ...pero entonces, aunque **great** y **awesome** significan cosas similares, tienen números muy diferentes asociados a ellos: **4.2** y **-32.1**...
-* ...y eso significa que la red neuronal probablemente necesitará mucha más complejidad y entrenamiento, porque aprender a usar correctamente la palabra **great** no ayudará a la red neuronal a usar correctamente la palabra **awesome**.
+Hemos asignado números similares a "Javier" y "Carlos" porque se usan en contextos similares (siempre va la palabra "es" detrás). Con estos datos de entrenamiento, el modelo no puede aprender más. Sin embargo, para hacerlo más interesante, nuestro modelo creará embeddings de tamaño 2, es decir, asignará dos números a cada palabra.
 
-Por lo tanto, sería ideal si a palabras similares que se usan de maneras similares se les pudieran asignar números similares, de modo que aprender a usar una palabra ayude a la red neuronal a aprender a usar la otra al mismo tiempo.
+### Definición de la red neuronal
 
-Y debido a que las mismas palabras se pueden usar en diferentes contextos, o ponerse en plural, o usarse de alguna otra manera, podría ser una buena idea asignar a cada palabra más de un número, para que la red neuronal pueda adaptarse más fácilmente a los diferentes contextos.
+Vamos a crear una red neuronal que dada una palabra, prediga la siguiente. Por ejemplo, si le damos "Javier", debería predecir "es". Si le damos "es", debería predecir "bueno". Y así sucesivamente. En definitiva, se trata de un problema de clasificación múltiple
 
-Estos números que asignamos a las palabras se llaman **Word Embeddings**, y las redes neuronales que los crean son bastante simples.Estas redes simples también pueden crear múltiples Word Embeddings por palabra para manejar los diferentes contextos en los que se puede usar una palabra.
-
-* Por ejemplo, las palabras **great** y **awesome** tienen significados similares y a menudo se usan en contextos similares. Se pueden usar de una manera positiva...
-  * *¡StatQuest es **great**!*
-  * *¡Este libro es **awesome**!*
-* ...y también se pueden usar de una manera sarcástica y negativa...
-  * *Mi celular está roto, ¡**great**!
-  * *El sentido del humor de mi papá es **awesome**.*
-* ...y una red simple de Word Embedding puede crear dos números de Word Embedding para cada palabra. El primer número, **Embedding #1**, podría capturar la forma en que estas palabras se usan en contextos positivos.
-* Y el segundo número, **Embedding #2**, podría capturar la forma en que estas palabras se usan en contextos negativos.
- 
-| Palabra | Embedding #1 (Positivo) | Embedding #2 (Negativo) |
-| :--- | :---: | :---: |
-| great | 1.85 | 0.98 |
-| awesome | 1.81 | 0.99 |
-
-Ahora profundicemos en los detalles de cómo se crean los Word Embeddings.
-
-## Práctica de entrenamiento de Word Embeddings
-
-Supongamos que tenemos únicamente dos frases con cuatro palabras en total para el entrenamiento de nuestros Word Embeddings:
-
-1. *¡Troll 2 is great!*
-2. *¡Gymkata is great!*
-
-Para cada palabra, queremos crear dos Word Embeddings: **Embedding #1** y **Embedding #2** de dos números cada uno. Lo interesante es que nuestro modelo tiene que ser capaz de aprender que las palabras `Troll 2` y `Gymkata` son similares, ya que aparecen en contexto similares y, por lo tanto, deberían tener embeddings similares.
-
-Los embeddings se podrían representar gráficamente así:
-
-![](../../img/trained_embedding_graph.png)
+::: {.callout-warning appearance="minimal"}
+Un momento, ¿el objetivo del entrenamiento no era crear embeddings de palabras? Sí, pero vamos a diseñar la red neuronal de tal manera que los embeddings de palabras se aprendan como parte del proceso de entrenamiento, que consiste en predecir palabras. De hecho, los embeddings de palabras serán simplemente los pesos que conectan la capa de entrada con la capa oculta de la red neuronal. Parece complicado, pero para eso está este sencillo ejemplo.
+:::
 
 ### Creación de los datasets de entrenamiento
 
@@ -84,24 +94,72 @@ import lightning as L # lightning has tons of cool tools that make neural networ
 import pandas as pd ## to create dataframes from graph input
 ```
 
-Ahora vamos a crear nuestros datos de entrenamiento a partir de dos frases, **Troll 2 is great** y **Gymkata is great**, lo que nos da un vocabulario simple de 4 palabras, o tokens: **Troll 2**, **is**, **great**, **Gymkata**. Nuestros datos de entrenamiento constan de dos partes: `inputs` (entradas), que son las entradas para la red neuronal, y `labels` (etiquetas), que son las salidas esperadas de las redes neuronales.
+Ahora vamos a crear nuestros datos de entrenamiento a partir de las dos frases, **Javier es bueno** y **Carlos es bueno**. Nuestros datos de entrenamiento constan de dos partes: `inputs` (entradas), que son las entradas para la red neuronal, y `labels` (etiquetas), que son las salidas esperadas de la red.
 
-La idea es hacer que cada token de una frase prediga el token que le sigue. Por ejemplo, utilizando la **codificación de un solo uno (one-hot-encoding)** para representar cada token, dado que **Troll 2** es el primer token de nuestro vocabulario, codificaremos la entrada (`input`) para **Troll 2** como `[1., 0., 0., 0.]`. Y dado que **Troll 2** predice el segundo token, **is** (que es el segundo token de nuestro vocabulario), codificaremos la etiqueta (`label`) para **Troll 2** como `[0., 1., 0., 0.]`. De la misma manera, podemos codificar las entradas (`inputs`) y etiquetas (`labels`) para **is**, **great** y **Gymkata**. **NOTA: Gymkata** predice el segundo token, **is**, por lo que su etiqueta es `[0., 1., 0., 0.]`.
+La idea es hacer que cada token de una frase prediga el token que le sigue. Por ejemplo, utilizando la **codificación de un solo uno (one-hot-encoding)** para representar cada token, dado que **Javier** es el primer token de nuestro vocabulario, codificaremos la entrada (`input`) para **Javier** como `[1., 0., 0., 0.]`. Y dado que **Javier** predice el segundo token, **es** (que es el segundo token de nuestro vocabulario), codificaremos la etiqueta (`label`) para **es** como `[0., 1., 0., 0.]`. De la misma manera, podemos codificar las entradas (`inputs`) y etiquetas (`labels`) para **es**, **bueno** y **Carlos**.
 
 ```{python}
 ## create the training data for the neural network.
-inputs = torch.tensor([[1., 0., 0., 0.], # one-hot-encoding for Troll 2...
-                       [0., 1., 0., 0.], # ...is
-                       [0., 0., 1., 0.], # ...great
-                       [0., 0., 0., 1.]]) # ...Gymkata
+inputs = torch.tensor([[1., 0., 0., 0.], # one-hot-encoding para Javier...
+                       [0., 1., 0., 0.], # ...es
+                       [0., 0., 1., 0.], # ...bueno
+                       [0., 0., 0., 1.]]) # ...Carlos
 
-labels = torch.tensor([[0., 1., 0., 0.], # "Troll 2" is followed by "is"
-                       [0., 0., 1., 0.], # "is" is followed by "great"
-                       [0., 0., 0., 1.], # "great" isn't followed by anything, but we'll pretend it was followed by "Gymkata"
-                       [0., 1., 0., 0.]]) # "Gymkata", just like "Troll 2", is followed by "is".
+labels = torch.tensor([[0., 1., 0., 0.], # "Javier" es seguido por "es"
+                       [0., 0., 1., 0.], # "es" es seguido por "bueno"
+                       [0., 0., 0., 1.], # "bueno" no es seguido por nada, pero lo asignamos a "Carlos"
+                       [0., 1., 0., 0.]]) # "Carlos", al igual que "Javier", es seguido por "es".
 ```
 
-Ahora que hemos creado los datos con los que queremos entrenar las incrustaciones (embeddings), los almacenaremos en un `DataLoader`. Dado que nuestro conjunto de datos es tan pequeño, usar un `DataLoader` es un poco exagerado, pero es fácil de hacer y nos permitirá escalar fácilmente a un vocabulario mucho más grande cuando llegue el momento.
+::: {.callout-info collapse="true"}
+## ¿Por qué se utiliza la codificación de un solo uno (One-Hot Encoding)?
+
+La codificación **One-Hot Encoding** es una pieza fundamental para el funcionamiento de las redes neuronales que procesan lenguaje natural. Debido a que los algoritmos no entienden el significado intrínseco de las palabras, necesitamos traducirlas a números sin alterar su naturaleza categórica. 
+
+A continuación, se detallan las tres razones principales de su uso en esta red:
+
+### 1. Evita relaciones de orden artificiales (El problema jerárquico)
+Si asignáramos una codificación numérica simple y secuencial a nuestro vocabulario (por ejemplo: *Javier* = 1, *Carlos* = 2, *es* = 3, *bueno* = 4), el algoritmo asumiría matemáticamente que existe una jerarquía o un orden de magnitud entre los elementos. 
+
+> **Ejemplo:** La red interpretaría erróneamente que *Carlos* ($2$) vale "el doble" que *Javier* ($1$), o que la palabra *es* ($3$) está más cerca de *bueno* ($4$) que de las demás. 
+
+Como estas categorías son puramente nominales (ninguna palabra es "mayor" o "mejor" que otra), el One-Hot Encoding soluciona el problema situando a todas las palabras a la misma distancia geométrica dentro del espacio vectorial.
+
+### 2. Permite seleccionar los embeddings de cada palabra
+Aunque la red procesa el vocabulario de forma simultánea, el One-Hot Encoding actúa como un **interruptor de activación**. Al contener un único $1$ y el resto ceros, anula matemáticamente el impacto de las palabras ausentes y aísla los pesos específicos de la palabra activa.
+
+Para entenderlo visualmente, supongamos que las dos neuronas de nuestra capa oculta tienen los siguientes pesos asignados:
+* **Neurona 1:** $[2.0, -2.2, -2.1, 1.7]$
+* **Neurona 2:** $[2.0,  2.5, -2.2,  2.0]$
+
+Cuando la red procesa la entrada para la palabra **"Javier"** (cuyo vector es $[1, 0, 0, 0]$), la magia de la multiplicación de matrices ocurre así:
+
+* **Salida Neurona 1:** $$(2.0 \times 1) + (-2.2 \times 0) + (-2.1 \times 0) + (1.7 \times 0) = \mathbf{2.0}$$
+* **Salida Neurona 2:** $$(2.0 \times 1) + (2.5 \times 0) + (-2.2 \times 0) + (2.0 \times 0) = \mathbf{2.0}$$
+
+Como resultado, el **embedding extraído para "Javier" es $[2.0, 2.0]$**. Gracias a los ceros del One-Hot Encoding, ninguna otra palabra del vocabulario puede interferir ni contaminar este vector en la capa actual.
+
+### 3. Sirve como etiqueta perfecta para el entrenamiento
+En este modelo, el objetivo es entrenar a la red para que sea capaz de **predecir la siguiente palabra de una frase**. Por ejemplo, queremos que al recibir la entrada "Javier", la red sea capaz de predecir la palabra "es".
+
+Para evaluar si la red se está equivocando o no, el One-Hot Encoding se utiliza para estructurar las respuestas correctas (etiquetas o *targets*):
+
+* Si la palabra que debe seguir a "Javier" es **"es"**, la etiqueta ideal para la capa de salida será **$[0, 1, 0, 0]$**. 
+
+Al comparar la distribución de probabilidades que predice la red (por ejemplo, tras pasar por la función *SoftMax*) contra esta etiqueta limpia, el algoritmo puede calcular matemáticamente el error exacto y ajustar los pesos mediante el descenso de gradiente.
+
+### ⚠️ El único "pero": La maldición de la dimensionalidad
+A pesar de sus enormes ventajas para mantener la neutralidad de las palabras, este sistema tiene un límite físico drástico: **la escala**. Si estuviéramos trabajando con un vocabulario real de 50,000 palabras, cada palabra requeriría un vector masivo de 50,000 posiciones, donde 49,999 valores serían ceros redundantes.
+
+Por esta razón, en la arquitectura de los modelos modernos de lenguaje, el One-Hot Encoding se reduce estrictamente a ser **la puerta de entrada** (el índice inicial) para que la red comience a operar, transformándose de inmediato en vectores densos, continuos y compactos: los *embeddings*.
+
+
+
+::: 
+
+### Creación del dataloader
+
+Ahora que hemos creado los datos con los que queremos entrenar embeddings, los almacenaremos en un `DataLoader`. Dado que nuestro conjunto de datos es tan pequeño, usar un `DataLoader` es un poco exagerado, pero es fácil de hacer y nos permitirá escalar fácilmente a un vocabulario mucho más grande cuando llegue el momento.
 
 ```{python}
 dataset = TensorDataset(inputs, labels)
@@ -110,36 +168,42 @@ dataloader = DataLoader(dataset)
 
 ### Creación de la red neuronal de Word Embeddings
 
-Ahora que ya tenemos listos los datos y el `DataLoader`, vamos a crear la clase que se encargará de generar word embeddings para cada token (palabra) del vocabulario.
+Esta es la red propuesta:
 
-La red neuronal que queremos entrenar, tiene esta estructura:
 
-![](../../img/word_embedding_network.png)
+![](../../img/embeddings_net.svg)
 
-Cada palabra está representada por 4 números. Esa palabra se envía a dos neuronas (porque queremos embeddins de tamaño 2). Cada una tendrá 4 parámetros que se multiplicarán por los 4 números de la palabra. La función de activación es lineal, lo que significa que el valor de salida de cada neurona es simplemente la suma de los productos de los números de entrada y sus pesos correspondientes.  Cada neurona emite 4 valores de salida, uno correspondiente a cada palabra ya que todas las palabras se introducen a la vez en el modelo. Estos 4 valores de salida se pasan a la capa de salida formada por 4 neuronas que reciben los 2 valores de cada neurona de la capa anterior. Estas dos entradas se multiplican por sus pesos correspondientes y se suman para producir un valor de salida para cada neurona de la capa de salida. Finalmente, los 4 valores de salida se concatenan en un solo tensor que se pasa a la función `sofmax` para calcular las probabilidades de la siguiente palabra.
+Cada palabra está representada por un vector de 4 dimensiones (4 números). Cada una de estas palabras se envía de forma simultánea a dos neuronas de la capa oculta, reflejando nuestro objetivo de proyectar el vocabulario a un espacio de *embeddings* de tamaño 2. 
 
-Observe que al multiplicar los 4 números de cada palabra por los pesos correspondientes de la primera capa, resultan 3 multiplicaciones a 0 y una multiplicación distinta de 0, ya que la palabra se codifica con un vector de une-hot.
+Para procesar esta información, cada neurona cuenta con 4 parámetros (pesos) que se multiplican por los 4 números correspondientes a la palabra de entrada. Como se explicó anteriormente, debido a la naturaleza del *One-Hot Encoding*, esta multiplicación matemática actúa de manera simplificada como un selector directo del vector de *embedding* de la palabra activa.
 
-Los embeddings de cada palabra se pueden obtener a partir de los pesos que van desde la capa de entrada a la capa oculta. Por ejemplo, el embedding de **Troll 2** se puede obtener a partir de los pesos `input1_w1` y `input1_w2`, que son los pesos que conectan la primera neurona de la capa oculta con las entradas correspondientes a **Troll 2**.
+La función de activación implementada en esta capa es lineal; esto implica que el valor de salida de cada neurona se calcula estrictamente como la suma de los productos entre los números de entrada y sus respectivos pesos. En la práctica, esto se traduce en algo extremadamente simple: la salida de la neurona es, sencillamente, **la suma de los embeddings de cada palabra activa**. Si alimentamos la red con una sola palabra, la neurona nos devolverá su vector de embedding individual. En cambio, si activamos varias palabras a la vez en la entrada, sus respectivos embeddings se fusionarán sumándose directamente componente a componente, sin sufrir ninguna deformación matemática.
 
-¿Por qué esperamos que los embeddings de **Troll 2** y **Gymkata** sean similares? Porque ambas palabras aparecen en contextos similares (ambas son seguidas por la palabra **is**), por lo que el modelo debería aprender a asignarles pesos similares para que puedan predecir la palabra **is** de manera similar.
+Es importante destacar que **esta red no incluye términos de sesgo (*bias*)**. En consecuencia, el valor de salida final de cada neurona se reduce a esta combinación lineal pura, permitiendo que la capa oculta extraiga o combine los embeddings del vocabulario según las palabras presentes en la entrada.
 
+:::{.callout-info collapse="true"}
+## ¿Por qué no hay términos de sesgo?
+
+En los modelos de *embeddings* no se utiliza sesgo (*bias*) por una razón matemática y conceptual fundamental: su inclusión rompería la pureza y el propósito geométrico del espacio vectorial.
+
+Cada neurona de la capa oculta aprende la representación vectorial idónea para cada palabra de forma independiente. Si añadiéramos un parámetro de sesgo a una neurona, este valor sería constante y se sumaría por igual a todas las palabras del vocabulario. 
+
+Matemáticamente, esto provocaría que los vectores de todas las palabras se desplazasen rígidamente en la misma dirección dentro del espacio. Dado que este desplazamiento uniforme no altera en absoluto las distancias relativas ni los ángulos entre los vectores de las palabras (que es donde reside el significado semántico), el término de sesgo resulta redundante y no aporta ninguna capacidad de aprendizaje adicional a la red.
+:::
+
+La capa oculta, que está compuesta por 2 neuronas, emite un total de 2 valores de salida que se distribuyen hacia la capa de salida. Esta capa está formada por 4 unidades de procesamiento (una para cada palabra de nuestro vocabulario), las cuales reciben los 2 datos provenientes de la capa anterior. En cada una de estas 4 unidades, las dos entradas se multiplican por sus respectivos pesos y se suman (junto con su término de sesgo, si lo hubiera) para generar un valor de salida individual, comúnmente denominado *logit*.
+
+Finalmente, los 4 valores de salida resultantes se agrupan en un solo tensor de 4 dimensiones. Este tensor se introduce en la función `softmax`, la cual transforma los valores en una distribución de probabilidad que nos indica cuál es la siguiente palabra más probable.
+
+Con esta arquitectura una implementación manual de la red neuronal nos permite entender exactamente cuáles son son pesos:
 
 
 ```{python}
 class WordEmbeddingFromScratch(L.LightningModule):
 
     def __init__(self):
-        ## __init__() initializes the weights and sets everything up for training
-
+        
         super().__init__()
-
-        ## The first thing we do is set the seed for the random number generorator.
-        ## This ensures that when someone creates a model from this class, that model
-        ## will start off with the exact same random numbers as I started out with when
-        ## I created this demo. At least, I hope that is what happens!!! :)
-        L.seed_everything(seed=42)
-
         ###################
         ##
         ## Initialize the weights.
@@ -251,7 +315,7 @@ class WordEmbeddingFromScratch(L.LightningModule):
         ##       (instead of just using it for the Word Embedding values), then we'll need to apply the softmax() function
         ##       ourselves (or just look to see what output value is largest).
 
-        return(output_presoftmax)
+        return output_presoftmax
 
 
     def configure_optimizers(self):
@@ -270,11 +334,17 @@ class WordEmbeddingFromScratch(L.LightningModule):
         return loss
 ```
 
-
+### Entrenamiento
 Ahora que hemos creado nuestra nueva clase, `WordEmbeddingFromScratch`, vamos a crear un modelo e imprimir los parámetros iniciales.
 
 
 ```{python}
+## The first thing we do is set the seed for the random number generorator.
+## This ensures that when someone creates a model from this class, that model
+## will start off with the exact same random numbers as I started out with when
+## I created this demo. At least, I hope that is what happens!!! :)
+L.seed_everything(seed=42)
+
 modelFromScratch = WordEmbeddingFromScratch() # create the model...
 
 print("Before optimization, the parameters are...")
@@ -282,7 +352,7 @@ for name, param in modelFromScratch.named_parameters():
     print(name, torch.round(param.data, decimals=2))
 ```
 
-Observa cómo los pesos para **input1** (`w1 = 0.3832` y `w2 = 0.4150`) e **input4** (`w1 = -0.2434` y `w2 = 0.2936`) son muy diferentes, a pesar de que ambos representan títulos de películas (**Troll2** y **Gymkata**) que se utilizan en el mismo contexto. Podemos verlo más gráficamente en una tabla.
+Observa cómo los pesos para **input1** (`w1 = 0.3832` y `w2 = 0.4150`) e **input4** (`w1 = -0.2434` y `w2 = 0.2936`) son muy diferentes, a pesar de que ambos representan nombres (**Javier** y **Carlos**) que se utilizan en el mismo contexto. Podemos verlo más gráficamente en una tabla.
 
 ```{python}
 data = {
@@ -294,7 +364,7 @@ data = {
            modelFromScratch.input2_w2.item(),
            modelFromScratch.input3_w2.item(),
            modelFromScratch.input4_w2.item()],
-    "token": ["Troll2", "is", "great", "Gymkata"],
+    "token": ["Javier", "es", "bueno", "Carlos"],
     "input": ["input1", "input2", "input3", "input4"]
 }
 df = pd.DataFrame(data)
@@ -323,7 +393,7 @@ from plotnine import *
 )
 ``` 
 
-En el gráfico podemos ver que los pesos para **Troll2** y **Gymkata**  no son más similares entre sí que los de las demás entradas. Sin embargo, al entrenar esta red neuronal, esperamos que esos pesos se vuelvan similares. Así que vamos a crear un `Trainer` y entrenar la red de incrustación (embedding network).
+En el gráfico podemos ver que los pesos para **Javier** y **Carlos**  no son más similares entre sí que los de las demás entradas. Sin embargo, al entrenar esta red neuronal, esperamos que esos pesos se vuelvan similares. Así que vamos a crear un `Trainer` y entrenar la red de incrustación (embedding network).
 
 ```{python}
 trainer = L.Trainer(max_epochs=100)
@@ -353,7 +423,7 @@ data = {
            modelFromScratch.input2_w2.item(),
            modelFromScratch.input3_w2.item(),
            modelFromScratch.input4_w2.item()],
-    "token": ["Troll2", "is", "great", "Gymkata"],
+    "token": ["Javier", "es", "bueno", "Carlos"],
     "input": ["input1", "input2", "input3", "input4"]
 }
 df = pd.DataFrame(data)
@@ -400,23 +470,277 @@ softmax = nn.Softmax(dim=0) ## dim=0 applies softmax to rows, dim=1 applies soft
 
 ## Now let's...
 
-## print the predictions for "Troll2"
+## print the predictions for "Javier"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[1., 0., 0., 0.]]))),
                   decimals=2))
 
-## print the predictions for "is"
+## print the predictions for "es"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[0., 1., 0., 0.]]))),
                   decimals=2))
 
-## print the predictions for "great"
+## print the predictions for "bueno"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[0., 0., 1., 0.]]))),
                   decimals=2))
 
-## print the predictions for "Gymkata"
+## print the predictions for "Carlos"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[0., 0., 0., 1.]]))),
                   decimals=2))
 ```
 
-Y vemos que todos los tokens predicen correctamente (otorgan la mayor probabilidad a) el token que les sigue. En este caso, tanto **Troll2** como **Gymkata** predicen correctamente el segundo token, **is**, con una probabilidad de **1.0**.
+Y vemos que todos los tokens predicen correctamente (otorgan la mayor probabilidad a) el token que les sigue. En este caso, tanto **Javier** como **Carlos** predicen correctamente el segundo token, **es**, con una probabilidad de **1.0**. O más claramente:
+
+```{python}
+labels_names = ["Javier", "es", "bueno", "Carlos"]
+predictions = torch.argmax(modelFromScratch([inputs]), dim=0)
+for i in range(len(predictions)):
+    print(f"{labels_names[i]} -> {labels_names[predictions[i]]}")
+``` 
+### ¿Por qué funciona?
+
+Al entrenar la red neuronal para predecir la siguiente palabra, obligamos al modelo a comprimir la información en la capa oculta. Para optimizar el resultado, los pesos asociados a palabras que aparecen en contextos similares (como **Javier** y **Carlos**) comienzan a alinearse y a parecerse entre sí. 
+
+Esto ocurre porque ambas palabras comparten el mismo objetivo: predecir la palabra **"es"**. Si el modelo falla en esta predicción, el algoritmo de retropropagación ajustará los pesos de "Javier" y "Carlos" en la misma dirección para aumentar la probabilidad de acierto. Al final del entrenamiento, este proceso agrupa las palabras con funciones gramaticales o significados similares en zonas cercanas espacio vectorial.
+
+> **Nota sobre la complejidad:** En esta red tan sencilla (con sólo dos frases y 4 palabras), existe el riesgo de que el modelo encuentre "atajos" y asigne pesos diferentes a ambas palabras logrando una predicción correcta. Sin embargo, en redes más complejas y con conjuntos de datos reales, la red se ve obligada a ser eficiente. Para optimizar el espacio, no le queda más remedio que encontrar una **representación común (embedding)** para todas las palabras que se usan en los mismos contextos^[*Javier* y *Carlos* se usarán en muchos otros contextos similares. Aunque también lo harán en otros diferentes y por eso sus vectores también reflejarán esas diferencias.].
+
+### Red neuronal de embeddings con nn.Linear()
+
+Ahora que ya sabemos cómo crear una red neuronal de embeddings desde cero, vamos a crear la misma red pero utilizando `nn.Linear()`, que es una función que hace exactamente lo mismo que la red que creamos manualmente, pero con menos código y más flexible.
+
+```{python}
+class WordEmbeddingWithLinear(L.LightningModule):
+
+    def __init__(self):
+
+        super().__init__()
+
+        ## In order to initialize weights from the 4 inputs (one for each unique word)
+        ##       to the 2 nodes in the hidden layer (top and bottom nodes), we simply make
+        ##       one call to nn.Linear() where in_features specifies the number of
+        ##       inputs and out_features specifies the number of nodes we
+        ##       are connecting them to. Since we don't want to use bias terms,
+        ##       we set bias=False
+        self.input_to_hidden = nn.Linear(in_features=4, out_features=2, bias=False)
+        ## Now, in order to connect the 2 nodes in the hidden layer to the 4 outputs, we
+        ##       make one call to nn.Linear(), where in_features specifies the number of
+        ##       nodes in hidden layer and out_features specifies the number of output values we want.
+        ##       And again, we can set bias=False
+        self.hidden_to_output = nn.Linear(in_features=2, out_features=4, bias=False)
+
+        ## We'll use CrossEntropyLoss in training_step()
+        self.loss = nn.CrossEntropyLoss()
 
 
+    def forward(self, input):
+
+        ## Unlike before, where we did all the math by hand, now we can
+        ## simply pass the input values to the weights we created with nn.Linear()
+        ## between the input and the hidden layer and save the result in "hidden"
+        ##
+        ## NOTE: Unlike before, we don't need to strip off the extra brackets from the
+        ##       input. the Linear ojbect knows what to do.
+        hidden = self.input_to_hidden(input)
+
+        ## Then we pass "hidden" to the weights we created with nn.Linear()
+        ## between the hidden layer and the output.
+        output_values = self.hidden_to_output(hidden)
+
+        return(output_values)
+
+
+    def configure_optimizers(self):
+        # this configures the optimizer we want to use for backpropagation.
+
+        return Adam(self.parameters(), lr=0.1)
+
+
+    def training_step(self, batch):
+        # take a step during gradient descent.
+
+        input_i, label_i = batch # collect input
+        output_i = self.forward(input_i) # run input through the neural network
+        loss = self.loss(output_i, label_i) ## loss = cross entropy
+
+        return loss
+```
+
+Entrenamos la red neuronal de embeddings creada con `nn.Linear()`...
+
+```{python}
+L.seed_everything(seed=42)
+modelWithLinear = WordEmbeddingWithLinear() # create the model...
+trainer = L.Trainer(max_epochs=100)
+trainer.fit(modelWithLinear, train_dataloaders=dataloader)
+```
+
+Mostramos los pesos:
+
+```{python}
+# Accedemos a la matriz de pesos de la capa input_to_hidden
+# Usamos .detach() para quitar los gradientes antes de convertirlos a floats
+weights = modelWithLinear.input_to_hidden.weight.detach()
+
+data = {
+    # Fila 0 contiene los pesos que van al primer nodo (equivalente a w1)
+    "w1": [weights[0, 0].item(),
+           weights[0, 1].item(),
+           weights[0, 2].item(),
+           weights[0, 3].item()],
+    # Fila 1 contiene los pesos que van al segundo nodo (equivalente a w2)
+    "w2": [weights[1, 0].item(),
+           weights[1, 1].item(),
+           weights[1, 2].item(),
+           weights[1, 3].item()],
+    "token": ["Javier", "es", "bueno", "Carlos"],
+    "input": ["input1", "input2", "input3", "input4"]
+}
+
+df = pd.DataFrame(data)
+df
+```
+
+Representamos gráficamente:
+
+```{python}
+from plotnine import *
+
+(
+    ggplot(df, aes(x="w1", y="w2", color="token"))
+    + geom_point(size=5)
+    + geom_text(
+        aes(label="token"),
+        ha="left",  # Alineación horizontal izquierda
+        size=10,  
+        color="black",
+        fontweight="semibold",
+        nudge_y=0.02,
+        nudge_x=-0.04
+    )
+    + theme_bw()
+    + theme(legend_position="none")
+)
+```
+
+### Entrenamiento con nn.Embedding
+
+`nn.Embedding` es una capa de PyTorch diseñada específicamente para funcionar como una **tabla de búsqueda (Lookup Table)**. En lugar de realizar una multiplicación de matrices completa para transformar un vector codificado en One-Hot, `nn.Embedding` utiliza el índice entero del token para extraer directamente la fila correspondiente de la matriz de pesos (los embeddings).
+
+Ventajas sobre nn.Linear:
+
+1. **Eficiencia en memoria y computación:** Para un vocabulario grande (por ejemplo, 50,000 palabras), usar `nn.Linear` requiere pasar un vector One-Hot de tamaño 50,000 y realizar miles de multiplicaciones por cero. `nn.Embedding` solo recibe el índice entero (ej. `3`) y extrae los pesos al instante mediante indexación, ahorrando una cantidad masiva de cómputo ($O(1)$ en la búsqueda).
+2. **Entradas simplificadas:** No necesitas transformar tus datos de texto a vectores One-Hot dispersos antes de meterlos al modelo. Puedes pasar directamente tensores de enteros con los IDs de las palabras.
+3. **Manejo de secuencias:** Facilita enormemente el trabajo con frases de longitudes variables y procesamiento en lotes (batches) de texto en modelos como RNNs o Transformers.
+
+
+Implementación de la red neuronal de embeddings utilizando nn.Embedding:
+
+```{python}
+
+### 1. Definición del modelo con nn.Embedding
+class WordEmbeddingWithEmbeddingLayer(L.LightningModule):
+
+    def __init__(self):
+        super().__init__()
+
+        # Reemplazamos nn.Linear por nn.Embedding.
+        # num_embeddings = 4 (tamaño del vocabulario)
+        # embedding_dim = 2 (dimensión del espacio latente)
+        self.input_to_hidden = nn.Embedding(num_embeddings=4, embedding_dim=2)
+        
+        # La capa de salida permanece igual para poder calcular la distribución de probabilidad
+        self.hidden_to_output = nn.Linear(in_features=2, out_features=4, bias=False)
+
+        self.loss = nn.CrossEntropyLoss()
+
+    def forward(self, input_indices):
+        # input_indices debe ser un tensor de enteros (LongTensor) con los IDs de las palabras
+        # nn.Embedding busca directamente los pesos asociados a esos IDs
+        hidden = self.input_to_hidden(input_indices)
+
+        # Pasamos la representación densa por la capa lineal de salida
+        output_values = self.hidden_to_output(hidden)
+
+        return output_values
+
+    def configure_optimizers(self):
+        return Adam(self.parameters(), lr=0.1)
+
+    def training_step(self, batch):
+        # IMPORTANTE: input_i ahora contiene índices enteros (0, 1, 2, 3) y no vectores One-Hot
+        input_i, label_i = batch 
+        output_i = self.forward(input_i) 
+        loss = self.loss(output_i, label_i) 
+        return loss
+```
+
+Creación de la instancia del modelo:
+
+```{python}
+L.seed_everything(seed=21)
+modelWithEmbedding = WordEmbeddingWithEmbeddingLayer()
+```
+
+
+Hay volver a crear el `DataLoader` con los índices enteros en lugar de los vectores One-Hot. Para esto, simplemente convertimos cada vector One-Hot a su índice correspondiente:
+
+```{python}
+# Convertimos los vectores One-Hot a índices enteros
+inputsForEmbed = torch.tensor([0, 1, 2, 3], dtype=torch.long)  # "Javier"=0, "es"=1, "bueno"=2, "Carlos"=3
+labels = torch.tensor([1, 2, 3, 1], dtype=torch.long)
+
+datasetForEmbed = TensorDataset(inputsForEmbed, labels)
+dataloaderForEmbed = DataLoader(datasetForEmbed)
+```                        
+Entrenamos el modelo:
+
+```{python}
+trainer = L.Trainer(max_epochs=100)
+trainer.fit(modelWithEmbedding, train_dataloaders=dataloaderForEmbed)
+```
+
+Extracción y preparación de los pesos entrenados:
+
+
+```{python}
+# En nn.Embedding los pesos se guardan en .weight con dimensiones (num_embeddings, embedding_dim)
+# Cada fila 'i' es directamente el vector de la palabra 'i'.
+weights = modelWithEmbedding.input_to_hidden.weight.detach()
+
+data = {
+    # Columna 'w1': guarda la primera dimensión del embedding de cada token
+    "w1": [weights[0, 0].item(),
+           weights[1, 0].item(),
+           weights[2, 0].item(),
+           weights[3, 0].item()],
+    # Columna 'w2': guarda la segunda dimensión del embedding de cada token
+    "w2": [weights[0, 1].item(),
+           weights[1, 1].item(),
+           weights[2, 1].item(),
+           weights[3, 1].item()],
+    "token": ["Javier", "es", "bueno", "Carlos"],
+    "input": ["input1", "input2", "input3", "input4"]
+}
+
+df = pd.DataFrame(data)
+print(df)
+```
+Representación gráfica:
+
+```{python}
+graph = (
+    ggplot(df, aes(x="w1", y="w2", color="token"))
+    + geom_point(size=5)
+    + geom_text(
+        aes(label="token"),
+        ha="left",  
+        size=10,  
+        color="black",
+        fontweight="semibold",
+        nudge_y=0.02,
+        nudge_x=-0.04
+    )
+    + theme_bw()
+    + theme(legend_position="none")
+)
+graph
+``` 
