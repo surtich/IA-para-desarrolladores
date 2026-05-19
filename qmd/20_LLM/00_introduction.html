@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>introduction – IA para desarrolladores</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5c7b0344403fcc0d3486fe5a6450fa50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">IA para desarrolladores</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../qmd/index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">¿Qué es un modelo de lenguaje grande (LLM)?</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Buscar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal simple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal múltiple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/40_logistic_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/50_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Redes neuronales</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">LLM</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/00_introduction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">¿Qué es un modelo de lenguaje grande (LLM)?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/20_word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word2Vec</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Apéndices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/10_derivadas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derivadas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../presentacion_2025.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Presentación 2025</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#qué-es-un-modelo-de-lenguaje-grande-llm" id="toc-qué-es-un-modelo-de-lenguaje-grande-llm" class="nav-link active" data-scroll-target="#qué-es-un-modelo-de-lenguaje-grande-llm">¿Qué es un modelo de lenguaje grande (LLM)?</a></li>
+  <li><a href="#definiciones" id="toc-definiciones" class="nav-link" data-scroll-target="#definiciones">Definiciones</a>
+  <ul class="collapse">
+  <li><a href="#nlp" id="toc-nlp" class="nav-link" data-scroll-target="#nlp">NLP</a></li>
+  <li><a href="#llm" id="toc-llm" class="nav-link" data-scroll-target="#llm">LLM</a></li>
+  <li><a href="#fine-tuning" id="toc-fine-tuning" class="nav-link" data-scroll-target="#fine-tuning">Fine-tuning</a></li>
+  <li><a href="#alucinación" id="toc-alucinación" class="nav-link" data-scroll-target="#alucinación">Alucinación</a></li>
+  <li><a href="#tokenización" id="toc-tokenización" class="nav-link" data-scroll-target="#tokenización">Tokenización</a></li>
+  <li><a href="#embeddings" id="toc-embeddings" class="nav-link" data-scroll-target="#embeddings">Embeddings</a></li>
+  <li><a href="#transformers" id="toc-transformers" class="nav-link" data-scroll-target="#transformers">Transformers</a></li>
+  <li><a href="#mecanismo-de-atención" id="toc-mecanismo-de-atención" class="nav-link" data-scroll-target="#mecanismo-de-atención">Mecanismo de atención</a></li>
+  </ul></li>
+  <li><a href="#el-proceso-de-entrenamiento-de-un-llm" id="toc-el-proceso-de-entrenamiento-de-un-llm" class="nav-link" data-scroll-target="#el-proceso-de-entrenamiento-de-un-llm">El proceso de entrenamiento de un LLM</a></li>
+  <li><a href="#preguntas-frecuentes" id="toc-preguntas-frecuentes" class="nav-link" data-scroll-target="#preguntas-frecuentes">Preguntas frecuentes</a>
+  <ul class="collapse">
+  <li><a href="#cómo-genera-su-respuesta-un-llm" id="toc-cómo-genera-su-respuesta-un-llm" class="nav-link" data-scroll-target="#cómo-genera-su-respuesta-un-llm">¿Cómo genera su respuesta un LLM?</a></li>
+  <li><a href="#tiene-memoria-un-llm" id="toc-tiene-memoria-un-llm" class="nav-link" data-scroll-target="#tiene-memoria-un-llm">¿Tiene memoria un LLM?</a></li>
+  <li><a href="#puede-aprender-un-llm-después-de-su-entrenamiento" id="toc-puede-aprender-un-llm-después-de-su-entrenamiento" class="nav-link" data-scroll-target="#puede-aprender-un-llm-después-de-su-entrenamiento">¿Puede aprender un LLM después de su entrenamiento?</a></li>
+  <li><a href="#puede-un-llm-consultar-información-en-internet-o-usar-herramientas-como-una-calculadora" id="toc-puede-un-llm-consultar-información-en-internet-o-usar-herramientas-como-una-calculadora" class="nav-link" data-scroll-target="#puede-un-llm-consultar-información-en-internet-o-usar-herramientas-como-una-calculadora">¿Puede un LLM consultar información en internet o usar herramientas como una calculadora?</a></li>
+  </ul></li>
+  <li><a href="#desafíos-en-el-desarrollo-de-llm" id="toc-desafíos-en-el-desarrollo-de-llm" class="nav-link" data-scroll-target="#desafíos-en-el-desarrollo-de-llm">Desafíos en el desarrollo de LLM</a></li>
+  <li><a href="#aplicaciones-de-llm" id="toc-aplicaciones-de-llm" class="nav-link" data-scroll-target="#aplicaciones-de-llm">Aplicaciones de LLM</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">¿Qué es un modelo de lenguaje grande (LLM)?</a></li></ol></nav></header>
+
+
+
+
+<section id="qué-es-un-modelo-de-lenguaje-grande-llm" class="level2">
+<h2 class="anchored" data-anchor-id="qué-es-un-modelo-de-lenguaje-grande-llm">¿Qué es un modelo de lenguaje grande (LLM)?</h2>
+<p>En noviembre de 2022, OpenAI lanzó ChatGPT, un modelo de lenguaje grande (LLM) que se hizo viral casi de inmediato. Desde entonces, los LLM se han convertido en una de las tecnologías más disruptivas en el campo de la inteligencia artificial, con aplicaciones que van desde la generación de texto hasta la traducción automática y la creación de aplicaciones. Hoy todos estamos usando modelos de lenguaje en nuestro día a día para infinidad de tareas. El campo del desarrollo de software es uno de los más afectados por esta tecnología, y es fundamental que los programadores comprendan cómo funcionan los LLM para aprovechar al máximo su potencial.</p>
+<p>Cuando un LLM responde a una petición de un usuario, da la impresión de que ha comprendido la tarea que se le ha encomendado y que sabe construir una respuesta adecuada. En definitiva, que el LLM conoce el significado de las palabras y las reglas que gramaticales que rigen el lenguaje en el que se está comunicando. En realidad, no es así, el LLM no ha aprendido en su entrenamiento reglas, sino asociaciones entre palabras. Sabe, por ejemplo, que la palabra “gato” a menudo se asocia con palabras como “maullar”, “pelaje”, “ratón”, etc., pero no sabe qué es un gato ni por qué esas palabras están asociadas con él. A diferencia de los humanos, los LLM no tienen experiencia directa con el mundo físico, por lo que no pueden aprender el significado de las palabras a través de la experiencia. En cambio, los LLM aprenden a asociar palabras con otras palabras a través de un proceso de entrenamiento en el que se les muestra una gran cantidad de texto y se les pide que predigan la siguiente palabra en una secuencia. A través de este proceso, los LLM aprenden a asignar números a las palabras, y estas asociaciones numéricas les permiten generar texto coherente y relevante en respuesta a las solicitudes de los usuarios. Sin embargo, también hay parecidos entre el proceso de aprendizaje de los LLM y el de los humanos. Cuando un niño aprende a hablar no necesita saber lo que es el sujeto y el predicado ni conjugar verbos cara construir oraciones gramaticalmente correctas. En cambio, aprende a asociar palabras con otras palabras a través de la exposición al lenguaje en su entorno.</p>
+</section>
+<section id="definiciones" class="level2">
+<h2 class="anchored" data-anchor-id="definiciones">Definiciones</h2>
+<section id="nlp" class="level3">
+<h3 class="anchored" data-anchor-id="nlp">NLP</h3>
+<p>El procesamiento de lenguaje natural (NLP) es una rama de la inteligencia artificial que se enfoca en la interacción entre las computadoras y el lenguaje humano. El objetivo del NLP es permitir que las máquinas comprendan, interpreten y generen texto de manera similar a como lo hacen los humanos.</p>
+</section>
+<section id="llm" class="level3">
+<h3 class="anchored" data-anchor-id="llm">LLM</h3>
+<p>Los modelos de lenguaje grandes (LLM) son un tipo de modelo de inteligencia artificial que ha sido entrenado con una gran cantidad de datos de texto para comprender y generar lenguaje humano de manera efectiva. Estos modelos utilizan técnicas avanzadas de aprendizaje automático, como las redes neuronales profundas, para aprender patrones y relaciones en el lenguaje. Los LLM pueden realizar tareas como traducción automática, generación de texto, respuesta a preguntas y análisis de sentimientos, entre otras aplicaciones.</p>
+</section>
+<section id="fine-tuning" class="level3">
+<h3 class="anchored" data-anchor-id="fine-tuning">Fine-tuning</h3>
+<p>El fine-tuning es el proceso de ajustar un modelo de lenguaje grande (LLM) preentrenado para que se adapte a una tarea específica o a un dominio de aplicación determinado. Esto se logra mediante la exposición del modelo a un conjunto de datos más pequeño y específico que está relacionado con la tarea que se desea realizar. Durante el fine-tuning, el modelo ajusta sus parámetros internos para mejorar su rendimiento en la tarea específica, lo que puede resultar en una mayor precisión y relevancia en las respuestas generadas por el modelo.</p>
+<p>Algunos ejemplos de tareas para las que se puede realizar fine-tuning incluyen la clasificación de texto, la generación de resúmenes, la traducción automática y la respuesta a preguntas específicas. El fine-tuning es una técnica importante para adaptar los LLM a aplicaciones del mundo real y mejorar su rendimiento en tareas específicas.</p>
+</section>
+<section id="alucinación" class="level3">
+<h3 class="anchored" data-anchor-id="alucinación">Alucinación</h3>
+<p>La alucinación en el contexto de los modelos de lenguaje se refiere a la generación de información incorrecta o inventada por parte del modelo con apariencia de ser real. Esto puede ocurrir cuando el modelo produce respuestas que parecen plausibles pero que no están basadas en datos reales o hechos verificables. La alucinación es un desafío importante en el desarrollo de modelos de lenguaje, ya que puede afectar la confiabilidad y la utilidad de las respuestas generadas por el modelo.</p>
+<p>Unos de los objetivos de este curso es entender por qué ocurre la alucinación y cómo mitigarla en los modelos de lenguaje grandes.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Ver ejemplos de alucinaciones
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Perplexity mayo 2025:</li>
+</ul>
+<p><img src="../../img/perplexity1.jpg" class="img-fluid"> <img src="../../img/perplexity3.jpg" class="img-fluid"></p>
+<ul>
+<li><a href="https://chatgpt.com/share/6a0b3242-8ae0-83eb-b649-e1225bcb188a">ChatGPT septiembre 2025</a>:</li>
+</ul>
+<p><img src="../../img/chatgpt1.png" class="img-fluid"></p>
+<ul>
+<li><a href="https://chatgpt.com/share/68c0066a-23e8-8007-ad8b-618dcd20f01c">ChatGPT septiembre 2025</a>:</li>
+</ul>
+<p><img src="../../img/chatgpt2.png" class="img-fluid"></p>
+<ul>
+<li><a href="https://chatgpt.com/share/6a0b34ef-4a74-83eb-ba24-155ebe56a9f3">ChatGPT septiembre 2025</a>:</li>
+</ul>
+<p><img src="../../img/chatgpt3.png" class="img-fluid"></p>
+<ul>
+<li><a href="https://www.perplexity.ai/search/928ceeb0-27f2-448c-95f7-4258a96ac59b">Perplexity mayo 2026</a>:</li>
+</ul>
+<p><img src="../../img/gemini1.png" class="img-fluid"></p>
+<ul>
+<li><a href="https://www.perplexity.ai/search/71b2a7f4-77c3-420c-8b5d-32f27851637e">Perplexity mayo 2026</a>:</li>
+</ul>
+<p><img src="../../img/perplexity2.png" class="img-fluid"></p>
+<ul>
+<li><a href="https://www.perplexity.ai/search/928ceeb0-27f2-448c-95f7-4258a96ac59b">Perplexity mayo 2026</a>:</li>
+</ul>
+<p><img src="../../img/perplexity4.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+</section>
+<section id="tokenización" class="level3">
+<h3 class="anchored" data-anchor-id="tokenización">Tokenización</h3>
+<p>La tokenización es el proceso de dividir un texto en unidades más pequeñas llamadas tokens. Estos tokens pueden ser palabras, subpalabras o caracteres, dependiendo del enfoque utilizado. La tokenización es un paso fundamental en el procesamiento de lenguaje natural, ya que permite a los modelos de lenguaje comprender y manipular el texto de manera más efectiva. Por ejemplo, en la frase “El gato está en la casa”, los tokens podrían ser [“El”, “gato”, “está”, “en”, “la”, “casa”].</p>
+</section>
+<section id="embeddings" class="level3">
+<h3 class="anchored" data-anchor-id="embeddings">Embeddings</h3>
+<p>Los embeddings son representaciones numéricas de palabras, frases o documentos que capturan su significado semántico en un espacio vectorial. Estas representaciones permiten a los modelos de lenguaje comprender y procesar el texto de manera más efectiva, ya que pueden comparar y manipular estas representaciones para realizar tareas como clasificación, búsqueda y generación de texto. Los embeddings se utilizan ampliamente en el procesamiento de lenguaje natural y son fundamentales para el funcionamiento de los modelos de lenguaje grandes (LLM).</p>
+<p>Los embeddings son la forma en que un LLM captura el significado de una palabra o frase. Por ejemplo, en un espacio de embeddings, las palabras “gato” y “perro” podrían estar cerca una de la otra, mientras que la palabra “automóvil” estaría más lejos, reflejando su relación semántica.</p>
+<p>El modelo de lenguaje aprende a generar embeddings a partir de grandes cantidades de texto durante su entrenamiento, lo que le permite comprender el contexto y las relaciones entre las palabras. Al ser vectores, los embeddings pueden ser manipulados matemáticamente, lo que permite a los modelos de lenguaje realizar tareas complejas como la analogía (por ejemplo, “rey” - “hombre” + “mujer” ≈ “reina”) y la clasificación de texto.</p>
+<p><img src="../../img/embeddings_paises.svg" class="img-fluid"></p>
+</section>
+<section id="transformers" class="level3">
+<h3 class="anchored" data-anchor-id="transformers">Transformers</h3>
+<p>Los transformers son una arquitectura de red neuronal que ha revolucionado el campo del procesamiento de lenguaje natural. Introducidos por Vaswani et al.&nbsp;en 2017, los transformers utilizan un mecanismo de atención para procesar secuencias de texto de manera más eficiente que las arquitecturas anteriores, como las redes neuronales recurrentes (RNN) y las redes neuronales convolucionales (CNN).</p>
+</section>
+<section id="mecanismo-de-atención" class="level3">
+<h3 class="anchored" data-anchor-id="mecanismo-de-atención">Mecanismo de atención</h3>
+<p>El mecanismo de atención es una técnica utilizada en los transformers que permite al modelo enfocarse en diferentes partes de la entrada de texto al generar una respuesta. En lugar de procesar el texto de manera secuencial, el mecanismo de atención permite al modelo asignar diferentes pesos a diferentes partes del texto, lo que le permite capturar relaciones a largo plazo y comprender mejor el contexto. Esto es especialmente útil para tareas como la traducción automática y la generación de texto, donde el contexto es crucial para producir respuestas coherentes y relevantes.</p>
+</section>
+</section>
+<section id="el-proceso-de-entrenamiento-de-un-llm" class="level2">
+<h2 class="anchored" data-anchor-id="el-proceso-de-entrenamiento-de-un-llm">El proceso de entrenamiento de un LLM</h2>
+<p>El entrenamiento dde un LLM es de tipo auto-supervisado, lo que significa que el modelo se entrena utilizando grandes cantidades de texto sin necesidad de etiquetas o anotaciones manuales. El entrenamiento consiste en predecir la siguiente palabra en una secuencia de texto, por lo que la etiqueta para cada ejemplo de entrenamiento es simplemente la siguiente palabra en el texto.</p>
+<ol type="1">
+<li><p><strong>Recolección de datos</strong>: Se recopila una gran cantidad de texto de diversas fuentes, como libros, artículos, sitios web y redes sociales. Estos datos deben ser representativos del lenguaje que el modelo se espera que comprenda y genere.</p></li>
+<li><p><strong>Preprocesamiento de datos</strong>: El texto recopilado se limpia y se prepara para el entrenamiento. Esto puede incluir la eliminación de caracteres no deseados, la tokenización (dividir el texto en unidades más pequeñas como palabras o subpalabras) y la normalización (convertir el texto a una forma estándar).</p></li>
+<li><p><strong>Entrenamiento del modelo</strong>: El modelo se entrena utilizando técnicas de aprendizaje automático, como el aprendizaje supervisado o no supervisado. Durante el entrenamiento, el modelo ajusta sus parámetros internos para minimizar la diferencia entre sus predicciones y los datos de entrenamiento. Esto se hace a través de un proceso iterativo que puede llevar semanas o meses, dependiendo del tamaño del modelo y la cantidad de datos.</p></li>
+<li><p><strong>Evaluación y ajuste</strong>: Después del entrenamiento, el modelo se evalúa utilizando conjuntos de datos de prueba para medir su rendimiento en tareas específicas. Si el rendimiento no es satisfactorio, se pueden realizar ajustes en la arquitectura del modelo, los datos de entrenamiento o los hiperparámetros para mejorar su desempeño.</p></li>
+<li><p><strong>Despliegue</strong>: Una vez que el modelo ha sido entrenado y evaluado, se puede desplegar para su uso en aplicaciones del mundo real, como chatbots, sistemas de recomendación o herramientas de generación de texto.</p></li>
+</ol>
+</section>
+<section id="preguntas-frecuentes" class="level2">
+<h2 class="anchored" data-anchor-id="preguntas-frecuentes">Preguntas frecuentes</h2>
+<section id="cómo-genera-su-respuesta-un-llm" class="level3">
+<h3 class="anchored" data-anchor-id="cómo-genera-su-respuesta-un-llm">¿Cómo genera su respuesta un LLM?</h3>
+<p>Cuando un LLM recibe una solicitud de un usuario (<em>prompt</em>), procesa el texto y genera una respuesta basada en los patrones estadísticos y asociaciones que ha aprendido durante su entrenamiento. Este proceso se realiza en los siguientes pasos:</p>
+<ol type="1">
+<li><strong>Tokenización</strong> El LLM divide el texto del usuario en unidades más pequeñas llamadas <em>tokens</em>. Estos fragmentos pueden ser palabras enteras, sílabas o caracteres.</li>
+</ol>
+<p><em>(Puedes ver un ejemplo de cómo se fragmenta la frase “El gato está en la casa” usando herramientas como el <a href="https://platform.openai.com/tokenizer">Tokenizer de OpenAI</a>).</em></p>
+<ol start="2" type="1">
+<li><p><strong>Conversión a Embeddings (Vectores numéricos)</strong> Como los modelos no entienden de letras, convierten cada token en una lista de números llamada <em>embedding</em>. Estos números sitúan a la palabra en un espacio vectorial según su significado semántico.</p></li>
+<li><p><strong>Mecanismo de Atención (Contextualización)</strong> El LLM analiza la relación entre todas las palabras de la frase para entender el contexto exacto.</p></li>
+</ol>
+<blockquote class="blockquote">
+<p><strong>Ejemplo:</strong> Si el usuario pregunta <em>“¿Está abierto el banco?”</em>, la palabra “banco” es ambigua (puede ser una entidad financiera, un asiento de parque o un conjunto de peces). El mecanismo de atención examina las palabras cercanas como <em>“abierto”</em>. Gracias a esto, el modelo recalcula el <em>embedding</em> de “banco”, acercándolo matemáticamente al concepto de “dinero/finanzas” y alejándolo de “silla” o “peces”.</p>
+</blockquote>
+<p><img src="../../img/attention.png" class="img-fluid"></p>
+<ol start="4" type="1">
+<li><p><strong>Predicción del siguiente token</strong> A diferencia de lo que se suele pensar, el modelo no genera la respuesta entera de golpe, sino <strong>palabra por palabra</strong>. El LLM procesa los embeddings contextualizados a través de sus capas neuronales y calcula una distribución de probabilidad para todo su vocabulario. El sistema elige el siguiente token basándose en esa probabilidad (aquí influye un parámetro modificable por el usuario: <em>temperatura</em>. A mayor temperatura, más riesgo y creatividad; a menor temperatura, más predecible).</p></li>
+<li><p><strong>Generación autorregresiva</strong> El LLM repite el proceso continuamente. Para elegir la tercera palabra, toma como entrada el <em>prompt</em> original <strong>más</strong> la primera y segunda palabra que él mismo acaba de generar. Por eso se dice que es un proceso <strong>autorregresivo</strong>: el contenido que genera se convierte en su propio combustible para seguir escribiendo.</p></li>
+<li><p><strong>Finalización de la respuesta</strong> Este bucle se repite hasta que ocurre una de dos condiciones: el modelo genera un token especial invisible llamado <strong>EOS</strong> (<em>End of Sequence</em> / Fin de secuencia) que indica que la respuesta ha concluido, o bien se alcanza el límite máximo de tokens configurado por el sistema.</p></li>
+</ol>
+</section>
+<section id="tiene-memoria-un-llm" class="level3">
+<h3 class="anchored" data-anchor-id="tiene-memoria-un-llm">¿Tiene memoria un LLM?</h3>
+<p>Cuando conversamos con un <code>chatbot</code>, da la sensación de que el modelo recuerda lo que se ha dicho anteriormente en la conversación. Sin embargo, esto no es exactamente cierto. Un LLM no tiene memoria en el sentido tradicional, ya que no puede almacenar información a largo plazo ni recordar conversaciones pasadas. En cambio, un LLM procesa cada entrada de manera independiente y genera respuestas basadas únicamente en la información proporcionada en esa entrada. Esa apariencia de memoria se debe a que el LLM utiliza el <strong>contexto</strong> de la conversación actual para generar respuestas coherentes y relevantes. Es decir, que escribimos en el <code>prompt</code>, el <code>chatbot</code> envía al LLM el <code>prompt</code> junto con los mensajes anteriores de la conversación, y el LLM utiliza esa información para generar una respuesta que tenga sentido en el contexto de la conversación. Sin embargo, una vez que la conversación termina, el LLM no retiene ninguna información sobre lo que se ha dicho, y cada nueva conversación comienza con una “pizarra en blanco”.</p>
+<p>La memoria de un LLM es la almacenada en los pesos de la red neuronal con la que fue entrenado. Estos pesos se ajustan durante el proceso de entrenamiento para capturar patrones y relaciones en el lenguaje. Así que la memoria de un LLM es estática y actualmente no puede ser actualizada con nueva información después de su entrenamiento, a menos que se realice un proceso de fine-tuning o que se incorpore en el contexto.</p>
+</section>
+<section id="puede-aprender-un-llm-después-de-su-entrenamiento" class="level3">
+<h3 class="anchored" data-anchor-id="puede-aprender-un-llm-después-de-su-entrenamiento">¿Puede aprender un LLM después de su entrenamiento?</h3>
+<p>Un LLM no puede aprender de manera tradicional después de su entrenamiento, ya que no tiene la capacidad de almacenar nueva información ni actualizar sus pesos de manera autónoma. Sin embargo, existen técnicas como el fine-tuning que permiten ajustar un LLM preentrenado para adaptarlo a tareas específicas o para incorporar nueva información. Sin embargo, si puede incorporar nueva información a través del contexto, lo que les permite generar respuestas basadas en información actualizada sin necesidad de un nuevo entrenamiento completo.</p>
+</section>
+<section id="puede-un-llm-consultar-información-en-internet-o-usar-herramientas-como-una-calculadora" class="level3">
+<h3 class="anchored" data-anchor-id="puede-un-llm-consultar-información-en-internet-o-usar-herramientas-como-una-calculadora">¿Puede un LLM consultar información en internet o usar herramientas como una calculadora?</h3>
+<p>Si le preguntas la hora a un <em>chatbot</em> o le pides que haga un cálculo matemático complejo, normalmente te dará una respuesta correcta. Esto suele dar la falsa impresión de que el LLM tiene acceso directo a información en tiempo real o a herramientas externas. Sin embargo, no es así.</p>
+<p>Es habitual confundir el <strong>LLM</strong> con el <strong>chatbot</strong> que lo utiliza: * <strong>El LLM (Modelo de Lenguaje):</strong> Es el motor inteligente, pero está “congelado” en el tiempo con los datos con los que fue entrenado. No puede navegar por internet ni calcular por sí mismo. * <strong>El chatbot:</strong> Es la aplicación que envuelve al LLM. El <em>chatbot</em> sí puede integrar bases de datos, calculadoras o conexiones a internet para vitaminar las capacidades del modelo.</p>
+<p>El proceso mediante el cual colaboran (conocido técnicamente como <em>Tool Calling</em>) funciona así:</p>
+<p><img src="../../img/tool_calling.png" class="img-fluid"></p>
+<ol type="1">
+<li><strong>La petición:</strong> El usuario hace una pregunta al <em>chatbot</em> (ej. <em>“¿Qué tiempo hace en Madrid?”</em>).</li>
+<li><strong>El menú de opciones:</strong> El <em>chatbot</em> envía la pregunta al LLM junto con un “menú” de las herramientas que tiene disponibles y las instrucciones de cómo usarlas. El LLM no puede tocarlas, solo sabe que existen.</li>
+<li><strong>La decisión del LLM:</strong> El LLM analiza la pregunta. Al darse cuenta de que no sabe el clima actual, decide que necesita ayuda. En lugar de responderle al usuario, genera un mensaje en un formato especial (como JSON) dirigido al <em>chatbot</em>. Por ejemplo: <code>CALL_TOOL: weather_api, PARAMS: {location: Madrid}</code>.</li>
+<li><strong>La ejecución:</strong> El <em>chatbot</em> lee ese código, ejecuta la herramienta (hace la consulta a la API del clima) y obtiene el dato real (ej. <em>“22°C y soleado”</em>).</li>
+<li><strong>La respuesta final:</strong> El <em>chatbot</em> le devuelve ese dato al LLM. Ahora que el LLM ya tiene la información que le faltaba, redacta una respuesta natural y amigable para el usuario: <em>“Hoy en Madrid hace un día espléndido, el cielo está soleado y el termómetro marca 22°C”</em>.</li>
+</ol>
+<blockquote class="blockquote">
+<p><strong>Nota:</strong> Este proceso puede ser iterativo. Si para resolver un problema el LLM necesita primero usar una calculadora y luego buscar un dato en internet, repetirá este ciclo con el <em>chatbot</em> las veces que sea necesario antes de dar la respuesta definitiva.</p>
+</blockquote>
+</section>
+</section>
+<section id="desafíos-en-el-desarrollo-de-llm" class="level2">
+<h2 class="anchored" data-anchor-id="desafíos-en-el-desarrollo-de-llm">Desafíos en el desarrollo de LLM</h2>
+<p>El desarrollo de modelos de lenguaje grandes (LLM) presenta varios desafíos, entre los cuales se incluyen:</p>
+<ol type="1">
+<li><p><strong>Requerimientos computacionales</strong>: El entrenamiento de LLM requiere una gran cantidad de recursos computacionales, incluyendo potentes GPUs y grandes cantidades de memoria. Esto puede ser costoso y limitar el acceso a la tecnología para algunos investigadores y desarrolladores.</p></li>
+<li><p><strong>Calidad de los datos</strong>: La calidad y la diversidad de los datos de entrenamiento son cruciales para el rendimiento del modelo. Si los datos contienen sesgos o información incorrecta, el modelo puede aprender y perpetuar esos problemas.</p></li>
+<li><p><strong>Alucinación</strong>: Como se mencionó anteriormente, la alucinación es un desafío importante en el desarrollo de LLM, ya que puede afectar la confiabilidad de las respuestas generadas por el modelo.</p></li>
+<li><p><strong>Ética y privacidad</strong>: El uso de LLM plantea preocupaciones éticas y de privacidad, especialmente en lo que respecta a la generación de contenido inapropiado o la recopilación de datos personales sin consentimiento.</p></li>
+<li><p><strong>Interpretabilidad</strong>: Los LLM son a menudo considerados como “cajas negras” debido a su complejidad, lo que dificulta la comprensión de cómo toman decisiones y generan respuestas. Esto puede ser un obstáculo para la confianza y la adopción de la tecnología.</p></li>
+</ol>
+</section>
+<section id="aplicaciones-de-llm" class="level2">
+<h2 class="anchored" data-anchor-id="aplicaciones-de-llm">Aplicaciones de LLM</h2>
+<p>Los modelos de lenguaje grandes (LLM) tienen una amplia gama de aplicaciones en diversos campos, incluyendo:</p>
+<ol type="1">
+<li><p><strong>Chatbots y asistentes virtuales</strong>: Los LLM se utilizan para crear chatbots y asistentes virtuales que pueden interactuar con los usuarios de manera natural y proporcionar respuestas útiles a sus preguntas.</p></li>
+<li><p><strong>Generación de contenido</strong>: Los LLM pueden generar texto de alta calidad para una variedad de propósitos, como redacción de artículos, creación de resúmenes y generación de código.</p></li>
+<li><p><strong>Traducción automática</strong>: Los LLM se utilizan para mejorar la traducción automática, permitiendo que los sistemas de traducción comprendan mejor el contexto y produzcan traducciones más precisas.</p></li>
+<li><p><strong>Análisis de sentimientos</strong>: Los LLM pueden analizar el sentimiento detrás de un texto, lo que es útil para aplicaciones como el monitoreo de redes sociales y la atención al cliente.</p></li>
+<li><p><strong>Búsqueda y recuperación de información</strong>: Los LLM pueden mejorar los sistemas de búsqueda al comprender mejor las consultas de los usuarios y proporcionar resultados más relevantes.</p></li>
+<li><p><strong>Educación y tutoría</strong>: Los LLM pueden ser utilizados para crear sistemas de tutoría personalizados que ayuden a los estudiantes a aprender de manera más efectiva.</p></li>
+</ol>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/surtich\.github\.io\/IA-para-desarrolladores\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

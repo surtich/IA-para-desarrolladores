@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg style="background-color:#ffffff" version="1.1" viewBox="0 0 1e3 600" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <marker id="arrow" markerHeight="6" markerWidth="6" orient="auto-start-reverse" refX="6" refY="5" viewBox="0 0 10 10">
+   <path d="m0 1.5 8 3.5-8 3.5z" fill="#3A7CA5"/>
+  </marker>
+  <style>.title-main { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; font-size: 24px; font-weight: bold; fill: #333333; text-anchor: middle; }
+      .header-text { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; font-size: 16px; font-weight: 600; fill: #555555; text-anchor: middle; letter-spacing: 1px; }
+      .label-text { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; font-size: 15px; fill: #222222; }
+      .sub-text { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; font-size: 13px; fill: #666666; }
+      .green-text { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; font-size: 14px; fill: #2E7D32; font-weight: 500; }</style>
+ </defs>
+ <g id="cbow-section">
+  <text class="header-text" x="100" y="50">INPUT</text>
+  <text class="header-text" x="240" y="50">PROJECTION</text>
+  <text class="header-text" x="380" y="50">OUTPUT</text>
+  <g fill="#EBF3F9" stroke="#3A7CA5" stroke-dasharray="4,4" stroke-width="2">
+   <rect x="75" y="90" width="45" height="70" rx="6"/>
+   <rect x="75" y="180" width="45" height="70" rx="6"/>
+   <rect x="75" y="350" width="45" height="70" rx="6"/>
+   <rect x="75" y="440" width="45" height="70" rx="6"/>
+  </g>
+  <rect x="215" y="235" width="50" height="80" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2.5"/>
+  <text class="label-text" x="240" y="340" text-anchor="middle">Embedding</text>
+  <text class="label-text" x="240" y="360" font-weight="bold" text-anchor="middle">Matrix (W)</text>
+  <rect x="355" y="240" width="50" height="70" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2.5"/>
+  <text class="label-text" x="363" y="280" font-weight="bold">w(t)</text>
+  <g stroke="#3A7CA5" stroke-width="2">
+   <line x1="120" x2="210" y1="125" y2="245" marker-end="url(#arrow)"/>
+   <line x1="120" x2="210" y1="215" y2="265" marker-end="url(#arrow)"/>
+   <line x1="120" x2="210" y1="385" y2="295" marker-end="url(#arrow)"/>
+   <line x1="120" x2="210" y1="475" y2="310" marker-end="url(#arrow)"/>
+   <line x1="265" x2="350" y1="275" y2="275" marker-end="url(#arrow)"/>
+  </g>
+  <text class="title-main" x="240" y="550">CBOW</text>
+  <g font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14.667px" font-weight="bold">
+   <text class="label-text" x="77" y="125">w(t-2)</text>
+   <text class="label-text" x="77" y="215">w(t-1)</text>
+   <text class="label-text" x="77" y="385">w(t+1)</text>
+   <text class="label-text" x="77" y="475">w(t+2)</text>
+  </g>
+ </g>
+ <g id="skipgram-section">
+  <text class="header-text" x="620" y="50">INPUT</text>
+  <text class="header-text" x="760" y="50">PROJECTION</text>
+  <text class="header-text" x="900" y="50">OUTPUT</text>
+  <rect x="595" y="235" width="45" height="70" rx="6" fill="#EBF3F9" stroke="#3A7CA5" stroke-dasharray="4,4" stroke-width="2"/>
+  <text class="label-text" x="603" y="275" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-weight="bold">w(t)</text>
+  <g text-anchor="middle">
+   <text class="label-text" x="618" y="330">Current</text>
+   <text class="label-text" x="103.20999" y="291.20499" fill="#222222" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15px"><tspan x="103.20999" y="291.20499">Context</tspan><tspan x="103.20999" y="309.95499">Words</tspan></text>
+   <text class="label-text" x="618" y="350">Word</text>
+  </g>
+  <rect x="735" y="235" width="50" height="80" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2.5"/>
+  <text class="label-text" x="760" y="340" text-anchor="middle">Embedding</text>
+  <text class="label-text" x="760" y="360" font-weight="bold" text-anchor="middle">Matrix (W)</text>
+  <rect x="875" y="90" width="45" height="70" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2.5"/>
+  <text class="label-text" x="878" y="130" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13.333px" font-weight="bold">w(t-2)</text>
+  <rect x="875" y="180" width="45" height="70" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2.5"/>
+  <text class="label-text" x="878" y="220" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13.333px" font-weight="bold">w(t-1)</text>
+  <rect x="875" y="350" width="45" height="70" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2.5"/>
+  <text class="label-text" x="878" y="390" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13.333px" font-weight="bold">w(t+1)</text>
+  <rect x="875" y="440" width="45" height="70" rx="6" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2.5"/>
+  <text class="label-text" x="878" y="478" font-family="'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13.333px" font-weight="bold">w(t+2)</text>
+  <g stroke="#3A7CA5" stroke-width="2">
+   <line x1="640" x2="730" y1="270" y2="270" marker-end="url(#arrow)"/>
+   <line x1="785" x2="870" y1="245" y2="135" marker-end="url(#arrow)"/>
+   <line x1="785" x2="870" y1="265" y2="210" marker-end="url(#arrow)"/>
+   <line x1="785" x2="870" y1="290" y2="365" marker-end="url(#arrow)"/>
+   <line x1="785" x2="870" y1="310" y2="445" marker-end="url(#arrow)"/>
+  </g>
+  <text class="title-main" x="760" y="550">Skip-gram</text>
+ </g>
+</svg>

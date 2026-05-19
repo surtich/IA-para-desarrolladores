@@ -110,6 +110,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -145,7 +174,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/10_word_embeddings.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/10_word_embeddings.html">Word embeddings</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/10_word_embeddings.html">Word embeddings</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
@@ -217,8 +246,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/00_introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">¿Qué es un modelo de lenguaje grande (LLM)?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/20_word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word2Vec</span></a>
   </div>
 </li>
       </ul>
@@ -256,22 +297,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">En esta página</h2>
    
   <ul>
-  <li><a href="#introducción" id="toc-introducción" class="nav-link active" data-scroll-target="#introducción">Introducción</a>
+  <li><a href="#introducción" id="toc-introducción" class="nav-link active" data-scroll-target="#introducción">Introducción</a></li>
+  <li><a href="#un-ejemplo-sencillo" id="toc-un-ejemplo-sencillo" class="nav-link" data-scroll-target="#un-ejemplo-sencillo">Un ejemplo sencillo</a>
   <ul class="collapse">
-  <li><a href="#números-aleatorios" id="toc-números-aleatorios" class="nav-link" data-scroll-target="#números-aleatorios">Números aleatorios</a></li>
-  </ul></li>
-  <li><a href="#práctica-de-entrenamiento-de-word-embeddings" id="toc-práctica-de-entrenamiento-de-word-embeddings" class="nav-link" data-scroll-target="#práctica-de-entrenamiento-de-word-embeddings">Práctica de entrenamiento de Word Embeddings</a>
-  <ul class="collapse">
+  <li><a href="#datos-de-entrenamiento" id="toc-datos-de-entrenamiento" class="nav-link" data-scroll-target="#datos-de-entrenamiento">Datos de entrenamiento</a></li>
+  <li><a href="#definición-de-la-red-neuronal" id="toc-definición-de-la-red-neuronal" class="nav-link" data-scroll-target="#definición-de-la-red-neuronal">Definición de la red neuronal</a></li>
   <li><a href="#creación-de-los-datasets-de-entrenamiento" id="toc-creación-de-los-datasets-de-entrenamiento" class="nav-link" data-scroll-target="#creación-de-los-datasets-de-entrenamiento">Creación de los datasets de entrenamiento</a></li>
-  <li><a href="#creación-de-la-red-neuronal-de-word-embeddings" id="toc-creación-de-la-red-neuronal-de-word-embeddings" class="nav-link" data-scroll-target="#creación-de-la-red-neuronal-de-word-embeddings">Creación de la red neuronal de Word Embeddings</a></li>
   </ul></li>
+  <li><a href="#por-qué-se-utiliza-la-codificación-de-un-solo-uno-one-hot-encoding" id="toc-por-qué-se-utiliza-la-codificación-de-un-solo-uno-one-hot-encoding" class="nav-link" data-scroll-target="#por-qué-se-utiliza-la-codificación-de-un-solo-uno-one-hot-encoding">¿Por qué se utiliza la codificación de un solo uno (One-Hot Encoding)?</a>
+  <ul class="collapse">
+  <li><a href="#evita-relaciones-de-orden-artificiales-el-problema-jerárquico" id="toc-evita-relaciones-de-orden-artificiales-el-problema-jerárquico" class="nav-link" data-scroll-target="#evita-relaciones-de-orden-artificiales-el-problema-jerárquico">1. Evita relaciones de orden artificiales (El problema jerárquico)</a></li>
+  <li><a href="#permite-seleccionar-los-embeddings-de-cada-palabra" id="toc-permite-seleccionar-los-embeddings-de-cada-palabra" class="nav-link" data-scroll-target="#permite-seleccionar-los-embeddings-de-cada-palabra">2. Permite seleccionar los embeddings de cada palabra</a></li>
+  <li><a href="#sirve-como-etiqueta-perfecta-para-el-entrenamiento" id="toc-sirve-como-etiqueta-perfecta-para-el-entrenamiento" class="nav-link" data-scroll-target="#sirve-como-etiqueta-perfecta-para-el-entrenamiento">3. Sirve como etiqueta perfecta para el entrenamiento</a></li>
+  <li><a href="#el-único-pero-la-maldición-de-la-dimensionalidad" id="toc-el-único-pero-la-maldición-de-la-dimensionalidad" class="nav-link" data-scroll-target="#el-único-pero-la-maldición-de-la-dimensionalidad">⚠️ El único “pero”: La maldición de la dimensionalidad</a></li>
+  </ul></li>
+  <li><a href="#creación-del-dataloader" id="toc-creación-del-dataloader" class="nav-link" data-scroll-target="#creación-del-dataloader">Creación del dataloader</a></li>
+  <li><a href="#creación-de-la-red-neuronal-de-word-embeddings" id="toc-creación-de-la-red-neuronal-de-word-embeddings" class="nav-link" data-scroll-target="#creación-de-la-red-neuronal-de-word-embeddings">Creación de la red neuronal de Word Embeddings</a></li>
+  <li><a href="#por-qué-no-hay-términos-de-sesgo" id="toc-por-qué-no-hay-términos-de-sesgo" class="nav-link" data-scroll-target="#por-qué-no-hay-términos-de-sesgo">¿Por qué no hay términos de sesgo?</a></li>
+  <li><a href="#entrenamiento" id="toc-entrenamiento" class="nav-link" data-scroll-target="#entrenamiento">Entrenamiento</a></li>
+  <li><a href="#por-qué-funciona" id="toc-por-qué-funciona" class="nav-link" data-scroll-target="#por-qué-funciona">¿Por qué funciona?</a></li>
+  <li><a href="#red-neuronal-de-embeddings-con-nn.linear" id="toc-red-neuronal-de-embeddings-con-nn.linear" class="nav-link" data-scroll-target="#red-neuronal-de-embeddings-con-nn.linear">Red neuronal de embeddings con nn.Linear()</a></li>
+  <li><a href="#entrenamiento-con-nn.embedding" id="toc-entrenamiento-con-nn.embedding" class="nav-link" data-scroll-target="#entrenamiento-con-nn.embedding">Entrenamiento con nn.Embedding</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/10_word_embeddings.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/10_word_embeddings.html">Word embeddings</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/10_word_embeddings.html">Word embeddings</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Word embeddings</h1>
 </div>
@@ -292,78 +345,70 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introducción" class="level2">
 <h2 class="anchored" data-anchor-id="introducción">Introducción</h2>
-<p>Las redes neuronales funcionan con números, no con palabras.</p>
-<ul>
-<li><strong>Por lo tanto,</strong> si queremos introducir palabras en una red neuronal, necesitamos una forma de convertirlas en números.</li>
-<li><strong>En teoría,</strong> podríamos simplemente asignar números aleatorios a las palabras…</li>
-</ul>
-<section id="números-aleatorios" class="level3 card border border-primary p-3">
-<h3 class="anchored" data-anchor-id="números-aleatorios">Números aleatorios</h3>
-<ul>
-<li>Troll 2 -&gt; 12</li>
-<li>is -&gt; -3.05</li>
-<li>great -&gt; 4.2</li>
-<li>awesome -&gt; -32.1</li>
-</ul>
+<p>En la lección anterior se explicó que los modelos de lenguaje representan las palabras con números, y que esos vectores numéricos son los llamados embeddings. Estos vectores se aprenden durante el entrenamiento, y se espera que las palabras que se usan de manera similar tengan embeddings similares. Es la forma que tiene el modelo de lenguaje de almacenar el “significado” de las palabras.</p>
+<p>Los embeddings de palabras se fundamentan en la hipótesis distribucional, que habitualmente se resume con una famosa frase del lingüista John Rupert Firth (1957):</p>
+<blockquote class="blockquote">
+<p>“Conocerás a una palabra por las compañías que mantiene”.</p>
+</blockquote>
+<p>El concepto se ilustra mejor con un ejemplo. Supongamos que un amigo chileno le dice:</p>
+<blockquote class="blockquote">
+<p>“A mis hijos les encantan las cabritas dulces; el olor a caramelo cuando las haces en la sartén inunda toda la casa”.</p>
+</blockquote>
+<p>Si no es usted chileno, es posible que no sepa qué son las “cabritas”. Pero por el contexto ya sabe muchas cosas: es algo dulce, que les gusta a los niños y que se hace en una sartén. Supongamos que la conversación continúa y su amigo dice:</p>
+<blockquote class="blockquote">
+<p>“Compramos un cubo gigante de cabritas saladas en el mostrador del cine antes de que empezara la película”.</p>
+</blockquote>
+<p>¡Vaya! También se pueden comprar cabritas saladas, y se venden en el cine dentro de un cubo. Seguramente ahora tiene claro que las “cabritas” son lo que en otros países llamamos palomitas de maíz. ¿Cómo lo supo si su amigo nunca lo aclaró? Porque las palabras “cabritas” y “palomitas” se usan exactamente en los mismos contextos.</p>
+<p>Un modelo de lenguaje aprende a asignar números a las palabras de tal manera que las palabras que se usan en contextos similares tengan números similares. En esta lección explicaremos cómo se crean estos números.</p>
 </section>
-<ul>
-<li>…pero entonces, aunque <strong>great</strong> y <strong>awesome</strong> significan cosas similares, tienen números muy diferentes asociados a ellos: <strong>4.2</strong> y <strong>-32.1</strong>…</li>
-<li>…y eso significa que la red neuronal probablemente necesitará mucha más complejidad y entrenamiento, porque aprender a usar correctamente la palabra <strong>great</strong> no ayudará a la red neuronal a usar correctamente la palabra <strong>awesome</strong>.</li>
-</ul>
-<p>Por lo tanto, sería ideal si a palabras similares que se usan de maneras similares se les pudieran asignar números similares, de modo que aprender a usar una palabra ayude a la red neuronal a aprender a usar la otra al mismo tiempo.</p>
-<p>Y debido a que las mismas palabras se pueden usar en diferentes contextos, o ponerse en plural, o usarse de alguna otra manera, podría ser una buena idea asignar a cada palabra más de un número, para que la red neuronal pueda adaptarse más fácilmente a los diferentes contextos.</p>
-<p>Estos números que asignamos a las palabras se llaman <strong>Word Embeddings</strong>, y las redes neuronales que los crean son bastante simples.Estas redes simples también pueden crear múltiples Word Embeddings por palabra para manejar los diferentes contextos en los que se puede usar una palabra.</p>
-<ul>
-<li>Por ejemplo, las palabras <strong>great</strong> y <strong>awesome</strong> tienen significados similares y a menudo se usan en contextos similares. Se pueden usar de una manera positiva…
-<ul>
-<li><em>¡StatQuest es <strong>great</strong>!</em></li>
-<li><em>¡Este libro es <strong>awesome</strong>!</em></li>
-</ul></li>
-<li>…y también se pueden usar de una manera sarcástica y negativa…
-<ul>
-<li>*Mi celular está roto, ¡<strong>great</strong>!</li>
-<li><em>El sentido del humor de mi papá es <strong>awesome</strong>.</em></li>
-</ul></li>
-<li>…y una red simple de Word Embedding puede crear dos números de Word Embedding para cada palabra. El primer número, <strong>Embedding #1</strong>, podría capturar la forma en que estas palabras se usan en contextos positivos.</li>
-<li>Y el segundo número, <strong>Embedding #2</strong>, podría capturar la forma en que estas palabras se usan en contextos negativos.</li>
-</ul>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Palabra</th>
-<th style="text-align: center;">Embedding #1 (Positivo)</th>
-<th style="text-align: center;">Embedding #2 (Negativo)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">great</td>
-<td style="text-align: center;">1.85</td>
-<td style="text-align: center;">0.98</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">awesome</td>
-<td style="text-align: center;">1.81</td>
-<td style="text-align: center;">0.99</td>
-</tr>
-</tbody>
-</table>
-<p>Ahora profundicemos en los detalles de cómo se crean los Word Embeddings.</p>
-</section>
-<section id="práctica-de-entrenamiento-de-word-embeddings" class="level2">
-<h2 class="anchored" data-anchor-id="práctica-de-entrenamiento-de-word-embeddings">Práctica de entrenamiento de Word Embeddings</h2>
-<p>Supongamos que tenemos únicamente dos frases con cuatro palabras en total para el entrenamiento de nuestros Word Embeddings:</p>
+<section id="un-ejemplo-sencillo" class="level2">
+<h2 class="anchored" data-anchor-id="un-ejemplo-sencillo">Un ejemplo sencillo</h2>
+<section id="datos-de-entrenamiento" class="level3">
+<h3 class="anchored" data-anchor-id="datos-de-entrenamiento">Datos de entrenamiento</h3>
+<p>Los modelos de lenguaje se entrenan con grandes cantidades de texto. Puede ser tan grande como toda la Wikipedia, o incluso mayores. Pero para entender cómo se crean los embeddings de palabras, vamos a imaginar que solo tenemos dos frases para entrenar nuestro modelo de lenguaje:</p>
 <ol type="1">
-<li><em>¡Troll 2 is great!</em></li>
-<li><em>¡Gymkata is great!</em></li>
+<li>Javier es bueno.</li>
+<li>Carlos es bueno.</li>
 </ol>
-<p>Para cada palabra, queremos crear dos Word Embeddings: <strong>Embedding #1</strong> y <strong>Embedding #2</strong> de dos números cada uno. Lo interesante es que nuestro modelo tiene que ser capaz de aprender que las palabras <code>Troll 2</code> y <code>Gymkata</code> son similares, ya que aparecen en contexto similares y, por lo tanto, deberían tener embeddings similares.</p>
-<p>Los embeddings se podrían representar gráficamente así:</p>
-<p><img src="../../img/trained_embedding_graph.png" class="img-fluid"></p>
+<p>Aunque este ejemplo no tenga interés práctico, es útil para entender cómo se crean los embeddings de palabras.</p>
+<p>En este caso, nuestro vocabulario solo tiene cuatro palabras: <strong>Javier</strong>, <strong>Carlos</strong>, <strong>es</strong> y <strong>bueno</strong>. Para cada una de estas palabras, el modelo de lenguaje un vector de números que representa su significado. ¿Cuántos números debería asignar el modelo a cada palabra? Bueno, eso depende de la complejidad del modelo. Cuántos más números asigne a cada palabra, más compleja será la red neuronal que se necesitará para aprender a asignar esos números correctamente, pero, también permitirá que el modelo capture más matices del significado de cada palabra.</p>
+<p>Para entender por qué los embeddings necesitan ser listas de números (vectores) y no un único dígito, supón que tenemos estas palabras en nuestro vocabulario: <strong>España</strong>, <strong>Francia</strong>, <strong>perro</strong> y <strong>gato</strong>. Si solo pudiéramos asignar un número a cada palabra, podríamos intentar organizarlas de la siguiente manera:</p>
+<p>Podríamos asignar el número 1 a “España”, el 1.2 a “Francia”, el 9 a “perro” y el 9.2 a “gato”. A simple vista funciona: los países están a un lado y los animales al otro. El problema llega cuando queremos añadir matices:</p>
+<ul>
+<li><p>¿Dónde colocamos “Madrid”? Debería estar cerca de España por ser su capital, pero si la ponemos en el 1.1, ¿cómo indicamos que es una ciudad y no un país como Francia? La ponemos en 0.9, pero surgen nuevos problemas: ¿Dónde colocamos “Barcelona”? Es una ciudad, así que va por la zona del 0.9, pero al ser una ciudad española debería estar pegada a “Madrid”, aunque “Madrid” a su vez necesita estar pegada a “España” por ser la capital de ese país.</p></li>
+<li><p>¿Dónde colocamos “tigre”? Es un animal, así que va por la zona del 9. Pero al ser un felino debería estar pegado a “gato” (9.2), aunque “gato” a su vez necesita estar pegado a “perro” (9) por ser las dos mascotas.</p></li>
+</ul>
+<p>Supongo que se entiende la idea. Lo anterior es un ejemplo obvio de las complicaciones: España tiene que estar cerca de Francia por estar próximas, pero cerca de Argentina por idioma, y así podríamos seguir razonando sobre todas los distintos ámbitos en los que se puede usar una misma palabra. Y aquí ni siquiera hemos abordado el tema de que una misma palabra puede tener diferentes significados dependiendo del contexto.</p>
+<p>Para resolver este rompecabezas los modelos de lenguaje reales utilizan embeddings de tamaños colosales, como 768, 1024 o incluso más dimensiones por palabra.</p>
+<p>Pero volvamos al ejemplo de las dos frases. Con sólo 4 palabras, no tenemos las complicaciones anteriores y podemos limitarnos a usar un único número. Por ejemplo::</p>
+<div class="card border border-primary p-3">
+<ul>
+<li>Javier -&gt; 12</li>
+<li>Carlos -&gt; 13</li>
+<li>es -&gt; 6</li>
+<li>bueno -&gt; 2</li>
+</ul>
+</div>
+<p>Hemos asignado números similares a “Javier” y “Carlos” porque se usan en contextos similares (siempre va la palabra “es” detrás). Con estos datos de entrenamiento, el modelo no puede aprender más. Sin embargo, para hacerlo más interesante, nuestro modelo creará embeddings de tamaño 2, es decir, asignará dos números a cada palabra.</p>
+</section>
+<section id="definición-de-la-red-neuronal" class="level3">
+<h3 class="anchored" data-anchor-id="definición-de-la-red-neuronal">Definición de la red neuronal</h3>
+<p>Vamos a crear una red neuronal que dada una palabra, prediga la siguiente. Por ejemplo, si le damos “Javier”, debería predecir “es”. Si le damos “es”, debería predecir “bueno”. Y así sucesivamente. En definitiva, se trata de un problema de clasificación múltiple</p>
+<div class="callout callout-style-simple callout-warning no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Un momento, ¿el objetivo del entrenamiento no era crear embeddings de palabras? Sí, pero vamos a diseñar la red neuronal de tal manera que los embeddings de palabras se aprendan como parte del proceso de entrenamiento, que consiste en predecir palabras. De hecho, los embeddings de palabras serán simplemente los pesos que conectan la capa de entrada con la capa oculta de la red neuronal. Parece complicado, pero para eso está este sencillo ejemplo.</p>
+</div>
+</div>
+</div>
+</section>
 <section id="creación-de-los-datasets-de-entrenamiento" class="level3">
 <h3 class="anchored" data-anchor-id="creación-de-los-datasets-de-entrenamiento">Creación de los datasets de entrenamiento</h3>
 <p>Realizamos las importaciones de los módulos necesarios.</p>
-<div id="9730ac51" class="cell" data-execution_count="1">
+<div id="37983fab" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch <span class="co"># torch will allow us to create tensors.</span></span>
@@ -380,25 +425,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd <span class="co">## to create dataframes from graph input</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Ahora vamos a crear nuestros datos de entrenamiento a partir de dos frases, <strong>Troll 2 is great</strong> y <strong>Gymkata is great</strong>, lo que nos da un vocabulario simple de 4 palabras, o tokens: <strong>Troll 2</strong>, <strong>is</strong>, <strong>great</strong>, <strong>Gymkata</strong>. Nuestros datos de entrenamiento constan de dos partes: <code>inputs</code> (entradas), que son las entradas para la red neuronal, y <code>labels</code> (etiquetas), que son las salidas esperadas de las redes neuronales.</p>
-<p>La idea es hacer que cada token de una frase prediga el token que le sigue. Por ejemplo, utilizando la <strong>codificación de un solo uno (one-hot-encoding)</strong> para representar cada token, dado que <strong>Troll 2</strong> es el primer token de nuestro vocabulario, codificaremos la entrada (<code>input</code>) para <strong>Troll 2</strong> como <code>[1., 0., 0., 0.]</code>. Y dado que <strong>Troll 2</strong> predice el segundo token, <strong>is</strong> (que es el segundo token de nuestro vocabulario), codificaremos la etiqueta (<code>label</code>) para <strong>Troll 2</strong> como <code>[0., 1., 0., 0.]</code>. De la misma manera, podemos codificar las entradas (<code>inputs</code>) y etiquetas (<code>labels</code>) para <strong>is</strong>, <strong>great</strong> y <strong>Gymkata</strong>. <strong>NOTA: Gymkata</strong> predice el segundo token, <strong>is</strong>, por lo que su etiqueta es <code>[0., 1., 0., 0.]</code>.</p>
-<div id="3d7efe1e" class="cell" data-execution_count="2">
+<p>Ahora vamos a crear nuestros datos de entrenamiento a partir de las dos frases, <strong>Javier es bueno</strong> y <strong>Carlos es bueno</strong>. Nuestros datos de entrenamiento constan de dos partes: <code>inputs</code> (entradas), que son las entradas para la red neuronal, y <code>labels</code> (etiquetas), que son las salidas esperadas de la red.</p>
+<p>La idea es hacer que cada token de una frase prediga el token que le sigue. Por ejemplo, utilizando la <strong>codificación de un solo uno (one-hot-encoding)</strong> para representar cada token, dado que <strong>Javier</strong> es el primer token de nuestro vocabulario, codificaremos la entrada (<code>input</code>) para <strong>Javier</strong> como <code>[1., 0., 0., 0.]</code>. Y dado que <strong>Javier</strong> predice el segundo token, <strong>es</strong> (que es el segundo token de nuestro vocabulario), codificaremos la etiqueta (<code>label</code>) para <strong>es</strong> como <code>[0., 1., 0., 0.]</code>. De la misma manera, podemos codificar las entradas (<code>inputs</code>) y etiquetas (<code>labels</code>) para <strong>es</strong>, <strong>bueno</strong> y <strong>Carlos</strong>.</p>
+<div id="11e57864" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">## create the training data for the neural network.</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> torch.tensor([[<span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>], <span class="co"># one-hot-encoding for Troll 2...</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>], <span class="co"># ...is</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>], <span class="co"># ...great</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>]]) <span class="co"># ...Gymkata</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> torch.tensor([[<span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>], <span class="co"># one-hot-encoding para Javier...</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>], <span class="co"># ...es</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>], <span class="co"># ...bueno</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>]]) <span class="co"># ...Carlos</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> torch.tensor([[<span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>], <span class="co"># "Troll 2" is followed by "is"</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>], <span class="co"># "is" is followed by "great"</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>], <span class="co"># "great" isn't followed by anything, but we'll pretend it was followed by "Gymkata"</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>]]) <span class="co"># "Gymkata", just like "Troll 2", is followed by "is".</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> torch.tensor([[<span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>], <span class="co"># "Javier" es seguido por "es"</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>], <span class="co"># "es" es seguido por "bueno"</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>], <span class="co"># "bueno" no es seguido por nada, pero lo asignamos a "Carlos"</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                       [<span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>]]) <span class="co"># "Carlos", al igual que "Javier", es seguido por "es".</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>Ahora que hemos creado los datos con los que queremos entrenar las incrustaciones (embeddings), los almacenaremos en un <code>DataLoader</code>. Dado que nuestro conjunto de datos es tan pequeño, usar un <code>DataLoader</code> es un poco exagerado, pero es fácil de hacer y nos permitirá escalar fácilmente a un vocabulario mucho más grande cuando llegue el momento.</p>
-<div id="caee2aa5" class="cell" data-execution_count="3">
+</section>
+</section>
+<section id="por-qué-se-utiliza-la-codificación-de-un-solo-uno-one-hot-encoding" class="level2 callout-info" data-collapse="true">
+<h2 class="anchored" data-anchor-id="por-qué-se-utiliza-la-codificación-de-un-solo-uno-one-hot-encoding">¿Por qué se utiliza la codificación de un solo uno (One-Hot Encoding)?</h2>
+<p>La codificación <strong>One-Hot Encoding</strong> es una pieza fundamental para el funcionamiento de las redes neuronales que procesan lenguaje natural. Debido a que los algoritmos no entienden el significado intrínseco de las palabras, necesitamos traducirlas a números sin alterar su naturaleza categórica.</p>
+<p>A continuación, se detallan las tres razones principales de su uso en esta red:</p>
+<section id="evita-relaciones-de-orden-artificiales-el-problema-jerárquico" class="level3">
+<h3 class="anchored" data-anchor-id="evita-relaciones-de-orden-artificiales-el-problema-jerárquico">1. Evita relaciones de orden artificiales (El problema jerárquico)</h3>
+<p>Si asignáramos una codificación numérica simple y secuencial a nuestro vocabulario (por ejemplo: <em>Javier</em> = 1, <em>Carlos</em> = 2, <em>es</em> = 3, <em>bueno</em> = 4), el algoritmo asumiría matemáticamente que existe una jerarquía o un orden de magnitud entre los elementos.</p>
+<blockquote class="blockquote">
+<p><strong>Ejemplo:</strong> La red interpretaría erróneamente que <em>Carlos</em> (<span class="math inline">\(2\)</span>) vale “el doble” que <em>Javier</em> (<span class="math inline">\(1\)</span>), o que la palabra <em>es</em> (<span class="math inline">\(3\)</span>) está más cerca de <em>bueno</em> (<span class="math inline">\(4\)</span>) que de las demás.</p>
+</blockquote>
+<p>Como estas categorías son puramente nominales (ninguna palabra es “mayor” o “mejor” que otra), el One-Hot Encoding soluciona el problema situando a todas las palabras a la misma distancia geométrica dentro del espacio vectorial.</p>
+</section>
+<section id="permite-seleccionar-los-embeddings-de-cada-palabra" class="level3">
+<h3 class="anchored" data-anchor-id="permite-seleccionar-los-embeddings-de-cada-palabra">2. Permite seleccionar los embeddings de cada palabra</h3>
+<p>Aunque la red procesa el vocabulario de forma simultánea, el One-Hot Encoding actúa como un <strong>interruptor de activación</strong>. Al contener un único <span class="math inline">\(1\)</span> y el resto ceros, anula matemáticamente el impacto de las palabras ausentes y aísla los pesos específicos de la palabra activa.</p>
+<p>Para entenderlo visualmente, supongamos que las dos neuronas de nuestra capa oculta tienen los siguientes pesos asignados: * <strong>Neurona 1:</strong> <span class="math inline">\([2.0, -2.2, -2.1, 1.7]\)</span> * <strong>Neurona 2:</strong> <span class="math inline">\([2.0,  2.5, -2.2,  2.0]\)</span></p>
+<p>Cuando la red procesa la entrada para la palabra <strong>“Javier”</strong> (cuyo vector es <span class="math inline">\([1, 0, 0, 0]\)</span>), la magia de la multiplicación de matrices ocurre así:</p>
+<ul>
+<li><strong>Salida Neurona 1:</strong> <span class="math display">\[(2.0 \times 1) + (-2.2 \times 0) + (-2.1 \times 0) + (1.7 \times 0) = \mathbf{2.0}\]</span></li>
+<li><strong>Salida Neurona 2:</strong> <span class="math display">\[(2.0 \times 1) + (2.5 \times 0) + (-2.2 \times 0) + (2.0 \times 0) = \mathbf{2.0}\]</span></li>
+</ul>
+<p>Como resultado, el <strong>embedding extraído para “Javier” es <span class="math inline">\([2.0, 2.0]\)</span></strong>. Gracias a los ceros del One-Hot Encoding, ninguna otra palabra del vocabulario puede interferir ni contaminar este vector en la capa actual.</p>
+</section>
+<section id="sirve-como-etiqueta-perfecta-para-el-entrenamiento" class="level3">
+<h3 class="anchored" data-anchor-id="sirve-como-etiqueta-perfecta-para-el-entrenamiento">3. Sirve como etiqueta perfecta para el entrenamiento</h3>
+<p>En este modelo, el objetivo es entrenar a la red para que sea capaz de <strong>predecir la siguiente palabra de una frase</strong>. Por ejemplo, queremos que al recibir la entrada “Javier”, la red sea capaz de predecir la palabra “es”.</p>
+<p>Para evaluar si la red se está equivocando o no, el One-Hot Encoding se utiliza para estructurar las respuestas correctas (etiquetas o <em>targets</em>):</p>
+<ul>
+<li>Si la palabra que debe seguir a “Javier” es <strong>“es”</strong>, la etiqueta ideal para la capa de salida será <strong><span class="math inline">\([0, 1, 0, 0]\)</span></strong>.</li>
+</ul>
+<p>Al comparar la distribución de probabilidades que predice la red (por ejemplo, tras pasar por la función <em>SoftMax</em>) contra esta etiqueta limpia, el algoritmo puede calcular matemáticamente el error exacto y ajustar los pesos mediante el descenso de gradiente.</p>
+</section>
+<section id="el-único-pero-la-maldición-de-la-dimensionalidad" class="level3">
+<h3 class="anchored" data-anchor-id="el-único-pero-la-maldición-de-la-dimensionalidad">⚠️ El único “pero”: La maldición de la dimensionalidad</h3>
+<p>A pesar de sus enormes ventajas para mantener la neutralidad de las palabras, este sistema tiene un límite físico drástico: <strong>la escala</strong>. Si estuviéramos trabajando con un vocabulario real de 50,000 palabras, cada palabra requeriría un vector masivo de 50,000 posiciones, donde 49,999 valores serían ceros redundantes.</p>
+<p>Por esta razón, en la arquitectura de los modelos modernos de lenguaje, el One-Hot Encoding se reduce estrictamente a ser <strong>la puerta de entrada</strong> (el índice inicial) para que la red comience a operar, transformándose de inmediato en vectores densos, continuos y compactos: los <em>embeddings</em>.</p>
+</section>
+</section>
+<section id="creación-del-dataloader" class="level3">
+<h3 class="anchored" data-anchor-id="creación-del-dataloader">Creación del dataloader</h3>
+<p>Ahora que hemos creado los datos con los que queremos entrenar embeddings, los almacenaremos en un <code>DataLoader</code>. Dado que nuestro conjunto de datos es tan pequeño, usar un <code>DataLoader</code> es un poco exagerado, pero es fácil de hacer y nos permitirá escalar fácilmente a un vocabulario mucho más grande cuando llegue el momento.</p>
+<div id="bf2098f8" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> TensorDataset(inputs, labels)</span>
@@ -408,168 +495,177 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="creación-de-la-red-neuronal-de-word-embeddings" class="level3">
 <h3 class="anchored" data-anchor-id="creación-de-la-red-neuronal-de-word-embeddings">Creación de la red neuronal de Word Embeddings</h3>
-<p>Ahora que ya tenemos listos los datos y el <code>DataLoader</code>, vamos a crear la clase que se encargará de generar word embeddings para cada token (palabra) del vocabulario.</p>
-<p>La red neuronal que queremos entrenar, tiene esta estructura:</p>
-<p><img src="../../img/word_embedding_network.png" class="img-fluid"></p>
-<p>Cada palabra está representada por 4 números. Esa palabra se envía a dos neuronas (porque queremos embeddins de tamaño 2). Cada una tendrá 4 parámetros que se multiplicarán por los 4 números de la palabra. La función de activación es lineal, lo que significa que el valor de salida de cada neurona es simplemente la suma de los productos de los números de entrada y sus pesos correspondientes. Cada neurona emite 4 valores de salida, uno correspondiente a cada palabra ya que todas las palabras se introducen a la vez en el modelo. Estos 4 valores de salida se pasan a la capa de salida formada por 4 neuronas que reciben los 2 valores de cada neurona de la capa anterior. Estas dos entradas se multiplican por sus pesos correspondientes y se suman para producir un valor de salida para cada neurona de la capa de salida. Finalmente, los 4 valores de salida se concatenan en un solo tensor que se pasa a la función <code>sofmax</code> para calcular las probabilidades de la siguiente palabra.</p>
-<p>Observe que al multiplicar los 4 números de cada palabra por los pesos correspondientes de la primera capa, resultan 3 multiplicaciones a 0 y una multiplicación distinta de 0, ya que la palabra se codifica con un vector de une-hot.</p>
-<p>Los embeddings de cada palabra se pueden obtener a partir de los pesos que van desde la capa de entrada a la capa oculta. Por ejemplo, el embedding de <strong>Troll 2</strong> se puede obtener a partir de los pesos <code>input1_w1</code> y <code>input1_w2</code>, que son los pesos que conectan la primera neurona de la capa oculta con las entradas correspondientes a <strong>Troll 2</strong>.</p>
-<p>¿Por qué esperamos que los embeddings de <strong>Troll 2</strong> y <strong>Gymkata</strong> sean similares? Porque ambas palabras aparecen en contextos similares (ambas son seguidas por la palabra <strong>is</strong>), por lo que el modelo debería aprender a asignarles pesos similares para que puedan predecir la palabra <strong>is</strong> de manera similar.</p>
-<div id="695a509f" class="cell" data-execution_count="4">
+<p>Esta es la red propuesta:</p>
+<p><img src="../../img/embeddings_net.svg" class="img-fluid"></p>
+<p>Cada palabra está representada por un vector de 4 dimensiones (4 números). Cada una de estas palabras se envía de forma simultánea a dos neuronas de la capa oculta, reflejando nuestro objetivo de proyectar el vocabulario a un espacio de <em>embeddings</em> de tamaño 2.</p>
+<p>Para procesar esta información, cada neurona cuenta con 4 parámetros (pesos) que se multiplican por los 4 números correspondientes a la palabra de entrada. Como se explicó anteriormente, debido a la naturaleza del <em>One-Hot Encoding</em>, esta multiplicación matemática actúa de manera simplificada como un selector directo del vector de <em>embedding</em> de la palabra activa.</p>
+<p>La función de activación implementada en esta capa es lineal; esto implica que el valor de salida de cada neurona se calcula estrictamente como la suma de los productos entre los números de entrada y sus respectivos pesos. En la práctica, esto se traduce en algo extremadamente simple: la salida de la neurona es, sencillamente, <strong>la suma de los embeddings de cada palabra activa</strong>. Si alimentamos la red con una sola palabra, la neurona nos devolverá su vector de embedding individual. En cambio, si activamos varias palabras a la vez en la entrada, sus respectivos embeddings se fusionarán sumándose directamente componente a componente, sin sufrir ninguna deformación matemática.</p>
+<p>Es importante destacar que <strong>esta red no incluye términos de sesgo (<em>bias</em>)</strong>. En consecuencia, el valor de salida final de cada neurona se reduce a esta combinación lineal pura, permitiendo que la capa oculta extraiga o combine los embeddings del vocabulario según las palabras presentes en la entrada.</p>
+</section>
+<section id="por-qué-no-hay-términos-de-sesgo" class="level2 callout-info" data-collapse="true">
+<h2 class="anchored" data-anchor-id="por-qué-no-hay-términos-de-sesgo">¿Por qué no hay términos de sesgo?</h2>
+<p>En los modelos de <em>embeddings</em> no se utiliza sesgo (<em>bias</em>) por una razón matemática y conceptual fundamental: su inclusión rompería la pureza y el propósito geométrico del espacio vectorial.</p>
+<p>Cada neurona de la capa oculta aprende la representación vectorial idónea para cada palabra de forma independiente. Si añadiéramos un parámetro de sesgo a una neurona, este valor sería constante y se sumaría por igual a todas las palabras del vocabulario.</p>
+<p>Matemáticamente, esto provocaría que los vectores de todas las palabras se desplazasen rígidamente en la misma dirección dentro del espacio. Dado que este desplazamiento uniforme no altera en absoluto las distancias relativas ni los ángulos entre los vectores de las palabras (que es donde reside el significado semántico), el término de sesgo resulta redundante y no aporta ninguna capacidad de aprendizaje adicional a la red.</p>
+</section>
+<p>La capa oculta, que está compuesta por 2 neuronas, emite un total de 2 valores de salida que se distribuyen hacia la capa de salida. Esta capa está formada por 4 unidades de procesamiento (una para cada palabra de nuestro vocabulario), las cuales reciben los 2 datos provenientes de la capa anterior. En cada una de estas 4 unidades, las dos entradas se multiplican por sus respectivos pesos y se suman (junto con su término de sesgo, si lo hubiera) para generar un valor de salida individual, comúnmente denominado <em>logit</em>.</p>
+<p>Finalmente, los 4 valores de salida resultantes se agrupan en un solo tensor de 4 dimensiones. Este tensor se introduce en la función <code>softmax</code>, la cual transforma los valores en una distribución de probabilidad que nos indica cuál es la siguiente palabra más probable.</p>
+<p>Con esta arquitectura una implementación manual de la red neuronal nos permite entender exactamente cuáles son son pesos:</p>
+<div id="61050fa3" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WordEmbeddingFromScratch(L.LightningModule):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">## __init__() initializes the weights and sets everything up for training</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">## The first thing we do is set the seed for the random number generorator.</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">## This ensures that when someone creates a model from this class, that model</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">## will start off with the exact same random numbers as I started out with when</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">## I created this demo. At least, I hope that is what happens!!! :)</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        L.seed_everything(seed<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">###################</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Initialize the weights.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">###################</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Initialize the weights.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: We're initializing the weights using values from a uniform distribtion</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       that goes from -0.5 to 0.5 (this is notated as U(-0.5, 0.5).</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       This is because of how nn.Linear() initializes weights -</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       nn.Linear() uses U(-sqrt(k), sqrt(k)), where k=1/in_features.</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       In our case, we have 4 inputs, so k=1/4 = 0.25. And the sqrt(0.25) = 0.5.</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       Thus, nn.Linear() would use U(-0.5, 0.5) to initialize the weights, so</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       that's what we'll do here as well.</span></span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: We're initializing the weights using values from a uniform distribtion</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       that goes from -0.5 to 0.5 (this is notated as U(-0.5, 0.5).</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       This is because of how nn.Linear() initializes weights -</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       nn.Linear() uses U(-sqrt(k), sqrt(k)), where k=1/in_features.</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       In our case, we have 4 inputs, so k=1/4 = 0.25. And the sqrt(0.25) = 0.5.</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       Thus, nn.Linear() would use U(-0.5, 0.5) to initialize the weights, so</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       that's what we'll do here as well.</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">###################</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        min_value <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        max_value <span class="op">=</span> <span class="fl">0.5</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now we initialize the weights that feed 4 inputs (one for each unique word)</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       into the 2 nodes in the hidden layer (top and bottom nodes)</span></span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: Because we want words (or tokens) that are used in the same context to have similar</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       weights, we are excluding bias terms from the connections from the inputs to the</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       nodes in the hidden layer (alternatively, you could think that</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       we set the bias terms to 0 and are not going to optimize them).</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ALSO </span><span class="al">NOTE</span><span class="co">: We're using nn.Parameter() here instead of torch.tensor() because we want</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       to easily print out the parameters before and after training. Parameters are just</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       tensors that are added to model's parameter list.</span></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input1_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input1_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input2_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input2_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input3_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input3_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input4_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input4_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now we initialize the weights that come out of the hidden layer to the "output"</span></span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: Again, we are excluding bias terms. This time, we exclude them simply because</span></span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       we do not need them.</span></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output1_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output1_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output2_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output2_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output3_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output3_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">###################</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        min_value <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        max_value <span class="op">=</span> <span class="fl">0.5</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now we initialize the weights that feed 4 inputs (one for each unique word)</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       into the 2 nodes in the hidden layer (top and bottom nodes)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: Because we want words (or tokens) that are used in the same context to have similar</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       weights, we are excluding bias terms from the connections from the inputs to the</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       nodes in the hidden layer (alternatively, you could think that</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       we set the bias terms to 0 and are not going to optimize them).</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ALSO </span><span class="al">NOTE</span><span class="co">: We're using nn.Parameter() here instead of torch.tensor() because we want</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       to easily print out the parameters before and after training. Parameters are just</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       tensors that are added to model's parameter list.</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input1_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input1_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input2_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input2_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input3_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input3_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input4_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input4_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now we initialize the weights that come out of the hidden layer to the "output"</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: Again, we are excluding bias terms. This time, we exclude them simply because</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       we do not need them.</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output1_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output1_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output2_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output2_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output3_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output3_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output4_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output4_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>        <span class="co">## For the loss function, we'll use CrossEntropyLoss, which we'll use in training_step()</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: The nn.CrossEntropyLoss automatically applies softmax for us, so we don't need to import it.</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output4_w1 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.output4_w2 <span class="op">=</span> nn.Parameter(Uniform(min_value, max_value).sample())</span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        <span class="co">## For the loss function, we'll use CrossEntropyLoss, which we'll use in training_step()</span></span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: The nn.CrossEntropyLoss automatically applies softmax for us, so we don't need to import it.</span></span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> nn.CrossEntropyLoss()</span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, <span class="bu">input</span>):</span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>        <span class="co">## forward() is where we do the math associated with running the inputs through the</span></span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>        <span class="co">## network</span></span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>        <span class="co">## The input is delivered inside of a list, like this...</span></span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>        <span class="co">##   [[1., 0., 0., 0.]]</span></span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...and it's just easier if we remove the extra pair of brackets so we only have...</span></span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>        <span class="co">##   [1., 0., 0., 0.]</span></span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...so let's do it.</span></span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>        <span class="bu">input</span> <span class="op">=</span> <span class="bu">input</span>[<span class="dv">0</span>]</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, <span class="bu">input</span>):</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>        <span class="co">## forward() is where we do the math associated with running the inputs through the</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        <span class="co">## network</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="co">## The input is delivered inside of a list, like this...</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>        <span class="co">##   [[1., 0., 0., 0.]]</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...and it's just easier if we remove the extra pair of brackets so we only have...</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>        <span class="co">##   [1., 0., 0., 0.]</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...so let's do it.</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>        <span class="bu">input</span> <span class="op">=</span> <span class="bu">input</span>[<span class="dv">0</span>]</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>        <span class="co">## First, for the top node in the hidden layer,</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>        <span class="co">## we multiply each input by its weight,</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>        <span class="co">## and then calculate the sum of those products...</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>        inputs_to_top_hidden <span class="op">=</span> ((<span class="bu">input</span>[<span class="dv">0</span>] <span class="op">*</span> <span class="va">self</span>.input1_w1) <span class="op">+</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>                                (<span class="bu">input</span>[<span class="dv">1</span>] <span class="op">*</span> <span class="va">self</span>.input2_w1) <span class="op">+</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>                                (<span class="bu">input</span>[<span class="dv">2</span>] <span class="op">*</span> <span class="va">self</span>.input3_w1) <span class="op">+</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>                                (<span class="bu">input</span>[<span class="dv">3</span>] <span class="op">*</span> <span class="va">self</span>.input4_w1))</span>
 <span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>        <span class="co">## First, for the top node in the hidden layer,</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...then, for the bottom node in the hidden layer,</span></span>
 <span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>        <span class="co">## we multiply each input by its weight,</span></span>
-<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>        <span class="co">## and then calculate the sum of those products...</span></span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>        inputs_to_top_hidden <span class="op">=</span> ((<span class="bu">input</span>[<span class="dv">0</span>] <span class="op">*</span> <span class="va">self</span>.input1_w1) <span class="op">+</span></span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>                                (<span class="bu">input</span>[<span class="dv">1</span>] <span class="op">*</span> <span class="va">self</span>.input2_w1) <span class="op">+</span></span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>                                (<span class="bu">input</span>[<span class="dv">2</span>] <span class="op">*</span> <span class="va">self</span>.input3_w1) <span class="op">+</span></span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>                                (<span class="bu">input</span>[<span class="dv">3</span>] <span class="op">*</span> <span class="va">self</span>.input4_w1))</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>        <span class="co">## and then calculate the sum of those products.</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>        inputs_to_bottom_hidden <span class="op">=</span> ((<span class="bu">input</span>[<span class="dv">0</span>] <span class="op">*</span> <span class="va">self</span>.input1_w2) <span class="op">+</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>                                   (<span class="bu">input</span>[<span class="dv">1</span>] <span class="op">*</span> <span class="va">self</span>.input2_w2) <span class="op">+</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>                                   (<span class="bu">input</span>[<span class="dv">2</span>] <span class="op">*</span> <span class="va">self</span>.input3_w2) <span class="op">+</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>                                   (<span class="bu">input</span>[<span class="dv">3</span>] <span class="op">*</span> <span class="va">self</span>.input4_w2))</span>
 <span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...then, for the bottom node in the hidden layer,</span></span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>        <span class="co">## we multiply each input by its weight,</span></span>
-<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>        <span class="co">## and then calculate the sum of those products.</span></span>
-<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>        inputs_to_bottom_hidden <span class="op">=</span> ((<span class="bu">input</span>[<span class="dv">0</span>] <span class="op">*</span> <span class="va">self</span>.input1_w2) <span class="op">+</span></span>
-<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>                                   (<span class="bu">input</span>[<span class="dv">1</span>] <span class="op">*</span> <span class="va">self</span>.input2_w2) <span class="op">+</span></span>
-<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>                                   (<span class="bu">input</span>[<span class="dv">2</span>] <span class="op">*</span> <span class="va">self</span>.input3_w2) <span class="op">+</span></span>
-<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>                                   (<span class="bu">input</span>[<span class="dv">3</span>] <span class="op">*</span> <span class="va">self</span>.input4_w2))</span>
-<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now, in theory, we could run inputs_to_top_hidden and inputs_to_bottom_hidden through</span></span>
-<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>        <span class="co">## linear activation functions, but the outputs would be the exact same as in the inputs,</span></span>
-<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>        <span class="co">## so we can just skip that step and instead compute the 4 output values from the 2 nodes in hidden layer</span></span>
-<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>        <span class="co">## by summing the products of the hidden layer values and a pair of weights for each output.</span></span>
-<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>        output1 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output1_w1) <span class="op">+</span></span>
-<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output1_w2))</span>
-<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>        output2 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output2_w1) <span class="op">+</span></span>
-<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output2_w2))</span>
-<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>        output3 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output3_w1) <span class="op">+</span></span>
-<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output3_w2))</span>
-<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>        output4 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output4_w1) <span class="op">+</span></span>
-<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output4_w2))</span>
-<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now we need to concatenate the 4 output tensors so that we can run them through</span></span>
-<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>        <span class="co">## the SoftMax function. However, because they are tensors (and have gradients attached to them),</span></span>
-<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>        <span class="co">## we can't just combine them in a simple list like this...</span></span>
-<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>        <span class="co"># output_values = [output1, output2, output3, output4] ## THIS WILL NOT WORK</span></span>
-<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...because that would strip off the gradients.</span></span>
-<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Instead, we use torch.stack(), which retains the gradients.</span></span>
-<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>        output_presoftmax <span class="op">=</span> torch.stack([output1, output2, output3, output4])</span>
-<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: The the loss function we are using, nn.CrossEntropyLoss, automatically applies softmax for us, so we</span></span>
-<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       need to do that ourselves. If we want to actually use this network to predict the next word</span></span>
-<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       (instead of just using it for the Word Embedding values), then we'll need to apply the softmax() function</span></span>
-<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       ourselves (or just look to see what output value is largest).</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now, in theory, we could run inputs_to_top_hidden and inputs_to_bottom_hidden through</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>        <span class="co">## linear activation functions, but the outputs would be the exact same as in the inputs,</span></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>        <span class="co">## so we can just skip that step and instead compute the 4 output values from the 2 nodes in hidden layer</span></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>        <span class="co">## by summing the products of the hidden layer values and a pair of weights for each output.</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>        output1 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output1_w1) <span class="op">+</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output1_w2))</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>        output2 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output2_w1) <span class="op">+</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output2_w2))</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>        output3 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output3_w1) <span class="op">+</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output3_w2))</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>        output4 <span class="op">=</span> ((inputs_to_top_hidden <span class="op">*</span> <span class="va">self</span>.output4_w1) <span class="op">+</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>                   (inputs_to_bottom_hidden <span class="op">*</span> <span class="va">self</span>.output4_w2))</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now we need to concatenate the 4 output tensors so that we can run them through</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>        <span class="co">## the SoftMax function. However, because they are tensors (and have gradients attached to them),</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>        <span class="co">## we can't just combine them in a simple list like this...</span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>        <span class="co"># output_values = [output1, output2, output3, output4] ## THIS WILL NOT WORK</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...because that would strip off the gradients.</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Instead, we use torch.stack(), which retains the gradients.</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>        output_presoftmax <span class="op">=</span> torch.stack([output1, output2, output3, output4])</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: The the loss function we are using, nn.CrossEntropyLoss, automatically applies softmax for us, so we</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       need to do that ourselves. If we want to actually use this network to predict the next word</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       (instead of just using it for the Word Embedding values), then we'll need to apply the softmax() function</span></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       ourselves (or just look to see what output value is largest).</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output_presoftmax</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> configure_optimizers(<span class="va">self</span>):</span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>        <span class="co"># configure_optimizers() configures the optimizer we want to use for backpropagation.</span></span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Adam(<span class="va">self</span>.parameters(), lr<span class="op">=</span><span class="fl">0.1</span>) <span class="co"># lr=0.1 sets the learning rate to 0.1</span></span>
 <span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>(output_presoftmax)</span>
-<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> configure_optimizers(<span class="va">self</span>):</span>
-<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>        <span class="co"># configure_optimizers() configures the optimizer we want to use for backpropagation.</span></span>
-<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Adam(<span class="va">self</span>.parameters(), lr<span class="op">=</span><span class="fl">0.1</span>) <span class="co"># lr=0.1 sets the learning rate to 0.1</span></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> training_step(<span class="va">self</span>, batch):</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>        <span class="co"># training_step() takes a step of gradient descent.</span></span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>        input_i, label_i <span class="op">=</span> batch <span class="co"># collect input</span></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>        output_i <span class="op">=</span> <span class="va">self</span>.forward(input_i) <span class="co"># run input through the neural network</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(output_i, label_i[<span class="dv">0</span>]) <span class="co">## loss = cross entropy</span></span>
 <span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> training_step(<span class="va">self</span>, batch):</span>
-<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>        <span class="co"># training_step() takes a step of gradient descent.</span></span>
-<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>        input_i, label_i <span class="op">=</span> batch <span class="co"># collect input</span></span>
-<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>        output_i <span class="op">=</span> <span class="va">self</span>.forward(input_i) <span class="co"># run input through the neural network</span></span>
-<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(output_i, label_i[<span class="dv">0</span>]) <span class="co">## loss = cross entropy</span></span>
-<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+<section id="entrenamiento" class="level3">
+<h3 class="anchored" data-anchor-id="entrenamiento">Entrenamiento</h3>
 <p>Ahora que hemos creado nuestra nueva clase, <code>WordEmbeddingFromScratch</code>, vamos a crear un modelo e imprimir los parámetros iniciales.</p>
-<div id="38c32468" class="cell" data-execution_count="5">
+<div id="aaa5b398" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>modelFromScratch <span class="op">=</span> WordEmbeddingFromScratch() <span class="co"># create the model...</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Before optimization, the parameters are..."</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, param <span class="kw">in</span> modelFromScratch.named_parameters():</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, torch.<span class="bu">round</span>(param.data, decimals<span class="op">=</span><span class="dv">2</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">## The first thing we do is set the seed for the random number generorator.</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">## This ensures that when someone creates a model from this class, that model</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">## will start off with the exact same random numbers as I started out with when</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">## I created this demo. At least, I hope that is what happens!!! :)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>L.seed_everything(seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>modelFromScratch <span class="op">=</span> WordEmbeddingFromScratch() <span class="co"># create the model...</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Before optimization, the parameters are..."</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, param <span class="kw">in</span> modelFromScratch.named_parameters():</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, torch.<span class="bu">round</span>(param.data, decimals<span class="op">=</span><span class="dv">2</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Before optimization, the parameters are...
@@ -591,8 +687,8 @@ output4_w1 tensor(0.2400)
 output4_w2 tensor(-0.0700)</code></pre>
 </div>
 </div>
-<p>Observa cómo los pesos para <strong>input1</strong> (<code>w1 = 0.3832</code> y <code>w2 = 0.4150</code>) e <strong>input4</strong> (<code>w1 = -0.2434</code> y <code>w2 = 0.2936</code>) son muy diferentes, a pesar de que ambos representan títulos de películas (<strong>Troll2</strong> y <strong>Gymkata</strong>) que se utilizan en el mismo contexto. Podemos verlo más gráficamente en una tabla.</p>
-<div id="dc98c1fd" class="cell" data-execution_count="6">
+<p>Observa cómo los pesos para <strong>input1</strong> (<code>w1 = 0.3832</code> y <code>w2 = 0.4150</code>) e <strong>input4</strong> (<code>w1 = -0.2434</code> y <code>w2 = 0.2936</code>) son muy diferentes, a pesar de que ambos representan nombres (<strong>Javier</strong> y <strong>Carlos</strong>) que se utilizan en el mismo contexto. Podemos verlo más gráficamente en una tabla.</p>
+<div id="90d68134" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
@@ -604,7 +700,7 @@ output4_w2 tensor(-0.0700)</code></pre>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>           modelFromScratch.input2_w2.item(),</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>           modelFromScratch.input3_w2.item(),</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>           modelFromScratch.input4_w2.item()],</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"token"</span>: [<span class="st">"Troll2"</span>, <span class="st">"is"</span>, <span class="st">"great"</span>, <span class="st">"Gymkata"</span>],</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"token"</span>: [<span class="st">"Javier"</span>, <span class="st">"es"</span>, <span class="st">"bueno"</span>, <span class="st">"Carlos"</span>],</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"input"</span>: [<span class="st">"input1"</span>, <span class="st">"input2"</span>, <span class="st">"input3"</span>, <span class="st">"input4"</span>]</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data)</span>
@@ -629,28 +725,28 @@ output4_w2 tensor(-0.0700)</code></pre>
 <th data-quarto-table-cell-role="th">0</th>
 <td>0.382269</td>
 <td>0.415004</td>
-<td>Troll2</td>
+<td>Javier</td>
 <td>input1</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
 <td>-0.117136</td>
 <td>0.459306</td>
-<td>is</td>
+<td>es</td>
 <td>input2</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
 <td>-0.109552</td>
 <td>0.100895</td>
-<td>great</td>
+<td>bueno</td>
 <td>input3</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
 <td>-0.243428</td>
 <td>0.293641</td>
-<td>Gymkata</td>
+<td>Carlos</td>
 <td>input4</td>
 </tr>
 </tbody>
@@ -660,7 +756,7 @@ output4_w2 tensor(-0.0700)</code></pre>
 </div>
 </div>
 <p>Gráficamente:</p>
-<div id="ebeafa94" class="cell" data-execution_count="7">
+<div id="5f45e7e1" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> <span class="op">*</span></span>
@@ -689,8 +785,8 @@ output4_w2 tensor(-0.0700)</code></pre>
 </div>
 </div>
 </div>
-<p>En el gráfico podemos ver que los pesos para <strong>Troll2</strong> y <strong>Gymkata</strong> no son más similares entre sí que los de las demás entradas. Sin embargo, al entrenar esta red neuronal, esperamos que esos pesos se vuelvan similares. Así que vamos a crear un <code>Trainer</code> y entrenar la red de incrustación (embedding network).</p>
-<div id="b414c9d9" class="cell" data-execution_count="8">
+<p>En el gráfico podemos ver que los pesos para <strong>Javier</strong> y <strong>Carlos</strong> no son más similares entre sí que los de las demás entradas. Sin embargo, al entrenar esta red neuronal, esperamos que esos pesos se vuelvan similares. Así que vamos a crear un <code>Trainer</code> y entrenar la red de incrustación (embedding network).</p>
+<div id="b10c0e9d" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> L.Trainer(max_epochs<span class="op">=</span><span class="dv">100</span>)</span>
@@ -698,12 +794,12 @@ output4_w2 tensor(-0.0700)</code></pre>
 </details>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"e3fcda4236304a20aa2ad7ec97ed55d5","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+{"model_id":"2a10b501fffa4c7eb1a17147c036ba5b","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
 <p>Ahora, con la red neuronal ya entrenada, vamos a imprimir los valores de cada peso…</p>
-<div id="c7536183" class="cell" data-execution_count="9">
+<div id="deaf8024" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"After optimization, the parameters are..."</span>)</span>
@@ -731,8 +827,8 @@ output4_w2 tensor(-3.2900)</code></pre>
 </div>
 </div>
 <p>…y después de <strong>100</strong> épocas, los pesos para <strong>input1</strong> (<code>w1 = 2.0244</code> y <code>w2 = 1.9754</code>) son ahora relativamente similares a los pesos para <strong>input4</strong> (<code>w1 = 1.7264</code> y <code>w2 = 1.9912</code>).</p>
-<p>Primero, vamos a crear el <code>DataFrame()</code> de pandas…</p>
-<div id="11a1a00e" class="cell" data-execution_count="10">
+<p>Para representarlo gráficamente, primero, vamos a crear el <code>DataFrame()</code> de pandas…</p>
+<div id="ed475d98" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
@@ -744,7 +840,7 @@ output4_w2 tensor(-3.2900)</code></pre>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>           modelFromScratch.input2_w2.item(),</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>           modelFromScratch.input3_w2.item(),</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>           modelFromScratch.input4_w2.item()],</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"token"</span>: [<span class="st">"Troll2"</span>, <span class="st">"is"</span>, <span class="st">"great"</span>, <span class="st">"Gymkata"</span>],</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"token"</span>: [<span class="st">"Javier"</span>, <span class="st">"es"</span>, <span class="st">"bueno"</span>, <span class="st">"Carlos"</span>],</span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"input"</span>: [<span class="st">"input1"</span>, <span class="st">"input2"</span>, <span class="st">"input3"</span>, <span class="st">"input4"</span>]</span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data)</span>
@@ -769,28 +865,28 @@ output4_w2 tensor(-3.2900)</code></pre>
 <th data-quarto-table-cell-role="th">0</th>
 <td>2.015867</td>
 <td>1.941373</td>
-<td>Troll2</td>
+<td>Javier</td>
 <td>input1</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
 <td>-2.181995</td>
 <td>2.318635</td>
-<td>is</td>
+<td>es</td>
 <td>input2</td>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
 <td>-2.028368</td>
 <td>-2.161824</td>
-<td>great</td>
+<td>bueno</td>
 <td>input3</td>
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
 <td>1.691295</td>
 <td>1.894237</td>
-<td>Gymkata</td>
+<td>Carlos</td>
 <td>input4</td>
 </tr>
 </tbody>
@@ -800,7 +896,7 @@ output4_w2 tensor(-3.2900)</code></pre>
 </div>
 </div>
 <p>Gráficamente:</p>
-<div id="c20823d9" class="cell" data-execution_count="11">
+<div id="f7668230" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> <span class="op">*</span></span>
@@ -831,8 +927,21 @@ output4_w2 tensor(-3.2900)</code></pre>
 </div>
 </div>
 </div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Advertencia</span>¿Qué significan los pesos de la capa de embeddings?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Aunque hemos visto que el modelo ha asignado valores similares a “Javier” y “Carlos”, las dimensiones y valores específicos de estos pesos no tienen un significado intrínseco. No es que el peso <code>w1</code> represente algo como “ser un nombre propio” y el peso <code>w2</code> represente algo como “ser el núcleo de sujeto”.</p>
+</div>
+</div>
 <p>Por último, podemos verificar que cada token del vocabulario predice correctamente el token que le sigue ejecutando los valores de entrada de la <strong>codificación de un solo uno (one-hot-encoded)</strong> para cada token a través de la red neuronal.</p>
-<div id="a699e8d2" class="cell" data-execution_count="12">
+<div id="25b254b3" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Haz clic para ver el código</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Let's see what the model predicts</span></span>
@@ -848,19 +957,19 @@ output4_w2 tensor(-3.2900)</code></pre>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">## Now let's...</span></span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "Troll2"</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "Javier"</span></span>
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(torch.<span class="bu">round</span>(softmax(modelFromScratch(torch.tensor([[<span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>]]))),</span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>                  decimals<span class="op">=</span><span class="dv">2</span>))</span>
 <span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "is"</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "es"</span></span>
 <span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(torch.<span class="bu">round</span>(softmax(modelFromScratch(torch.tensor([[<span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>]]))),</span>
 <span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                  decimals<span class="op">=</span><span class="dv">2</span>))</span>
 <span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "great"</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "bueno"</span></span>
 <span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(torch.<span class="bu">round</span>(softmax(modelFromScratch(torch.tensor([[<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>, <span class="fl">0.</span>]]))),</span>
 <span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                  decimals<span class="op">=</span><span class="dv">2</span>))</span>
 <span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "Gymkata"</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="co">## print the predictions for "Carlos"</span></span>
 <span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(torch.<span class="bu">round</span>(softmax(modelFromScratch(torch.tensor([[<span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">0.</span>, <span class="fl">1.</span>]]))),</span>
 <span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>                  decimals<span class="op">=</span><span class="dv">2</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
@@ -871,15 +980,373 @@ tensor([0., 0., 0., 1.], grad_fn=&lt;RoundBackward1&gt;)
 tensor([0., 1., 0., 0.], grad_fn=&lt;RoundBackward1&gt;)</code></pre>
 </div>
 </div>
-<p>Y vemos que todos los tokens predicen correctamente (otorgan la mayor probabilidad a) el token que les sigue. En este caso, tanto <strong>Troll2</strong> como <strong>Gymkata</strong> predicen correctamente el segundo token, <strong>is</strong>, con una probabilidad de <strong>1.0</strong>.</p>
+<p>Y vemos que todos los tokens predicen correctamente (otorgan la mayor probabilidad a) el token que les sigue. En este caso, tanto <strong>Javier</strong> como <strong>Carlos</strong> predicen correctamente el segundo token, <strong>es</strong>, con una probabilidad de <strong>1.0</strong>. O más claramente:</p>
+<div id="88778047" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>labels_names <span class="op">=</span> [<span class="st">"Javier"</span>, <span class="st">"es"</span>, <span class="st">"bueno"</span>, <span class="st">"Carlos"</span>]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> torch.argmax(modelFromScratch([inputs]), dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(predictions)):</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>labels_names[i]<span class="sc">}</span><span class="ss"> -&gt; </span><span class="sc">{</span>labels_names[predictions[i]]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Javier -&gt; es
+es -&gt; bueno
+bueno -&gt; Carlos
+Carlos -&gt; es</code></pre>
+</div>
+</div>
+</section>
+<section id="por-qué-funciona" class="level3">
+<h3 class="anchored" data-anchor-id="por-qué-funciona">¿Por qué funciona?</h3>
+<p>Al entrenar la red neuronal para predecir la siguiente palabra, obligamos al modelo a comprimir la información en la capa oculta. Para optimizar el resultado, los pesos asociados a palabras que aparecen en contextos similares (como <strong>Javier</strong> y <strong>Carlos</strong>) comienzan a alinearse y a parecerse entre sí.</p>
+<p>Esto ocurre porque ambas palabras comparten el mismo objetivo: predecir la palabra <strong>“es”</strong>. Si el modelo falla en esta predicción, el algoritmo de retropropagación ajustará los pesos de “Javier” y “Carlos” en la misma dirección para aumentar la probabilidad de acierto. Al final del entrenamiento, este proceso agrupa las palabras con funciones gramaticales o significados similares en zonas cercanas espacio vectorial.</p>
+<blockquote class="blockquote">
+<p><strong>Nota sobre la complejidad:</strong> En esta red tan sencilla (con sólo dos frases y 4 palabras), existe el riesgo de que el modelo encuentre “atajos” y asigne pesos diferentes a ambas palabras logrando una predicción correcta. Sin embargo, en redes más complejas y con conjuntos de datos reales, la red se ve obligada a ser eficiente. Para optimizar el espacio, no le queda más remedio que encontrar una <strong>representación común (embedding)</strong> para todas las palabras que se usan en los mismos contextos<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+</blockquote>
+</section>
+<section id="red-neuronal-de-embeddings-con-nn.linear" class="level3">
+<h3 class="anchored" data-anchor-id="red-neuronal-de-embeddings-con-nn.linear">Red neuronal de embeddings con nn.Linear()</h3>
+<p>Ahora que ya sabemos cómo crear una red neuronal de embeddings desde cero, vamos a crear la misma red pero utilizando <code>nn.Linear()</code>, que es una función que hace exactamente lo mismo que la red que creamos manualmente, pero con menos código y más flexible.</p>
+<div id="16746a2b" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WordEmbeddingWithLinear(L.LightningModule):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">## In order to initialize weights from the 4 inputs (one for each unique word)</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       to the 2 nodes in the hidden layer (top and bottom nodes), we simply make</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       one call to nn.Linear() where in_features specifies the number of</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       inputs and out_features specifies the number of nodes we</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       are connecting them to. Since we don't want to use bias terms,</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       we set bias=False</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input_to_hidden <span class="op">=</span> nn.Linear(in_features<span class="op">=</span><span class="dv">4</span>, out_features<span class="op">=</span><span class="dv">2</span>, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Now, in order to connect the 2 nodes in the hidden layer to the 4 outputs, we</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       make one call to nn.Linear(), where in_features specifies the number of</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       nodes in hidden layer and out_features specifies the number of output values we want.</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       And again, we can set bias=False</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hidden_to_output <span class="op">=</span> nn.Linear(in_features<span class="op">=</span><span class="dv">2</span>, out_features<span class="op">=</span><span class="dv">4</span>, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">## We'll use CrossEntropyLoss in training_step()</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, <span class="bu">input</span>):</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Unlike before, where we did all the math by hand, now we can</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">## simply pass the input values to the weights we created with nn.Linear()</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">## between the input and the hidden layer and save the result in "hidden"</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">## </span><span class="al">NOTE</span><span class="co">: Unlike before, we don't need to strip off the extra brackets from the</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       input. the Linear ojbect knows what to do.</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>        hidden <span class="op">=</span> <span class="va">self</span>.input_to_hidden(<span class="bu">input</span>)</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Then we pass "hidden" to the weights we created with nn.Linear()</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">## between the hidden layer and the output.</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>        output_values <span class="op">=</span> <span class="va">self</span>.hidden_to_output(hidden)</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>(output_values)</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> configure_optimizers(<span class="va">self</span>):</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># this configures the optimizer we want to use for backpropagation.</span></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Adam(<span class="va">self</span>.parameters(), lr<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> training_step(<span class="va">self</span>, batch):</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>        <span class="co"># take a step during gradient descent.</span></span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>        input_i, label_i <span class="op">=</span> batch <span class="co"># collect input</span></span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>        output_i <span class="op">=</span> <span class="va">self</span>.forward(input_i) <span class="co"># run input through the neural network</span></span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(output_i, label_i) <span class="co">## loss = cross entropy</span></span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Entrenamos la red neuronal de embeddings creada con <code>nn.Linear()</code>…</p>
+<div id="66855fbc" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>L.seed_everything(seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>modelWithLinear <span class="op">=</span> WordEmbeddingWithLinear() <span class="co"># create the model...</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> L.Trainer(max_epochs<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>trainer.fit(modelWithLinear, train_dataloaders<span class="op">=</span>dataloader)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"a16f4ef8b03f46c189debcc6c5f9a0c3","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<p>Mostramos los pesos:</p>
+<div id="21a41830" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Accedemos a la matriz de pesos de la capa input_to_hidden</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Usamos .detach() para quitar los gradientes antes de convertirlos a floats</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> modelWithLinear.input_to_hidden.weight.detach()</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fila 0 contiene los pesos que van al primer nodo (equivalente a w1)</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w1"</span>: [weights[<span class="dv">0</span>, <span class="dv">0</span>].item(),</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">0</span>, <span class="dv">1</span>].item(),</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">0</span>, <span class="dv">2</span>].item(),</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">0</span>, <span class="dv">3</span>].item()],</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fila 1 contiene los pesos que van al segundo nodo (equivalente a w2)</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w2"</span>: [weights[<span class="dv">1</span>, <span class="dv">0</span>].item(),</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">1</span>, <span class="dv">1</span>].item(),</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">1</span>, <span class="dv">2</span>].item(),</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">1</span>, <span class="dv">3</span>].item()],</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"token"</span>: [<span class="st">"Javier"</span>, <span class="st">"es"</span>, <span class="st">"bueno"</span>, <span class="st">"Carlos"</span>],</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"input"</span>: [<span class="st">"input1"</span>, <span class="st">"input2"</span>, <span class="st">"input3"</span>, <span class="st">"input4"</span>]</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">w1</th>
+<th data-quarto-table-cell-role="th">w2</th>
+<th data-quarto-table-cell-role="th">token</th>
+<th data-quarto-table-cell-role="th">input</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>2.510447</td>
+<td>-0.068821</td>
+<td>Javier</td>
+<td>input1</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>-1.017650</td>
+<td>2.482441</td>
+<td>es</td>
+<td>input2</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>-1.974159</td>
+<td>-1.818951</td>
+<td>bueno</td>
+<td>input3</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>2.435523</td>
+<td>-0.222808</td>
+<td>Carlos</td>
+<td>input4</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Representamos gráficamente:</p>
+<div id="9b388c80" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    ggplot(df, aes(x<span class="op">=</span><span class="st">"w1"</span>, y<span class="op">=</span><span class="st">"w2"</span>, color<span class="op">=</span><span class="st">"token"</span>))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(size<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_text(</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        aes(label<span class="op">=</span><span class="st">"token"</span>),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">"left"</span>,  <span class="co"># Alineación horizontal izquierda</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span><span class="dv">10</span>,  </span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"black"</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>        fontweight<span class="op">=</span><span class="st">"semibold"</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        nudge_y<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        nudge_x<span class="op">=-</span><span class="fl">0.04</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_bw()</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(legend_position<span class="op">=</span><span class="st">"none"</span>)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div>
+<figure class="figure">
+<p><img src="10_word_embeddings_files/figure-html/cell-18-output-1.png" width="672" height="480" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="entrenamiento-con-nn.embedding" class="level3">
+<h3 class="anchored" data-anchor-id="entrenamiento-con-nn.embedding">Entrenamiento con nn.Embedding</h3>
+<p><code>nn.Embedding</code> es una capa de PyTorch diseñada específicamente para funcionar como una <strong>tabla de búsqueda (Lookup Table)</strong>. En lugar de realizar una multiplicación de matrices completa para transformar un vector codificado en One-Hot, <code>nn.Embedding</code> utiliza el índice entero del token para extraer directamente la fila correspondiente de la matriz de pesos (los embeddings).</p>
+<p>Ventajas sobre nn.Linear:</p>
+<ol type="1">
+<li><strong>Eficiencia en memoria y computación:</strong> Para un vocabulario grande (por ejemplo, 50,000 palabras), usar <code>nn.Linear</code> requiere pasar un vector One-Hot de tamaño 50,000 y realizar miles de multiplicaciones por cero. <code>nn.Embedding</code> solo recibe el índice entero (ej. <code>3</code>) y extrae los pesos al instante mediante indexación, ahorrando una cantidad masiva de cómputo (<span class="math inline">\(O(1)\)</span> en la búsqueda).</li>
+<li><strong>Entradas simplificadas:</strong> No necesitas transformar tus datos de texto a vectores One-Hot dispersos antes de meterlos al modelo. Puedes pasar directamente tensores de enteros con los IDs de las palabras.</li>
+<li><strong>Manejo de secuencias:</strong> Facilita enormemente el trabajo con frases de longitudes variables y procesamiento en lotes (batches) de texto en modelos como RNNs o Transformers.</li>
+</ol>
+<p>Implementación de la red neuronal de embeddings utilizando nn.Embedding:</p>
+<div id="86546a8c" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">### 1. Definición del modelo con nn.Embedding</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WordEmbeddingWithEmbeddingLayer(L.LightningModule):</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reemplazamos nn.Linear por nn.Embedding.</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># num_embeddings = 4 (tamaño del vocabulario)</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># embedding_dim = 2 (dimensión del espacio latente)</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input_to_hidden <span class="op">=</span> nn.Embedding(num_embeddings<span class="op">=</span><span class="dv">4</span>, embedding_dim<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># La capa de salida permanece igual para poder calcular la distribución de probabilidad</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.hidden_to_output <span class="op">=</span> nn.Linear(in_features<span class="op">=</span><span class="dv">2</span>, out_features<span class="op">=</span><span class="dv">4</span>, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, input_indices):</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># input_indices debe ser un tensor de enteros (LongTensor) con los IDs de las palabras</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># nn.Embedding busca directamente los pesos asociados a esos IDs</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>        hidden <span class="op">=</span> <span class="va">self</span>.input_to_hidden(input_indices)</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pasamos la representación densa por la capa lineal de salida</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>        output_values <span class="op">=</span> <span class="va">self</span>.hidden_to_output(hidden)</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output_values</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> configure_optimizers(<span class="va">self</span>):</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Adam(<span class="va">self</span>.parameters(), lr<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> training_step(<span class="va">self</span>, batch):</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># IMPORTANTE: input_i ahora contiene índices enteros (0, 1, 2, 3) y no vectores One-Hot</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>        input_i, label_i <span class="op">=</span> batch </span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>        output_i <span class="op">=</span> <span class="va">self</span>.forward(input_i) </span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(output_i, label_i) </span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Creación de la instancia del modelo:</p>
+<div id="b8356726" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>L.seed_everything(seed<span class="op">=</span><span class="dv">21</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>modelWithEmbedding <span class="op">=</span> WordEmbeddingWithEmbeddingLayer()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Hay volver a crear el <code>DataLoader</code> con los índices enteros en lugar de los vectores One-Hot. Para esto, simplemente convertimos cada vector One-Hot a su índice correspondiente:</p>
+<div id="35dbe33f" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertimos los vectores One-Hot a índices enteros</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>inputsForEmbed <span class="op">=</span> torch.tensor([<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], dtype<span class="op">=</span>torch.<span class="bu">long</span>)  <span class="co"># "Javier"=0, "es"=1, "bueno"=2, "Carlos"=3</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> torch.tensor([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>], dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>datasetForEmbed <span class="op">=</span> TensorDataset(inputsForEmbed, labels)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>dataloaderForEmbed <span class="op">=</span> DataLoader(datasetForEmbed)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Entrenamos el modelo:</p>
+<div id="61b3da8b" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> L.Trainer(max_epochs<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>trainer.fit(modelWithEmbedding, train_dataloaders<span class="op">=</span>dataloaderForEmbed)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"5b23a015c0114626a2e837ea9c7e432b","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<p>Extracción y preparación de los pesos entrenados:</p>
+<div id="9a7ed343" class="cell" data-execution_count="22">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># En nn.Embedding los pesos se guardan en .weight con dimensiones (num_embeddings, embedding_dim)</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Cada fila 'i' es directamente el vector de la palabra 'i'.</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> modelWithEmbedding.input_to_hidden.weight.detach()</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Columna 'w1': guarda la primera dimensión del embedding de cada token</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w1"</span>: [weights[<span class="dv">0</span>, <span class="dv">0</span>].item(),</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">1</span>, <span class="dv">0</span>].item(),</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">2</span>, <span class="dv">0</span>].item(),</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">3</span>, <span class="dv">0</span>].item()],</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Columna 'w2': guarda la segunda dimensión del embedding de cada token</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w2"</span>: [weights[<span class="dv">0</span>, <span class="dv">1</span>].item(),</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">1</span>, <span class="dv">1</span>].item(),</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">2</span>, <span class="dv">1</span>].item(),</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>           weights[<span class="dv">3</span>, <span class="dv">1</span>].item()],</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"token"</span>: [<span class="st">"Javier"</span>, <span class="st">"es"</span>, <span class="st">"bueno"</span>, <span class="st">"Carlos"</span>],</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"input"</span>: [<span class="st">"input1"</span>, <span class="st">"input2"</span>, <span class="st">"input3"</span>, <span class="st">"input4"</span>]</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data)</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         w1        w2   token   input
+0  1.983230  1.749041  Javier  input1
+1 -2.022404  2.207318      es  input2
+2 -1.472047 -4.546832   bueno  input3
+3  2.531943  1.984023  Carlos  input4</code></pre>
+</div>
+</div>
+<p>Representación gráfica:</p>
+<div id="abbb02a5" class="cell" data-execution_count="23">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>graph <span class="op">=</span> (</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    ggplot(df, aes(x<span class="op">=</span><span class="st">"w1"</span>, y<span class="op">=</span><span class="st">"w2"</span>, color<span class="op">=</span><span class="st">"token"</span>))</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(size<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_text(</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        aes(label<span class="op">=</span><span class="st">"token"</span>),</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        ha<span class="op">=</span><span class="st">"left"</span>,  </span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span><span class="dv">10</span>,  </span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"black"</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>        fontweight<span class="op">=</span><span class="st">"semibold"</span>,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>        nudge_y<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        nudge_x<span class="op">=-</span><span class="fl">0.04</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_bw()</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(legend_position<span class="op">=</span><span class="st">"none"</span>)</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>graph</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<div>
+<figure class="figure">
+<p><img src="10_word_embeddings_files/figure-html/cell-24-output-1.png" width="672" height="480" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>
-</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Notas</h2>
+
+<ol>
+<li id="fn1"><p><em>Javier</em> y <em>Carlos</em> se usarán en muchos otros contextos similares. Aunque también lo harán en otros diferentes y por eso sus vectores también reflejarán esas diferencias.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script type="application/vnd.jupyter.widget-state+json">
-{"state":{"0e740961588248fdb3b14aa2291b0ad4":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_d979af866df34c53a78da9d808d57194","max":1,"min":0,"orientation":"horizontal","style":"IPY_MODEL_564a3b63bb6243d88e416a859542bc94","tabbable":null,"tooltip":null,"value":1}},"3b300af9cef847a39f02d52f2f68b9e2":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_e2626d02e2ba4b728659f7b4726a9cc1","placeholder":"​","style":"IPY_MODEL_f4e08829dcf949528037bae7d0e7bcd8","tabbable":null,"tooltip":null,"value":"Epoch 99: 100%"}},"564a3b63bb6243d88e416a859542bc94":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"6aee428f46fa49d992f71a9e49b0a69c":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":"inline-flex","flex":null,"flex_flow":"row wrap","grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"100%"}},"8575d3f754ad4f40bfc7a6c7adbfd6e9":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"9a78d64223d040c2bef31906a25e2e34":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_8575d3f754ad4f40bfc7a6c7adbfd6e9","placeholder":"​","style":"IPY_MODEL_d0b7dc8337844dac923e8faf5550ebc2","tabbable":null,"tooltip":null,"value":" 4/4 [00:00&lt;00:00, 166.70it/s, v_num=2]"}},"d0b7dc8337844dac923e8faf5550ebc2":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"d979af866df34c53a78da9d808d57194":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":"2","flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"e2626d02e2ba4b728659f7b4726a9cc1":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"e3fcda4236304a20aa2ad7ec97ed55d5":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_3b300af9cef847a39f02d52f2f68b9e2","IPY_MODEL_0e740961588248fdb3b14aa2291b0ad4","IPY_MODEL_9a78d64223d040c2bef31906a25e2e34"],"layout":"IPY_MODEL_6aee428f46fa49d992f71a9e49b0a69c","tabbable":null,"tooltip":null}},"f4e08829dcf949528037bae7d0e7bcd8":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}}},"version_major":2,"version_minor":0}
+{"state":{"05fda769799a4450aff3301839901b45":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":"2","flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"1642e8416389424196e28d818d6d3c9a":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"2a10b501fffa4c7eb1a17147c036ba5b":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_b22d55d7cfc9477493d4867617b7bad5","IPY_MODEL_4defccf7880e47f0823baa320c8a3356","IPY_MODEL_8bc457151ee949f7843cba31e36ee63c"],"layout":"IPY_MODEL_c7163a7376c949589babee924efa765c","tabbable":null,"tooltip":null}},"3c2022738bc341a0a8b13dc163812262":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_d9ac068db6e0483dae821808c32189f6","max":1,"min":0,"orientation":"horizontal","style":"IPY_MODEL_bcfe385b1b3548e897aca4d4a214a8db","tabbable":null,"tooltip":null,"value":1}},"40ad9a8771fb417abf3cff19d78de9c4":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_40c75fe4ec434c5ebb5f864bbf05456e","placeholder":"​","style":"IPY_MODEL_e4adc7c98c51414f89849285a8549aec","tabbable":null,"tooltip":null,"value":"Epoch 99: 100%"}},"40c75fe4ec434c5ebb5f864bbf05456e":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"4c9fb027f9b44d25ac0b790c14adfee3":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_8a6f67153a8445a89918f2aeed2982f9","placeholder":"​","style":"IPY_MODEL_7045ecbeb4f94c4086113c6f610c9161","tabbable":null,"tooltip":null,"value":"Epoch 99: 100%"}},"4defccf7880e47f0823baa320c8a3356":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_05fda769799a4450aff3301839901b45","max":1,"min":0,"orientation":"horizontal","style":"IPY_MODEL_6104ad3144ac4fb2881ff7f940c3efc1","tabbable":null,"tooltip":null,"value":1}},"4eacf2f4c54f49e3b613c55960fb793a":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_b981b4732d314b14823664c5f96054af","placeholder":"​","style":"IPY_MODEL_a6921251a8f544ae9b8821b3dd83bdaa","tabbable":null,"tooltip":null,"value":" 4/4 [00:00&lt;00:00, 203.73it/s, v_num=38]"}},"5b23a015c0114626a2e837ea9c7e432b":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_4c9fb027f9b44d25ac0b790c14adfee3","IPY_MODEL_3c2022738bc341a0a8b13dc163812262","IPY_MODEL_7bd80e94c8ad4d0182df2b94b0011dbe"],"layout":"IPY_MODEL_c845dcdd8b2d4e51b3c3cd2491ab8d47","tabbable":null,"tooltip":null}},"6104ad3144ac4fb2881ff7f940c3efc1":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"7045ecbeb4f94c4086113c6f610c9161":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"7bd80e94c8ad4d0182df2b94b0011dbe":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_1642e8416389424196e28d818d6d3c9a","placeholder":"​","style":"IPY_MODEL_f06f014ce6b44186b2afa85f671f1382","tabbable":null,"tooltip":null,"value":" 4/4 [00:00&lt;00:00, 202.15it/s, v_num=39]"}},"7c0fa64b951e411797acc7e8e66c14cb":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":"inline-flex","flex":null,"flex_flow":"row wrap","grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"100%"}},"8a6f67153a8445a89918f2aeed2982f9":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"8bc457151ee949f7843cba31e36ee63c":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_bbeb9389c7dd4bc3ac167c004b8c025d","placeholder":"​","style":"IPY_MODEL_8d49afdb19be4855adb666e0576ef4a4","tabbable":null,"tooltip":null,"value":" 4/4 [00:00&lt;00:00, 162.24it/s, v_num=37]"}},"8d49afdb19be4855adb666e0576ef4a4":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"8e48b95cad5142d3b2531445811d8f51":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":"2","flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"903fb6e073cb4a159a13b2305c317635":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"a16f4ef8b03f46c189debcc6c5f9a0c3":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_40ad9a8771fb417abf3cff19d78de9c4","IPY_MODEL_c2ffd33b9d6e40eaaac89a447d6a33bb","IPY_MODEL_4eacf2f4c54f49e3b613c55960fb793a"],"layout":"IPY_MODEL_7c0fa64b951e411797acc7e8e66c14cb","tabbable":null,"tooltip":null}},"a6921251a8f544ae9b8821b3dd83bdaa":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"af0a7d27d496444c87600f3c7df303f4":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"b22d55d7cfc9477493d4867617b7bad5":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_af0a7d27d496444c87600f3c7df303f4","placeholder":"​","style":"IPY_MODEL_f3c0b1461474462791ebe6b4fa6780a5","tabbable":null,"tooltip":null,"value":"Epoch 99: 100%"}},"b981b4732d314b14823664c5f96054af":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"bbeb9389c7dd4bc3ac167c004b8c025d":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"bcfe385b1b3548e897aca4d4a214a8db":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"c2ffd33b9d6e40eaaac89a447d6a33bb":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_8e48b95cad5142d3b2531445811d8f51","max":1,"min":0,"orientation":"horizontal","style":"IPY_MODEL_903fb6e073cb4a159a13b2305c317635","tabbable":null,"tooltip":null,"value":1}},"c7163a7376c949589babee924efa765c":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":"inline-flex","flex":null,"flex_flow":"row wrap","grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"100%"}},"c845dcdd8b2d4e51b3c3cd2491ab8d47":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":"inline-flex","flex":null,"flex_flow":"row wrap","grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"100%"}},"d9ac068db6e0483dae821808c32189f6":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":"2","flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"e4adc7c98c51414f89849285a8549aec":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"f06f014ce6b44186b2afa85f671f1382":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"f3c0b1461474462791ebe6b4fa6780a5":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}}},"version_major":2,"version_minor":0}
 </script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -954,7 +1421,7 @@ tensor([0., 1., 0., 0.], grad_fn=&lt;RoundBackward1&gt;)</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/surtich\.github\.io\/IA-para-desarrolladores\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
