@@ -411,7 +411,7 @@ for name, param in modelFromScratch.named_parameters():
 
 ...y después de **100** épocas, los pesos para **input1** (`w1 = 2.0244` y `w2 = 1.9754`) son ahora relativamente similares a los pesos para **input4** (`w1 = 1.7264` y `w2 = 1.9912`).
 
-Primero, vamos a crear el `DataFrame()` de pandas...
+Para representarlo gráficamente, primero, vamos a crear el `DataFrame()` de pandas...
 
 ```{python}
 data = {
@@ -453,6 +453,12 @@ from plotnine import *
     + theme(legend_position="none")
 )
 ``` 
+
+:::{.callout-warning}
+## ¿Qué significan los pesos de la capa de embeddings?
+
+Aunque hemos visto que el modelo ha asignado valores similares a "Javier" y "Carlos", las dimensiones y valores específicos de estos pesos no tienen un significado intrínseco. No es que el peso `w1` represente algo como "ser un nombre propio" y el peso `w2` represente algo como "ser el núcleo de sujeto".
+:::
 
 Por último, podemos verificar que cada token del vocabulario predice correctamente el token que le sigue ejecutando los valores de entrada de la **codificación de un solo uno (one-hot-encoded)** para cada token a través de la red neuronal.
 
