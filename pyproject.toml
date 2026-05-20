@@ -9,6 +9,7 @@ dependencies = [
     "lightning>=2.6.1",
     "numpy>=2.4.4",
     "pandas>=3.0.3",
+    "plotly>=6.7.0",
     "plotnine>=0.15.4",
     "pytorch-lightning>=2.6.1",
     "scikit-learn>=1.8.0",

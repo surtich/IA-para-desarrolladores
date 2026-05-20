@@ -1,4 +1,4 @@
-## ¿Qué es un modelo de lenguaje grande (LLM)?
+## ¿Qué es LLM?
 
 En noviembre de 2022, OpenAI lanzó ChatGPT, un modelo de lenguaje grande (LLM) que se hizo viral casi de inmediato. Desde entonces, los LLM se han convertido en una de las tecnologías más disruptivas en el campo de la inteligencia artificial, con aplicaciones que van desde la generación de texto hasta la traducción automática y la creación de aplicaciones. Hoy todos estamos usando modelos de lenguaje en nuestro día a día para infinidad de tareas. El campo del desarrollo de software es uno de los más afectados por esta tecnología, y es fundamental que los programadores comprendan cómo funcionan los LLM para aprovechar al máximo su potencial.
 

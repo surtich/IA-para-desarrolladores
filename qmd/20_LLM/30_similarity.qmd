@@ -1,0 +1,475 @@
+---
+title: Similitud entre palabras
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+En las lecciones anteriores, hemos aprendido que podemos representar palabras usando vectores. Esto nos permite conocer las palabras más cercanas a una dada, lo que es útil para tareas como la clasificación y la generación de texto. Pero, ¿cómo podemos medir la similitud entre dos palabras representadas como vectores?
+
+Veamos un ejemplo sencillo para entender esto: imagine que queremos representar las siguientes frutas en un espacio de dos dimensiones, donde el eje X representa la acidez y el eje Y representa el tamaño:
+
+
+
+```{python}
+#| fig-align: center
+import pandas as pd
+import plotly.graph_objects as go
+
+# 1. Tu DataFrame original con las coordenadas fijas
+df_frutas = pd.DataFrame({
+    'Fruta': ['Sandía', 'Naranja', 'Uvas', 'Limón'],
+    'Acidez': [4, 7, 3, 9],
+    'Tamaño': [9, 5, 1, 3],
+    'Icono': ['🍉', '🍊', '🍇', '🍋'],
+    'Orden_Aparicion': [1, 2, 3, 4]
+})
+
+nombres_pasos = ['0. Vacío', '1. Sandía', '2. Naranja', '3. Uvas', '4. Limón']
+
+# 2. Construimos los "Frames" (Fotogramas) manualmente uno a uno
+fotogramas = []
+
+for num_paso, nombre_paso in enumerate(nombres_pasos):
+    x_datos = []
+    y_datos = []
+    text_datos = []
+    
+    for idx, fruta in df_frutas.iterrows():
+        if fruta['Orden_Aparicion'] <= num_paso:
+            x_datos.append(fruta['Acidez'])
+            y_datos.append(fruta['Tamaño'])
+            text_datos.append(fruta['Icono'])
+            
+    fotogramas.append(go.Frame(
+        data=[go.Scatter(
+            x=x_datos,
+            y=y_datos,
+            text=text_datos,
+            mode='text',
+            textposition='middle center',
+            textfont=dict(size=28) # <--- ¡CORREGIDO AQUÍ! Propiedad correcta para el tamaño del emoji
+        )],
+        name=nombre_paso
+    ))
+
+# 3. Creamos la figura inicial (Paso 0: Vacío)
+fig = go.Figure(
+    data=[go.Scatter(
+        x=[], 
+        y=[], 
+        mode='text', 
+        textposition='middle center',
+        textfont=dict(size=28) # <--- Corregido también en el estado inicial
+    )], 
+    frames=fotogramas
+)
+
+# 4. CREAMOS TUS BOTONES EXCLUSIVOS CON EMOJIS
+botones_iconos = [
+    {
+        "label": "🏠",
+        "method": "animate",
+        "args": [[nombres_pasos[0]], {"frame": {"duration": 200, "redraw": True}, "mode": "immediate"}]
+    }
+]
+
+for i in range(1, len(nombres_pasos)):
+    emoji_fruta = df_frutas.iloc[i-1]['Icono']
+    botones_iconos.append({
+        "label": emoji_fruta,
+        "method": "animate",
+        "args": [[nombres_pasos[i]], {"frame": {"duration": 300, "redraw": True}, "mode": "immediate"}]
+    })
+
+# 5. DISEÑO ULTRA MINIMALISTA Y CUADRADO
+fig.update_layout(
+    width=600,
+    height=600,
+    paper_bgcolor='#FFFFFF',
+    plot_bgcolor='#FFFFFF',
+    showlegend=False,
+    margin=dict(l=50, r=50, t=80, b=120),
+    
+    updatemenus=[{
+        "type": "buttons",
+        "direction": "right",
+        "x": 0.5,
+        "xanchor": "center",
+        "y": -0.15,
+        "showactive": True,
+        "buttons": botones_iconos
+    }],
+    
+    title={"text": "¿Dónde va cada fruta?", "x": 0.5, "xanchor": "center"},
+    font=dict(size=14),
+    
+    xaxis=dict(range=[0, 11], showgrid=False, zeroline=False, showline=True, linecolor='black', title="Acidez"),
+    yaxis=dict(range=[0, 11], showgrid=False, zeroline=False, showline=True, linecolor='black', title="Tamaño")
+)
+
+# 6. Mostrar el gráfico libre de errores
+fig.show()
+```
+
+## Distancia euclidiana
+
+Está claro que las dos frutas más similares entre sí son la naranja y el limón. Pero, ¿a qué distancia están? Podríamos calcular la **distancia euclidiana** entre los puntos que representan a cada fruta:
+
+$$
+d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}
+$$
+
+```{python}
+
+# 2. Filtramos Naranja (6,5) y Limón (9,3)
+x_naranja, y_naranja = df_frutas[df_frutas['Fruta'] == 'Naranja'][['Acidez', 'Tamaño']].values[0]
+x_limon, y_limon = df_frutas[df_frutas['Fruta'] == 'Limón'][['Acidez', 'Tamaño']].values[0]
+
+# 3. Creamos la figura de Plotly
+fig = go.Figure()
+
+# --- CAPA 1: Líneas de la Distancia Euclídea ---
+# Cateto horizontal (Δ Acidez)
+fig.add_trace(go.Scatter(
+    x=[x_naranja, x_limon], y=[y_naranja, y_naranja],
+    mode='lines', line=dict(color='#7f8c8d', width=2, dash='dash'),
+    showlegend=False, hoverinfo='skip'
+))
+
+# Cateto vertical (Δ Tamaño)
+fig.add_trace(go.Scatter(
+    x=[x_limon, x_limon], y=[y_naranja, y_limon],
+    mode='lines', line=dict(color='#7f8c8d', width=2, dash='dash'),
+    showlegend=False, hoverinfo='skip'
+))
+
+# Hipotenusa (Distancia Euclídea Real)
+fig.add_trace(go.Scatter(
+    x=[x_naranja, x_limon], y=[y_naranja, y_limon],
+    mode='lines', line=dict(color='#e74c3c', width=4),
+    showlegend=False, hoverinfo='skip'
+))
+
+# --- CAPA 2: Los Emojis (Plotly los lee del navegador, no fallan nunca) ---
+fig.add_trace(go.Scatter(
+    x=[x_naranja, x_limon],
+    y=[y_naranja, y_limon],
+    mode='text',
+    text=['🍊', '🍋'],
+    textposition='middle center',
+    textfont=dict(size=30),
+    showlegend=False
+))
+
+# --- CAPA 3: Diseño Cuadrado y Minimalista ---
+fig.update_layout(
+    width=600,
+    height=600,
+    paper_bgcolor='#FFFFFF',
+    plot_bgcolor='#FFFFFF',
+    
+    title={"text": "Distancia Euclídea entre Naranja y Limón", "x": 0.5, "xanchor": "center"},
+    font=dict(size=14),
+    
+    xaxis=dict(range=[0, 11], showgrid=False, zeroline=False, showline=True, linecolor='black', title="Acidez"),
+    yaxis=dict(range=[0, 11], showgrid=False, zeroline=False, showline=True, linecolor='black', title="Tamaño")
+)
+
+# Configuración para que Quarto lo muestre estático y no responda a zooms raros
+# (Mantiene el formato limpio de una imagen)
+fig.show(config={'staticPlot': True})
+``` 
+
+## Similitud coseno
+
+Pero, en realidad, no nos interesa la distancia sino la similitud, que no es lo mismo. La distancia es una medida de separación y, por lo tanto, no negativa. Sin embargo, podríamos utilizar una medida de similitud negativa para palabras opuestas, como "frío" y "caliente".
+
+Una forma de medir la similitud entre dos vectores es utilizando el coseno del ángulo entre ellos, lo que se conoce como **similitud coseno**. La fórmula para la similitud coseno entre dos vectores $\mathbf{a}, \mathbf{b} \in \mathbb{R}^n$ es:
+
+$$
+\text{Similitud Coseno} = \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{a}\| \|\mathbf{b}\|} = \frac{\sum_{i=1}^{n} a_i b_i}{\sqrt{\sum_{i=1}^{n} a_i^2} \sqrt{\sum_{i=1}^{n} b_i^2}} 
+$$
+
+Para el caso particular de dos dimensiones:
+
+$$
+\text{Similitud Coseno} = \frac{x_1 x_2 + y_1 y_2}{\sqrt{x_1^2 + y_1^2} \sqrt{x_2^2 + y_2^2}}
+$$
+
+O lo que es lo mismo: la similitud coseno es el producto escalar de los dos vectores dividido por el producto de sus magnitudes. El resultado es un valor entre -1 y 1, donde 1 significa que los vectores son idénticos, 0 significa que son ortogonales (sin relación) y -1 significa que son opuestos.
+
+
+
+```{python}
+import numpy as np
+
+# 1. Coordenadas de las frutas
+x_naranja, y_naranja = df_frutas[df_frutas['Fruta'] == 'Naranja'][['Acidez', 'Tamaño']].values[0]
+x_limon, y_limon = df_frutas[df_frutas['Fruta'] == 'Limón'][['Acidez', 'Tamaño']].values[0]
+# 2. Generamos puntos para dibujar el arco del ángulo (usando trigonometría básica)
+# Calculamos los ángulos de cada vector en radianes
+angulo_limon = np.arctan2(y_limon, x_limon)
+angulo_naranja = np.arctan2(y_naranja, x_naranja)
+
+# Creamos un rango de ángulos intermedios para trazar la curva del arco
+angulos_arco = np.linspace(angulo_limon, angulo_naranja, 50)
+radio_arco = 2.5 # Radio del arco visual para que no tape las frutas
+
+x_arco = radio_arco * np.cos(angulos_arco)
+y_arco = radio_arco * np.sin(angulos_arco)
+
+# 3. Inicializamos el gráfico
+fig = go.Figure()
+
+# --- CAPA 1: Vectores desde el origen (0,0) ---
+# Vector a la Naranja
+fig.add_trace(go.Scatter(
+    x=[0, x_naranja], y=[0, y_naranja],
+    mode='lines+markers', line=dict(color='#3498db', width=2),
+    marker=dict(size=[0, 0]), showlegend=False, hoverinfo='skip'
+))
+
+# Vector al Limón
+fig.add_trace(go.Scatter(
+    x=[0, x_limon], y=[0, y_limon],
+    mode='lines+markers', line=dict(color='#2ecc71', width=2),
+    marker=dict(size=[0, 0]), showlegend=False, hoverinfo='skip'
+))
+
+# --- CAPA 2: El Arco que representa el Ángulo Teta (θ) ---
+fig.add_trace(go.Scatter(
+    x=x_arco, y=y_arco,
+    mode='lines', line=dict(color='#e67e22', width=3, dash='dot'),
+    showlegend=False, hoverinfo='skip'
+))
+
+# Etiqueta del ángulo "θ" en medio del arco
+fig.add_trace(go.Scatter(
+    x=[radio_arco * 1.2 * np.cos((angulo_limon + angulo_naranja)/2)],
+    y=[radio_arco * 1.2 * np.sin((angulo_limon + angulo_naranja)/2)],
+    mode='text', text=['θ'], textfont=dict(size=20, color='#e67e22'),
+    showlegend=False, hoverinfo='skip'
+))
+
+# --- CAPA 3: Los Emojis de las frutas ---
+fig.add_trace(go.Scatter(
+    x=[x_naranja, x_limon],
+    y=[y_naranja, y_limon],
+    mode='text',
+    text=['🍊', '🍋'],
+    textposition='middle center',
+    textfont=dict(size=30),
+    showlegend=False
+))
+
+# --- CAPA 4: Diseño Cuadrado y Minimalista ---
+fig.update_layout(
+    width=600,
+    height=600,
+    paper_bgcolor='#FFFFFF',
+    plot_bgcolor='#FFFFFF',
+    
+    title={"text": "Distancia Coseno (Ángulo θ) entre Naranja y Limón", "x": 0.5, "xanchor": "center"},
+    font=dict(size=14),
+    
+    # Empezamos los ejes desde -0.5 para que el origen (0,0) se vea claro y con aire
+    xaxis=dict(range=[-0.5, 11], showgrid=False, zeroline=True, zerolinecolor='black', showline=True, linecolor='black', title="Acidez"),
+    yaxis=dict(range=[-0.5, 11], showgrid=False, zeroline=True, zerolinecolor='black', showline=True, linecolor='black', title="Tamaño")
+)
+
+# Mostrar de forma estática en Quarto sin controles interactivos
+fig.show(config={'staticPlot': True})
+```
+
+Otra ventaja de la similitud coseno es que no se ve afectada por las unidades de medida de las dimensiones ni por el número de dimensiones. Por ello, la distancia coseno es invariante a cambios de escala:
+
+```{python}
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+
+# 1. Coordenadas Originales (Caso 1)
+x_nar1, y_nar1 = df_frutas[df_frutas['Fruta'] == 'Naranja'][['Acidez', 'Tamaño']].values[0]
+x_lim1, y_lim1 = df_frutas[df_frutas['Fruta'] == 'Limón'][['Acidez', 'Tamaño']].values[0]
+
+# 2. Coordenadas Escaladas (Caso 2)
+factor_escala = 1.8
+x_nar2, y_nar2 = x_nar1 * factor_escala, y_nar1 * factor_escala
+x_lim2, y_lim2 = x_lim1 * factor_escala, y_lim1 * factor_escala
+
+# --- TRUCO VECTORIAL: Calcular recortes para que las líneas no atraviesen los emojis ---
+def calcular_puntos_recortados(x1, y1, x2, y2, margen=0.6):
+    # Dirección del vector (dx, dy) y su longitud
+    dx, dy = x2 - x1, y2 - y1
+    dist = np.sqrt(dx**2 + dy**2)
+    
+    # Vector unitario
+    ux, uy = dx / dist, dy / dist
+    
+    # El tramo dashed empieza un poco después de (x1, y1) y termina un poco antes de (x2, y2)
+    x_inicio_dashed = x1 + (margen * ux)
+    y_inicio_dashed = y1 + (margen * uy)
+    x_fin_dashed = x2 - (margen * ux)
+    y_fin_dashed = y2 - (margen * uy)
+    
+    # Para el tramo al origen, también recortamos un poco antes de (x1, y1)
+    x_fin_origen = x1 - (margen * ux)
+    y_fin_origen = y1 - (margen * uy)
+    
+    return (x_fin_origen, y_fin_origen), (x_inicio_dashed, y_inicio_dashed, x_fin_dashed, y_fin_dashed)
+
+# Calculamos los puntos de parada para Naranja y Limón
+(x_f_or_nar, y_f_or_nar), (x_i_dash_nar, y_i_dash_nar, x_f_dash_nar, y_f_dash_nar) = calcular_puntos_recortados(x_nar1, y_nar1, x_nar2, y_nar2)
+(x_f_or_lim, y_f_or_lim), (x_i_dash_lim, y_i_dash_lim, x_f_dash_lim, y_f_dash_lim) = calcular_puntos_recortados(x_lim1, y_lim1, x_lim2, y_lim2)
+
+
+# 3. Arco del ángulo theta
+angulo_limon = np.arctan2(y_lim1, x_lim1)
+angulo_naranja = np.arctan2(y_nar1, x_nar1)
+angulos_arco = np.linspace(angulo_limon, angulo_naranja, 50)
+radio_arco = 4.5
+x_arco = radio_arco * np.cos(angulos_arco)
+y_arco = radio_arco * np.sin(angulos_arco)
+
+# 4. Inicializamos la figura
+fig = go.Figure()
+
+# --- CAPA 1: Vectores Tramo 1 (Origen -> Fruta 1) ---
+# Continuo a la Naranja
+fig.add_trace(go.Scatter(
+    x=[0, x_f_or_nar], y=[0, y_f_or_nar],
+    mode='lines', line=dict(color='#3498db', width=2),
+    showlegend=False, hoverinfo='skip'
+))
+# Continuo al Limón
+fig.add_trace(go.Scatter(
+    x=[0, x_f_or_lim], y=[0, y_f_or_lim],
+    mode='lines', line=dict(color='#2ecc71', width=2),
+    showlegend=False, hoverinfo='skip'
+))
+
+# --- CAPA 2: Vectores Tramo 2 en Traslación (Fruta 1 -> Fruta 2) [DASHED y recortados] ---
+# Dashed a la Naranja escalada
+fig.add_trace(go.Scatter(
+    x=[x_i_dash_nar, x_f_dash_nar], y=[y_i_dash_nar, y_f_dash_nar],
+    mode='lines', line=dict(color='#3498db', width=2, dash='dash'),
+    showlegend=False, hoverinfo='skip'
+))
+# Dashed al Limón escalado
+fig.add_trace(go.Scatter(
+    x=[x_i_dash_lim, x_f_dash_lim], y=[y_i_dash_lim, y_f_dash_lim],
+    mode='lines', line=dict(color='#2ecc71', width=2, dash='dash'),
+    showlegend=False, hoverinfo='skip'
+))
+
+# --- CAPA 3: El Ángulo θ ---
+fig.add_trace(go.Scatter(
+    x=x_arco, y=y_arco,
+    mode='lines', line=dict(color='#e67e22', width=3, dash='dot'),
+    showlegend=False, hoverinfo='skip'
+))
+fig.add_trace(go.Scatter(
+    x=[radio_arco * 1.15 * np.cos((angulo_limon + angulo_naranja)/2)],
+    y=[radio_arco * 1.15 * np.sin((angulo_limon + angulo_naranja)/2)],
+    mode='text', text=['θ'], textfont=dict(size=22, color='#e67e22'),
+    showlegend=False, hoverinfo='skip'
+))
+
+# --- CAPA 4: Iconos Originales (Opacidad Total) ---
+fig.add_trace(go.Scatter(
+    x=[x_nar1, x_lim1], y=[y_nar1, y_lim1],
+    mode='text', text=['🍊', '🍋'],
+    textposition='middle center', textfont=dict(size=30),
+    showlegend=False
+))
+
+# --- CAPA 5: Iconos Escalados (Semitransparentes y perfectamente limpios por detrás) ---
+fig.add_trace(go.Scatter(
+    x=[x_nar2, x_lim2], y=[y_nar2, y_lim2],
+    mode='text', text=['🍊', '🍋'],
+    textposition='middle center', textfont=dict(size=30),
+    opacity=0.4,
+    showlegend=False
+))
+
+# --- CAPA 6: Diseño del lienzo ---
+fig.update_layout(
+    width=650,
+    height=650,
+    paper_bgcolor='#FFFFFF',
+    plot_bgcolor='#FFFFFF',
+    
+    title={"text": "Invarianza de Escala en Distancia Coseno (Mismo Ángulo θ)", "x": 0.5, "xanchor": "center"},
+    font=dict(size=14),
+    
+    xaxis=dict(range=[-0.5, 20], showgrid=False, zeroline=True, zerolinecolor='black', showline=True, linecolor='black', title="Acidez"),
+    yaxis=dict(range=[-0.5, 20], showgrid=False, zeroline=True, zerolinecolor='black', showline=True, linecolor='black', title="Tamaño")
+)
+
+fig.show(config={'staticPlot': True})
+
+def norm(vector):
+    return np.sqrt(np.sum(vector ** 2))
+
+
+def cosine_similarity(vector_a, vector_b):
+    dot_product = np.dot(vector_a, vector_b)
+    norm_a = norm(vector_a)
+    norm_b = norm(vector_b)
+    return dot_product / (norm_a * norm_b)
+
+# Vectores de las frutas
+vector_naranja = np.array([x_naranja, y_naranja])
+vector_limon = np.array([x_limon, y_limon])
+
+similitud = cosine_similarity(vector_naranja, vector_limon)
+print(f"Similitud Coseno entre Naranja y Limón: {similitud:.4f}")
+
+similitud = cosine_similarity(vector_naranja*1.8, vector_limon*1.8)
+print(f"Similitud Coseno entre Naranja y Limón escalados: {similitud:.4f}")
+```
+
+## Producto escalar
+
+Podríamos medir la similitud de dos vectores sin normalizarlos, es decir, sin dividir por el producto de sus magnitudes. Esto se conoce como simplemente **producto escalar**. La fórmula sería: 
+
+$$
+\text{Similitud Producto Escalar} = \mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^{n} a_i b_i
+$$
+
+A diferencia de la similitud coseno, que solo se fija en el ángulo $\theta$, el producto escalar es sensible tanto a la orientación como a la magnitud de los vectores, ya que geométricamente equivale a:
+
+$$\mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \|\mathbf{b}\| \cos(\theta)$$
+
+Esto significa que un producto escalar puede ser muy alto por dos motivos independientes:
+
+* Porque los vectores apuntan en una dirección muy similar ($\cos(\theta)$ cercano a 1).
+
+* Porque uno de los vectores (o ambos) tiene componentes con valores extremadamente grandes ($\|\mathbf{a}\|$ o $\|\mathbf{b}\|$ altos).
+
+Una de las coincidencias más fascinantes de la computación es que el bloque fundamental de cualquier Red Neuronal Artificial (ANN) basa su funcionamiento en esta operación. Cuando una neurona recibe un vector de entradas $\mathbf{x}$ y lo procesa con su vector de pesos $\mathbf{w}$, lo que hace internamente antes de aplicar la función de activación es calcular, precisamente, un producto escalar:
+
+$$z = \mathbf{w} \cdot \mathbf{x} + b = \sum_{i=1}^{n} w_i x_i + b$$
+
+
+💡 Intuición geométrica en IA:
+En este contexto, el vector de pesos $\mathbf{w}$ representa el "perfil ideal" o patrón que la neurona está buscando reconocer. Al computar el producto escalar $\mathbf{w} \cdot \mathbf{x}$, la neurona mide la similitud entre lo que está viendo ($\mathbf{x}$) y su patrón ideal ($\mathbf{w}$).
+
+Si la entrada se alinea perfectamente con sus pesos, el producto escalar se maximiza, la neurona "se emociona" (da un valor alto) y se activa.
+
+El término de sesgo ($\mathbf{b}$) actúa como un umbral de tolerancia para decidir cual debe ser esa similitud antes de dejar pasar la señal.
+
+Por lo tanto, las redes neuronales no son calculadoras abstractas, sino gigantescos sistemas geométricos que miden constantemente el parecido entre los datos de entrada y los patrones que han aprendido en sus pesos a lo largo del entrenamiento.
+
+
+
+
