@@ -1,0 +1,291 @@
+---
+title: Mecanismo de Atención
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+Lea las siguientes oraciones y preste atención a la palabra **"estaba"**:
+
+* *Doblé la esquina porque **estaba** buscando la tienda.*
+* *Doblé la esquina porque la tienda **estaba** abierta por el otro lado.*
+* *Doblé la esquina porque por el otro lado **estaba** abierta la tienda.*
+
+¿A quién o a qué se refiere el verbo "estaba" en cada caso?
+
+* **En la primera oración:** Se refiere a un sujeto implícito (**"yo"**). Nuestro cerebro descarta automáticamente a la tienda porque la semántica nos dicta que son las personas las que buscan objetos y no al revés.
+* **En la segunda oración:** Se refiere a **"la tienda"**, que actúa como sujeto explícito inmediatamente anterior al verbo.
+* **En la tercera oración:** Se refiere nuevamente a **"la tienda"**, pero con una dificultad añadida: el sujeto se ha desplazado hasta el final de la frase, forzándonos a mantener la información en suspenso hasta leer la última palabra.
+
+¿Cómo logra nuestro cerebro resolver esta ambigüedad de manera instantánea?
+
+A través del **contexto**. Los seres humanos no procesamos el lenguaje como una lista de palabras aisladas. Comprendemos el significado de cada término analizando cómo se relaciona con las demás palabras de la oración, sin importar si están cerca, lejos o si ni siquiera se han escrito (como el sujeto elíptico).
+
+
+**El reto computacional: De la mente a la máquina**
+
+Esto nos plantea un problema enorme cuando intentamos que un ordenador procese texto: **¿Cómo conseguimos que un modelo de lenguaje entienda el contexto?** ¿Cómo hacemos para que una máquina sepa con qué otra palabra debe asociar "estaba" en cada uno de los escenarios anteriores?
+
+Históricamente, los modelos de Inteligencia Artificial leían las frases palabra por palabra, en orden cronológico (de izquierda a derecha). El problema es que para cuando llegaban al final de frases largas, ya habían "olvidado" las conexiones del principio. La tercera oración de nuestro ejemplo, donde el sujeto aparece al final, era su peor pesadilla.
+
+La solución revolucionaria a este problema llegó en 2017 con el **Mecanismo de Atención** (*Attention Mechanism*). 
+
+En lugar de leer secuencialmente, la Atención permite al modelo mirar **toda la frase a la vez** y calcular dinámicamente una "puntuación de relevancia" entre cada par de palabras. Es el equivalente matemático a hacer que la palabra "estaba" dirija una mirada inquisitiva al resto de la oración para decidir en cuál de las otras palabras debe concentrar su "atención" para cobrar sentido.
+
+## Prestando atención
+
+Lo que queremos es que nuestro modelo replique lo que hacemos los humanos. Es decir, que esa capaz de que cuando procese una palabra mire al resto de palabras de la frase y decida cuáles son relevantes para entender su significado en ese contexto:
+
+<div style="text-align: center;">
+![](../../img/atencion_mecanismo.svg)
+</div>
+
+Ya conocemos el concepto de **embedding** para representar palabras la similitud entre palabras:
+
+```{python}
+import plotly.graph_objects as go
+
+# --- CONFIGURACIÓN DE LOS ELEMENTOS ---
+elementos_base = {
+    "Fútbol": (0, 6, "⚽"),
+    "Baloncesto": (1, 6, "🏀"),
+    "Tenis": (1, 5, "🎾"),
+    "Plátano": (6, 5, "🍌"),
+    "Cerezas": (6, 4, "🍒"),
+    "Fresa": (5, 4, "🍓"),
+    "Castillo": (1, 2, "🏰"),
+    "Casa": (2, 2, "🏠"),
+    "Edificio": (2, 1, "🏢"),
+    "Bicicleta": (5, 1, "🚲"),
+    "Camión": (6, 1, "🚚"),
+    "Coche": (6, 0, "🚗")
+}
+
+# Coordenadas: Base + Letras A(1,4), B(3,1), C(5,5)
+x_coords = [coord[0] for coord in elementos_base.values()] + [0, 1, 5]
+y_coords = [coord[1] for coord in elementos_base.values()] + [5, 1, 5]
+
+# --- ESTADOS PARA LOS FOTOGRAMAS ---
+emojis_init = [coord[2] for coord in elementos_base.values()] + ["A", "B", "C"]
+colores_init = ['black'] * 12 + ['#6b0d2f'] * 3
+tamaños_init = [26] * 12 + [30] * 3
+
+emojis_final = [coord[2] for coord in elementos_base.values()] + ["", "", "🍎"]
+colores_final = ['black'] * 12 + ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'black']
+tamaños_final = [26] * 12 + [1, 1, 32] 
+
+fig = go.Figure()
+
+# Traza inicial: cambiado 'mode' a 'text' para eliminar puntos
+fig.add_trace(go.Scatter(
+    x=x_coords, y=y_coords,
+    mode='text',
+    text=emojis_init,
+    textposition="middle center",
+    textfont=dict(size=tamaños_init, color=colores_init),
+    hoverinfo="text"
+))
+
+# Definición de fotogramas
+fig.frames = [
+    go.Frame(data=[go.Scatter(text=emojis_init, textfont=dict(size=tamaños_init, color=colores_init))], name="inicio"),
+    go.Frame(data=[go.Scatter(text=emojis_final, textfont=dict(size=tamaños_final, color=colores_final))], name="aparece_manzana")
+]
+
+# --- DISEÑO ---
+fig.update_layout(
+    title="<b>Cuestionario de Embeddings 1</b><br>¿Dónde estaría la manzana?, ¿A, B, C? ",
+    width=600, height=600,
+    margin=dict(l=50, r=50, t=80, b=120),
+    plot_bgcolor='white',
+    xaxis=dict(range=[-0.5, 6.5], showgrid=True, gridcolor='#e0e0e0', zeroline=False),
+    yaxis=dict(range=[-0.5, 6.5], showgrid=True, gridcolor='#e0e0e0', zeroline=False),
+    updatemenus=[dict(
+        type="buttons", direction="left",
+        buttons=[
+            dict(label="Reiniciar", method="animate", args=[["inicio"], dict(frame=dict(duration=300), mode="immediate")]),
+            dict(label="Mostrar 🍎", method="animate", args=[["aparece_manzana"], dict(frame=dict(duration=300), mode="immediate")])
+        ],
+        x=0.5, xanchor="center", y=-0.15
+    )]
+)
+
+fig.show(config={'displayModeBar': False})
+```
+
+Pero la situación no es siempre tan sencilla. En el gráfico de abajo, la manzana (🍎) es un fruta y debería estar con las frutas, pero también es el nombre de una compañía y debería estar entre los cachivaches electrónicos. Por lo tanto podría estar en "C". Pero ...
+
+
+```{python}
+import plotly.graph_objects as go
+
+# --- CONFIGURACIÓN DE LOS ELEMENTOS ---
+elementos_base = {
+    "Fresa": (0, 6, "🍓"),
+    "Naranja": (0, 5, "🍊"),
+    "Cerezas": (1, 6, "🍒"),
+    "Laptop": (6, 0, "💻"),
+    "Teléfono": (5, 0, "📱"),
+    "TV": (6, 1, "📺"), 
+}
+
+# Coordenadas: Base + Letras A(1,4), B(3,1), C(5,5)
+x_coords = [coord[0] for coord in elementos_base.values()] + [1, 5, 3]
+y_coords = [coord[1] for coord in elementos_base.values()] + [5, 1, 3]
+
+# --- ESTADOS PARA LOS FOTOGRAMAS ---
+emojis_init = [coord[2] for coord in elementos_base.values()] + ["A", "B", "C"]
+colores_init = ['black'] * 6 + ['#6b0d2f'] * 3
+tamaños_init = [26] * 6 + [30] * 3
+
+emojis_final = [coord[2] for coord in elementos_base.values()] + ["", "", "🍎"]
+colores_final = ['black'] * 6 + ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'black']
+tamaños_final = [26] * 6 + [1, 1, 32] 
+
+fig = go.Figure()
+
+# Traza inicial: cambiado 'mode' a 'text' para eliminar puntos
+fig.add_trace(go.Scatter(
+    x=x_coords, y=y_coords,
+    mode='text',
+    text=emojis_init,
+    textposition="middle center",
+    textfont=dict(size=tamaños_init, color=colores_init),
+    hoverinfo="text"
+))
+
+# Definición de fotogramas
+fig.frames = [
+    go.Frame(data=[go.Scatter(text=emojis_init, textfont=dict(size=tamaños_init, color=colores_init))], name="inicio"),
+    go.Frame(data=[go.Scatter(text=emojis_final, textfont=dict(size=tamaños_final, color=colores_final))], name="aparece_manzana")
+]
+
+# --- DISEÑO ---
+fig.update_layout(
+    title="<b>Cuestionario de Embeddings 2</b><br>¿Dónde estaría la manzana?, ¿A, B, C? ",
+    width=600, height=600,
+    margin=dict(l=50, r=50, t=80, b=120),
+    plot_bgcolor='white',
+    xaxis=dict(range=[-0.5, 6.5], showgrid=True, gridcolor='#e0e0e0', zeroline=False),
+    yaxis=dict(range=[-0.5, 6.5], showgrid=True, gridcolor='#e0e0e0', zeroline=False),
+    updatemenus=[dict(
+        type="buttons", direction="left",
+        buttons=[
+            dict(label="Reiniciar", method="animate", args=[["inicio"], dict(frame=dict(duration=300), mode="immediate")]),
+            dict(label="Mostrar 🍎", method="animate", args=[["aparece_manzana"], dict(frame=dict(duration=300), mode="immediate")])
+        ],
+        x=0.5, xanchor="center", y=-0.15
+    )]
+)
+
+fig.show(config={'displayModeBar': False})
+```
+
+Pero "C" es una posición neutra no satisfactoria. Lo que queremos es que si estamos hablando de frutas, los embeddings de "manzana" sean atraídos por las palabras de contexto relacionadas con frutas hacia los embeddings de las frutas y si estamos hablando de tecnología, que sean atraídos por las palabras de contexto relacionadas con tecnología hacia los embeddings de los cachivaches electrónicos. Por ejemplo:
+
+* En la frase *"buy an apple and an orange"* habría que desplazar el embedding de "manzana" (apple) hacia las frutas.
+* En la frase *"apple unveiled a new iPhone"* habría que desplazar el embedding de "manzana" (apple) hacia los cachivaches electrónicos.
+
+¿Qué palabra ayuda a decidir el contexto de "manzana" en cada una de las frases anteriores? 
+
+<div style="text-align: center;">
+![](../../img/atencion_apple.svg)
+</div>
+
+
+
+```{python}
+import plotly.graph_objects as go
+
+# --- CONFIGURACIÓN ---
+# Naranja en (0,6), Laptop en (6,0), Manzana inicial en (3,3)
+# Destinos: Naranja (1.5, 4.5), Laptop (4.5, 1.5)
+x_init = [0, 6, 3, 4]
+y_init = [6, 0, 3, 3]
+emojis = ["🍊", "💻", "🍎"]
+
+fig = go.Figure()
+
+
+
+# 1. Traza para la línea del rastro
+fig.add_trace(go.Scatter(
+    x=[None, None], y=[None, None],
+    mode='lines',
+    line=dict(color='gray', width=2, dash='dot'),
+    showlegend=False
+))
+
+
+fig.add_trace(go.Scatter(
+    x=[3], y=[3],
+    mode='text',
+    hoverinfo="text",
+    text=["🍎"],
+    textposition="middle center",
+    textfont=dict(size=[30], color=['rgba(0,0,0,.5)']),
+    showlegend=False))
+
+
+fig.add_trace(go.Scatter(
+    x=x_init, y=y_init,
+    mode='text',
+    hoverinfo="text",
+    text=emojis,
+    textposition="middle center",
+    textfont=dict(size=[30, 30, 30]), 
+    showlegend=False))
+
+
+fig.frames = [
+    # Naranja: rastro de (3,3) a (1.5, 4.5)
+    go.Frame(data=[
+        go.Scatter(x=[3, 1.5], y=[3, 4.5]),
+        go.Scatter(),
+        go.Scatter(x=[0, 6, 1.5], y=[6, 0, 4.5])
+        ],
+         name="orange_attention"),
+
+    # Laptop: rastro de (3,3) a (4.5, 1.5)
+    go.Frame(data=[
+        go.Scatter(x=[3, 4.5], y=[3, 1.5]),
+        go.Scatter(),
+        go.Scatter(x=[0, 6, 4.5, 3], y=[6, 0, 1.5, 3])], name="laptop_attention"),
+    # Reiniciar: ocultamos rastro y volvemos a (3,3)
+    go.Frame(data=[
+        go.Scatter(x=[None, None], y=[None, None]),
+        go.Scatter(),
+        go.Scatter(x=[0, 6, 3, 3], y=[6, 0, 3, 3])], name="inicio")
+]
+
+
+fig.update_layout(
+    width=600, height=600,
+    margin=dict(l=50, r=50, t=80, b=120),
+    plot_bgcolor='white',
+    xaxis=dict(range=[-0.5, 6.5], showgrid=True, gridcolor='#e0e0e0', zeroline=False),
+    yaxis=dict(range=[-0.5, 6.5], showgrid=True, gridcolor='#e0e0e0', zeroline=False),
+    updatemenus=[dict(
+        type="buttons", direction="left",
+        buttons=[
+            dict(label="Reiniciar", method="animate", args=[["inicio"], dict(frame=dict(duration=300), mode="immediate")]),
+            dict(label="🍎 ⬅️ 🍊", method="animate", args=[["orange_attention"], dict(frame=dict(duration=300), mode="immediate")]),
+            dict(label="🍎 ⬅️ 💻", method="animate", args=[["laptop_attention"], dict(frame=dict(duration=300), mode="immediate")])
+        ],
+        x=0.5, xanchor="center", y=-0.15
+    )]
+)
+
+fig.show(config={'displayModeBar': False})
+```
+
+
+
