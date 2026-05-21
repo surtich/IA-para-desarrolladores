@@ -31,6 +31,10 @@ website:
         - section: "Apéndices"
           contents:
               - qmd/90_apendices/10_derivadas.qmd
+              - qmd/90_apendices/20_matrices.qmd
+              - text: "Transformaciones lineales"
+                href: linear_transformations.html
+                target: _blank
               - text: "Presentación 2025"
                 href: presentacion_2025.html
                 target: _blank
@@ -44,6 +48,7 @@ format:
     toc: true
 resources:
     - presentacion_2025.html
+    - linear_transformations.html
     - README.md
 
 
