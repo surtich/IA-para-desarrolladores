@@ -470,6 +470,15 @@ El término de sesgo ($\mathbf{b}$) actúa como un umbral de tolerancia para dec
 
 Por lo tanto, las redes neuronales no son calculadoras abstractas, sino gigantescos sistemas geométricos que miden constantemente el parecido entre los datos de entrada y los patrones que han aprendido en sus pesos a lo largo del entrenamiento.
 
+## Producto escalar escalado (Scaled Dot-Product)
 
+El producto escalar es una métrica de similitud sensible a la magnitud de los vectores. Aunque en ciertos contextos esto es una ventaja, a menudo puede generar resultados sesgados cuando los vectores presentan escalas divergentes. Para mitigar este problema, se emplea el producto escalar escalado, cuya fórmula es:
 
+$$
+\text{Similitud} = \frac{\mathbf{a} \cdot \mathbf{b}}{\sqrt{n}}
+$$
+
+Donde $n$ representa la dimensionalidad de los vectores. Al dividir por la raíz cuadrada de la dimensión, se normaliza la varianza del resultado, lo que permite que las medidas de similitud sean comparables incluso cuando se trabaja con vectores de distintas magnitudes.
+
+Se utiliza en el cálculo de la atención (ver siguiente lección) para estabilizar los gradientes durante el entrenamiento, evitando que el producto escalar crezca excesivamente en magnitud y sature la función softmax, lo que impediría que el modelo aprenda eficazmente las relaciones entre tokens.
 

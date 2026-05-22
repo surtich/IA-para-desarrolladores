@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 1000 500"
+   width="100%"
+   height="100%"
+   version="1.1"
+   id="svg40"
+   sodipodi:docname="atencion_pez.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview40"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.188"
+     inkscape:cx="500"
+     inkscape:cy="250"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg40" />
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .title { font-family: sans-serif; font-size: 40px; font-weight: bold; fill: #4caf50; }
+      .label { font-family: sans-serif; font-size: 18px; font-weight: bold; text-anchor: middle; fill: #333333; }
+      .text-green { font-family: sans-serif; font-size: 24px; font-weight: bold; fill: #4caf50; text-anchor: middle; }
+      .subtext-green { font-family: sans-serif; font-size: 16px; font-weight: bold; fill: #2e7d32; text-anchor: middle; }
+      .text-orange { font-family: sans-serif; font-size: 24px; font-weight: bold; fill: #e65100; text-anchor: middle; }
+      .subtext-orange { font-family: sans-serif; font-size: 16px; font-weight: bold; fill: #bf360c; text-anchor: middle; }
+      .block-green { fill: #66bb6a; stroke: #2e7d32; stroke-width: 1; }
+      .block-orange { fill: #ffa726; stroke: #e65100; stroke-width: 1; }
+      .line-sep { stroke: #2e7d32; stroke-width: 1; opacity: 0.5; }
+      .line-sep-orange { stroke: #e65100; stroke-width: 1; opacity: 0.5; }
+    </style>
+    <marker
+       id="arrow-blue"
+       viewBox="0 0 10 10"
+       refX="5"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 0 0 L 10 5 L 0 10 z"
+         fill="#29b6f6"
+         id="path1" />
+    </marker>
+    <marker
+       id="blue-arrow"
+       viewBox="0 0 10 10"
+       refX="6"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         d="M 0,1 10,5 0,9 Z"
+         fill="#3a9ad9"
+         id="path4-0" />
+    </marker>
+  </defs>
+  <rect
+     width="100%"
+     height="100%"
+     fill="#fefefa"
+     id="rect1" />
+  <text
+     x="327"
+     y="47"
+     class="title"
+     id="text2">Keys <tspan
+   fill="#333333"
+   id="tspan1">and </tspan><tspan
+   fill="#e65100"
+   id="tspan2">Queries</tspan></text>
+  <g
+     transform="translate(265, 80)"
+     id="g6">
+    <path
+       d="M 10 25 C 25 5, 65 10, 80 25 C 65 40, 25 45, 10 25 Z"
+       fill="#90caf9"
+       stroke="#1565c0"
+       stroke-width="2"
+       id="path2" />
+    <path
+       d="M 80 25 L 95 10 L 90 25 L 95 40 Z"
+       fill="#64b5f6"
+       stroke="#1565c0"
+       stroke-width="2"
+       id="path3" />
+    <path
+       d="M 45 13 Q 55 0 60 13 Z"
+       fill="#64b5f6"
+       stroke="#1565c0"
+       stroke-width="2"
+       id="path4" />
+    <path
+       d="M 45 37 Q 55 48 60 37 Z"
+       fill="#64b5f6"
+       stroke="#1565c0"
+       stroke-width="2"
+       id="path5" />
+    <circle
+       cx="25"
+       cy="22"
+       r="3"
+       fill="#333"
+       id="circle5" />
+  </g>
+  <g
+     transform="translate(657,69)"
+     id="g11">
+    <path
+       d="M 10,45 Q 35,5 70,25 85,45 75,55 40,45 10,45 Z"
+       fill="none"
+       stroke="#424242"
+       stroke-width="2"
+       id="path7" />
+    <path
+       d="M 25,35 Q 45,20 65,33 M 35,43 Q 55,25 73,43 M 18,45 45,12 M 35,47 60,17 M 55,48 72,28"
+       fill="none"
+       stroke="#757575"
+       stroke-width="1"
+       id="path8" />
+    <circle
+       cx="12"
+       cy="45"
+       r="3.5"
+       fill="#212121"
+       id="circle8" />
+    <circle
+       cx="32"
+       cy="47"
+       r="3.5"
+       fill="#212121"
+       id="circle9" />
+    <circle
+       cx="54"
+       cy="49"
+       r="3.5"
+       fill="#212121"
+       id="circle10" />
+    <circle
+       cx="75"
+       cy="53"
+       r="3.5"
+       fill="#212121"
+       id="circle11" />
+  </g>
+  <text
+     x="308"
+     y="157"
+     class="label"
+     id="text11">Pez</text>
+  <text
+     x="704"
+     y="159"
+     class="label"
+     id="text12">Red</text>
+  <g
+     transform="translate(210, 175)"
+     id="g16">
+    <rect
+       width="200"
+       height="130"
+       class="block-green"
+       rx="2"
+       id="rect12" />
+    <line
+       x1="0"
+       y1="21"
+       x2="200"
+       y2="21"
+       class="line-sep"
+       id="line12" />
+    <line
+       x1="0"
+       y1="43"
+       x2="200"
+       y2="43"
+       class="line-sep"
+       id="line13" />
+    <line
+       x1="0"
+       y1="65"
+       x2="200"
+       y2="65"
+       class="line-sep"
+       id="line14" />
+    <line
+       x1="0"
+       y1="87"
+       x2="200"
+       y2="87"
+       class="line-sep"
+       id="line15" />
+    <line
+       x1="0"
+       y1="108"
+       x2="200"
+       y2="108"
+       class="line-sep"
+       id="line16" />
+  </g>
+  <g
+     transform="translate(210, 325)"
+     id="g21">
+    <rect
+       width="200"
+       height="130"
+       class="block-orange"
+       rx="2"
+       id="rect16" />
+    <line
+       x1="0"
+       y1="21"
+       x2="200"
+       y2="21"
+       class="line-sep-orange"
+       id="line17" />
+    <line
+       x1="0"
+       y1="43"
+       x2="200"
+       y2="43"
+       class="line-sep-orange"
+       id="line18" />
+    <line
+       x1="0"
+       y1="65"
+       x2="200"
+       y2="65"
+       class="line-sep-orange"
+       id="line19" />
+    <line
+       x1="0"
+       y1="87"
+       x2="200"
+       y2="87"
+       class="line-sep-orange"
+       id="line20" />
+    <line
+       x1="0"
+       y1="108"
+       x2="200"
+       y2="108"
+       class="line-sep-orange"
+       id="line21" />
+  </g>
+  <g
+     transform="translate(590, 175)"
+     id="g26">
+    <rect
+       width="200"
+       height="130"
+       class="block-green"
+       rx="2"
+       id="rect21" />
+    <line
+       x1="0"
+       y1="21"
+       x2="200"
+       y2="21"
+       class="line-sep"
+       id="line22" />
+    <line
+       x1="0"
+       y1="43"
+       x2="200"
+       y2="43"
+       class="line-sep"
+       id="line23" />
+    <line
+       x1="0"
+       y1="65"
+       x2="200"
+       y2="65"
+       class="line-sep"
+       id="line24" />
+    <line
+       x1="0"
+       y1="87"
+       x2="200"
+       y2="87"
+       class="line-sep"
+       id="line25" />
+    <line
+       x1="0"
+       y1="108"
+       x2="200"
+       y2="108"
+       class="line-sep"
+       id="line26" />
+  </g>
+  <g
+     transform="translate(590, 325)"
+     id="g31">
+    <rect
+       width="200"
+       height="130"
+       class="block-orange"
+       rx="2"
+       id="rect26" />
+    <line
+       x1="0"
+       y1="21"
+       x2="200"
+       y2="21"
+       class="line-sep-orange"
+       id="line27" />
+    <line
+       x1="0"
+       y1="43"
+       x2="200"
+       y2="43"
+       class="line-sep-orange"
+       id="line28" />
+    <line
+       x1="0"
+       y1="65"
+       x2="200"
+       y2="65"
+       class="line-sep-orange"
+       id="line29" />
+    <line
+       x1="0"
+       y1="87"
+       x2="200"
+       y2="87"
+       class="line-sep-orange"
+       id="line30" />
+    <line
+       x1="0"
+       y1="108"
+       x2="200"
+       y2="108"
+       class="line-sep-orange"
+       id="line31" />
+  </g>
+  <text
+     x="135"
+     y="235"
+     class="text-green"
+     id="text31">Pull</text>
+  <text
+     x="135"
+     y="260"
+     class="subtext-green"
+     id="text32">keys</text>
+  <text
+     x="135"
+     y="375"
+     class="text-orange"
+     id="text33">Get pulled</text>
+  <text
+     x="135"
+     y="400"
+     class="subtext-orange"
+     id="text34">queries</text>
+  <text
+     x="865"
+     y="235"
+     class="text-green"
+     id="text35">Pull</text>
+  <text
+     x="865"
+     y="260"
+     class="subtext-green"
+     id="text36">keys</text>
+  <text
+     x="865"
+     y="375"
+     class="text-orange"
+     id="text37">Get pulled</text>
+  <text
+     x="865"
+     y="400"
+     class="subtext-orange"
+     id="text38">queries</text>
+  <g
+     id="g38">
+    <line
+       x1="660"
+       y1="115"
+       x2="385"
+       y2="115"
+       stroke="#d32f2f"
+       stroke-width="14"
+       id="line38" />
+    <polygon
+       points="390,103 365,115 390,127"
+       fill="#d32f2f"
+       id="polygon38" />
+  </g>
+  <path
+     d="M 430,370 L 570,230"
+     fill="none"
+     stroke="#29b6f6"
+     stroke-width="3"
+     marker-start="url(#arrow-blue)"
+     marker-end="url(#arrow-blue)"
+     id="path38" />
+  <g
+     id="g40">
+    <line
+       x1="435"
+       y1="235"
+       x2="565"
+       y2="365"
+       stroke="#d32f2f"
+       stroke-width="12"
+       id="line39" />
+    <polygon
+       points="447,231 423,223 431,247"
+       fill="#d32f2f"
+       id="polygon39" />
+    <polygon
+       points="553,369 577,377 569,353"
+       fill="#d32f2f"
+       id="polygon40" />
+  </g>
+  <line
+     x1="370"
+     y1="92"
+     x2="668"
+     y2="92"
+     stroke="#3a9ad9"
+     stroke-width="2.5"
+     marker-end="url(#blue-arrow)"
+     id="line30-9" />
+</svg>

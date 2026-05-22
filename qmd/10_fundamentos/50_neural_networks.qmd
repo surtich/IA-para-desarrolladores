@@ -845,6 +845,74 @@ color_map = {1: 'green', 0: 'red'}
 
 Esto es muy interesante: La red ha aprendido a separar mediante dos líneas rectas el espacio de entrada en tres regiones. Como ya hemos dicho, esto es algo que no es posible con una sola neurona. Pero es interesante que la red haya "comprendido" por sí misma que la mejor frontera de decisión sea una línea recta, realmente no tendría por qué haberlo hecho así, podría haber aprendido una frontera de decisión con forma curva. Observe que las líneas no son paralelas entre sí, es lo que habría sucedido si la red hubiera hecho un aprendizaje perfecto.
 
+En 3D:
+
+```{python}
+import numpy as np
+import pandas as pd
+import torch
+import matplotlib.pyplot as plt
+from matplotlib import cm
+
+# --- (Esto mantiene tu lógica original de datos) ---
+
+# 1. Crear el grid de puntos (lo cambiamos a 50x50 para que el gráfico 3D no sea pesado)
+x1_range = np.linspace(-0.5, 1.5, 50)
+x2_range = np.linspace(-0.5, 1.5, 50)
+X1, X2 = np.meshgrid(x1_range, x2_range)
+
+mesh_points = np.c_[X1.ravel(), X2.ravel()]
+mesh_tensor = torch.tensor(mesh_points, dtype=torch.float)
+
+# 2. Predecir con el modelo OR
+model.eval()
+with torch.no_grad():
+    probs = model(mesh_tensor).numpy()
+
+# Redimensionar las probabilidades para que tengan la forma del grid (50x50)
+Z_probs = probs.reshape(X1.shape)
+
+# 3. Puntos reales de la compuerta OR
+# Nota: Corregí el último punto de tu 'real' [0, 1, 1, 0] a [0, 1, 1, 1] ya que es una compuerta OR
+df_points = pd.DataFrame({
+    'x1': [0, 0, 1, 1],
+    'x2': [0, 1, 0, 1],
+    'real': [0, 1, 1, 1] 
+})
+
+# --- 4. CONSTRUIR EL GRÁFICO 3D ---
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(1, 1, 1, projection='3d')
+
+# Dibujar la superficie de probabilidad (Frontera de decisión en 3D)
+# Usamos un mapa de color de Rojo (0) a Verde (1) como querías
+cmap_custom = cm.get_cmap('RdYlGn') 
+surf = ax.plot_surface(X1, X2, Z_probs, cmap=cmap_custom, alpha=0.6, edgecolor='none')
+
+# Dibujar los 4 puntos reales de la compuerta
+for idx, row in df_points.iterrows():
+    color = 'green' if row['real'] == 1 else 'red'
+    # Graficamos el punto en su posición (x1, x2) y la altura real (0 o 1)
+    ax.scatter(row['x1'], row['x2'], row['real'], color=color, s=100, edgecolor='black', linewidth=1.5)
+
+# Configuración de etiquetas y límites
+ax.set_title('Superficie de Decisión 3D - Neurona OR', fontsize=14, pad=20)
+ax.set_xlabel('Entrada X1', fontsize=11)
+ax.set_ylabel('Entrada X2', fontsize=11)
+ax.set_zlabel('Probabilidad / Resultado', fontsize=11)
+
+ax.set_zlim(-0.1, 1.1)
+
+# Añadir una barra de color para la probabilidad
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=10, label='Probabilidad de ser 1')
+
+# Ajustar el ángulo de visión inicial para que se aprecie bien la pendiente
+ax.view_init(elev=25, azim=-135)
+
+plt.show()
+``` 
+
 Los parámetros aprendidos por el modelo son:
 
 ```{python} 
