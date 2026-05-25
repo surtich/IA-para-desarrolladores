@@ -5,8 +5,12 @@
     <lastmod>2026-05-18T15:25:50.763Z</lastmod>
   </url>
   <url>
-    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/10_word_embeddings.html</loc>
-    <lastmod>2026-05-19T19:30:04.000Z</lastmod>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/20_word2vec.html</loc>
+    <lastmod>2026-05-19T21:51:39.688Z</lastmod>
+  </url>
+  <url>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/00_introduction.html</loc>
+    <lastmod>2026-05-20T19:20:31.627Z</lastmod>
   </url>
   <url>
     <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/10_fundamentos/40_logistic_regression.html</loc>
@@ -21,6 +25,10 @@
     <lastmod>2026-05-18T15:25:50.754Z</lastmod>
   </url>
   <url>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/90_apendices/20_matrices.html</loc>
+    <lastmod>2026-05-21T18:55:49.415Z</lastmod>
+  </url>
+  <url>
     <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/90_apendices/10_derivadas.html</loc>
     <lastmod>2026-05-18T15:25:50.760Z</lastmod>
   </url>
@@ -30,14 +38,18 @@
   </url>
   <url>
     <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/10_fundamentos/50_neural_networks.html</loc>
-    <lastmod>2026-05-18T15:25:50.758Z</lastmod>
+    <lastmod>2026-05-22T12:45:20.891Z</lastmod>
   </url>
   <url>
-    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/00_introduction.html</loc>
-    <lastmod>2026-05-18T19:06:13.283Z</lastmod>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/40_attention.html</loc>
+    <lastmod>2026-05-25T21:01:41.871Z</lastmod>
   </url>
   <url>
-    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/20_word2vec.html</loc>
-    <lastmod>2026-05-19T21:51:39.688Z</lastmod>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/10_word_embeddings.html</loc>
+    <lastmod>2026-05-19T19:30:04.000Z</lastmod>
+  </url>
+  <url>
+    <loc>https://surtich.github.io/IA-para-desarrolladores/qmd/20_LLM/30_similarity.html</loc>
+    <lastmod>2026-05-21T16:29:27.013Z</lastmod>
   </url>
 </urlset>

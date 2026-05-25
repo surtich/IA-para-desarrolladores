@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Introducción – IA para desarrolladores</title>
+<title>Álgebra Lineal – IA para desarrolladores</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -23,45 +23,10 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -105,12 +70,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Buscar"
   }
 }</script>
-<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
-<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
-<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
-
-<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -176,7 +135,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Introducción</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/90_apendices/10_derivadas.html">Apéndices</a></li><li class="breadcrumb-item"><a href="../../qmd/90_apendices/20_matrices.html">Álgebra Lineal</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
@@ -207,7 +166,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link active">
+  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -295,7 +254,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../qmd/90_apendices/20_matrices.html" class="sidebar-item-text sidebar-link">
+  <a href="../../qmd/90_apendices/20_matrices.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Álgebra Lineal</span></a>
   </div>
 </li>
@@ -323,20 +282,23 @@ window.Quarto = {
     <h2 id="toc-title">En esta página</h2>
    
   <ul>
-  <li><a href="#conceptos-clave" id="toc-conceptos-clave" class="nav-link active" data-scroll-target="#conceptos-clave">Conceptos clave</a></li>
-  <li><a href="#aprendizaje-automático" id="toc-aprendizaje-automático" class="nav-link" data-scroll-target="#aprendizaje-automático">Aprendizaje Automático</a></li>
-  <li><a href="#qué-es-un-modelo" id="toc-qué-es-un-modelo" class="nav-link" data-scroll-target="#qué-es-un-modelo">¿Qué es un modelo?</a></li>
-  <li><a href="#qué-modelo-se-ajusta-mejor-a-los-datos" id="toc-qué-modelo-se-ajusta-mejor-a-los-datos" class="nav-link" data-scroll-target="#qué-modelo-se-ajusta-mejor-a-los-datos">¿Qué modelo se ajusta mejor a los datos?</a></li>
-  <li><a href="#best_model" id="toc-best_model" class="nav-link" data-scroll-target="#best_model">¿Qué modelo modelo lineal es mejor?</a></li>
+  <li><a href="#qué-es-un-vector" id="toc-qué-es-un-vector" class="nav-link active" data-scroll-target="#qué-es-un-vector">¿Qué es un Vector?</a></li>
+  <li><a href="#suma-de-vectores" id="toc-suma-de-vectores" class="nav-link" data-scroll-target="#suma-de-vectores">Suma de Vectores</a></li>
+  <li><a href="#escalado" id="toc-escalado" class="nav-link" data-scroll-target="#escalado">Escalado</a></li>
+  <li><a href="#magnitud-de-un-vector" id="toc-magnitud-de-un-vector" class="nav-link" data-scroll-target="#magnitud-de-un-vector">Magnitud de un Vector</a></li>
+  <li><a href="#producto-escalar" id="toc-producto-escalar" class="nav-link" data-scroll-target="#producto-escalar">Producto Escalar</a></li>
+  <li><a href="#matrices" id="toc-matrices" class="nav-link" data-scroll-target="#matrices">Matrices</a></li>
+  <li><a href="#simulación" id="toc-simulación" class="nav-link" data-scroll-target="#simulación">Simulación</a></li>
+  <li><a href="#transformaciones-multidimensionales-mathbbrn-to-mathbbrm" id="toc-transformaciones-multidimensionales-mathbbrn-to-mathbbrm" class="nav-link" data-scroll-target="#transformaciones-multidimensionales-mathbbrn-to-mathbbrm">Transformaciones Multidimensionales (<span class="math inline">\(\mathbb{R}^n \to \mathbb{R}^m\)</span>)</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../../qmd/10_fundamentos/10_intro.html">Introducción</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/90_apendices/10_derivadas.html">Apéndices</a></li><li class="breadcrumb-item"><a href="../../qmd/90_apendices/20_matrices.html">Álgebra Lineal</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Introducción</h1>
+<h1 class="title">Álgebra Lineal</h1>
 </div>
 
 
@@ -353,275 +315,226 @@ window.Quarto = {
 </header>
 
 
-<section id="conceptos-clave" class="level2">
-<h2 class="anchored" data-anchor-id="conceptos-clave">Conceptos clave</h2>
-<p><img src="../../img/ia_diagram.svg" class="img-fluid"></p>
-<ul>
-<li><p><strong>Inteligencia Artificial (IA):</strong> Campo de la informática que busca crear sistemas capaces de realizar tareas que normalmente requieren inteligencia humana, como el razonamiento y la resolución de problemas.</p></li>
-<li><p><strong>Aprendizaje Automático (Machine Learning):</strong> Rama de la IA centrada en algoritmos que permiten a las computadoras aprender y mejorar sus predicciones a partir de datos, sin ser programadas explícitamente para cada paso.</p></li>
-<li><p><strong>Aprendizaje Profundo (Deep Learning):</strong> Evolución del Machine Learning que utiliza redes neuronales multicapa para procesar datos complejos (imágenes, audio, texto), imitando la estructura del cerebro.</p></li>
-<li><p><strong>Procesamiento de Lenguaje Natural (NLP):</strong> Disciplina que permite a las máquinas entender, interpretar y generar lenguaje humano, sirviendo de puente entre personas y computadoras.</p></li>
-<li><p><strong>IA Generativa:</strong> Categoría de la IA diseñada para <strong>crear contenido original</strong> (texto, imágenes, código) en lugar de solo clasificar o analizar datos existentes.</p></li>
-<li><p><strong>LLM (Modelos de Lenguaje Extensos):</strong> Un tipo de IA Generativa entrenada con volúmenes masivos de datos. Son el motor de herramientas como ChatGPT y representan la intersección perfecta entre el <em>Deep Learning</em> y el <em>NLP</em>.</p></li>
-</ul>
-</section>
-<section id="aprendizaje-automático" class="level2">
-<h2 class="anchored" data-anchor-id="aprendizaje-automático">Aprendizaje Automático</h2>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    subgraph Tradicional
-        D1[Datos] --&gt; T1[Algoritmo]
-        R1[Reglas] --&gt; T1
-        T1 --&gt; S1[Respuestas]
-    end
-
-    subgraph Machine_Learning
-        D2[Datos] --&gt; M1[Entrenamiento]
-        S2[Respuestas] --&gt; M1
-        M1 --&gt; R2[Reglas]
-    end
-
-    Tradicional --&gt; Machine_Learning
-    style Tradicional fill:#f9f,stroke:#333,stroke-width:1px
-    style Machine_Learning fill:#bbf,stroke:#333,stroke-width:1px
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
-<p>El aprendizaje automático se puede clasificar en varias categorías, siendo las más comunes:</p>
-<ul>
-<li><p><strong>Aprendizaje supervisado</strong>: En este enfoque, el modelo se entrena utilizando un conjunto de datos etiquetados, donde cada entrada tiene una salida conocida. El objetivo es aprender una función que mapee las entradas a las salidas. Ejemplos incluyen la regresión y la clasificación.</p></li>
-<li><p><strong>Aprendizaje no supervisado</strong>: Aquí, el modelo se entrena con datos no etiquetados y su objetivo es identificar patrones o estructuras subyacentes en los datos. Ejemplos incluyen el agrupamiento (clustering) y la reducción de dimensionalidad.</p></li>
-<li><p><strong>Aprendizaje semi-supervisado</strong>: Combina elementos del aprendizaje supervisado y no supervisado, utilizando un pequeño conjunto de datos etiquetados junto con un gran conjunto de datos no etiquetados para mejorar el rendimiento del modelo. Etiquetar datos habitualmente es un proceso costoso ya que suele hacerse de forma manual y requerir un conocimiento experto, este enfoque permite una reducción de coste.</p></li>
-<li><p><strong>Aprendizaje auto-supervisado</strong>: Es un enfoque en el que el modelo genera sus propias etiquetas a partir de los datos no etiquetados. Este enfoque ha ganado popularidad en tareas como el procesamiento del lenguaje natural y la visión por computadora. Por ejemplo, los LLM (Modelos de Lenguaje Grande) utilizan aprendizaje auto-supervisado para predecir la siguiente palabra en una secuencia de texto, lo que les permite aprender representaciones útiles del lenguaje sin necesidad de etiquetas explícitas.</p></li>
-<li><p><strong>Aprendizaje por refuerzo</strong>: En este enfoque, un agente aprende a tomar decisiones mediante la interacción con un entorno. Recibe recompensas o penalizaciones en función de sus acciones y ajusta su comportamiento para maximizar la recompensa acumulada a lo largo del tiempo.</p></li>
-<li><p><strong>Aprendizaje por transferencia</strong>: Este enfoque implica tomar un modelo previamente entrenado en una tarea y adaptarlo a una nueva tarea relacionada, aprovechando el conocimiento adquirido en la tarea original.</p></li>
-</ul>
-</section>
-<section id="qué-es-un-modelo" class="level2">
-<h2 class="anchored" data-anchor-id="qué-es-un-modelo">¿Qué es un modelo?</h2>
-<p>Un modelo en el contexto del aprendizaje automático es una representación matemática o computacional de un proceso o fenómeno que se utiliza para hacer predicciones o tomar decisiones basadas en datos. Los modelos pueden variar en complejidad, desde simples ecuaciones lineales hasta redes neuronales profundas. La elección del modelo depende de la naturaleza del problema, la cantidad y calidad de los datos disponibles, y los objetivos específicos del análisis.</p>
-<p>Por ejemplo, supongamos que preguntamos a varias personas adultas sobre su peso y altura, obteniendo los siguientes datos:</p>
-<div id="66e77765" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'nombre'</span>: [<span class="st">'Leo'</span>, <span class="st">'Sara'</span>, <span class="st">'Marta'</span>, <span class="st">'Elena'</span>, <span class="st">'Javier'</span>],</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'peso'</span>: [<span class="fl">100.0</span>, <span class="fl">60.0</span>, <span class="fl">50.0</span>, <span class="fl">80.0</span>, <span class="fl">70.0</span>],</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'altura'</span>: [<span class="fl">190.0</span>, <span class="fl">154.0</span>, <span class="fl">145.0</span>, <span class="fl">172.0</span>, <span class="fl">163.0</span>]</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>df.set_index(<span class="st">'nombre'</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">peso</th>
-<th data-quarto-table-cell-role="th">altura</th>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">nombre</th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Leo</th>
-<td>100.0</td>
-<td>190.0</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Sara</th>
-<td>60.0</td>
-<td>154.0</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Marta</th>
-<td>50.0</td>
-<td>145.0</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Elena</th>
-<td>80.0</td>
-<td>172.0</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Javier</th>
-<td>70.0</td>
-<td>163.0</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div id="b127f042" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ggplot(df, aes(x<span class="op">=</span><span class="st">'peso'</span>, y<span class="op">=</span><span class="st">'altura'</span>))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(color<span class="op">=</span><span class="st">'#FF4136'</span>, fill<span class="op">=</span><span class="st">'#FF851B'</span>, size<span class="op">=</span><span class="dv">5</span>, stroke<span class="op">=</span><span class="fl">1.5</span>) </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_x_continuous(breaks<span class="op">=</span>df[<span class="st">'peso'</span>], labels<span class="op">=</span>df.index, limits<span class="op">=</span>(<span class="dv">40</span>, <span class="dv">110</span>))</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_y_continuous(breaks<span class="op">=</span><span class="va">None</span>, labels<span class="op">=</span><span class="va">None</span>, limits<span class="op">=</span>(<span class="dv">140</span>, <span class="dv">200</span>))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_minimal()</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        panel_grid_major<span class="op">=</span>element_blank(),</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        panel_grid_minor<span class="op">=</span>element_blank(),</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        axis_line<span class="op">=</span>element_line(color<span class="op">=</span><span class="st">'#666666'</span>, size<span class="op">=</span><span class="fl">1.5</span>),</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>element_text(rotation<span class="op">=</span><span class="dv">45</span>, hjust<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="qué-es-un-vector" class="level2">
+<h2 class="anchored" data-anchor-id="qué-es-un-vector">¿Qué es un Vector?</h2>
+<p>En esencia, un <strong>vector</strong> es una lista ordenada de números. Desde el punto de vista geométrico, podemos imaginarlo como una <strong>flecha</strong> que nace en el origen <span class="math inline">\((0,0)\)</span> y termina en unas coordenadas específicas del espacio.</p>
+<p>Por ejemplo, el vector <span class="math inline">\(\vec{v} = [4, 2]\)</span> nos dice que avancemos 4 unidades en el eje X y 2 unidades en el eje Y.</p>
+<div id="cell-fig-vector-base" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div>
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-3-output-1.png" width="672" height="480" class="figure-img"></p>
+<div id="fig-vector-base" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vector-base-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="20_matrices_files/figure-html/fig-vector-base-output-1.png" width="384" height="384" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vector-base-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;1: Representación geométrica del vector [4, 2]
+</figcaption>
 </figure>
-</div>
-</div>
-</div>
-<p>En este ejemplo vemos claramente que:</p>
-<p><span class="math display">\[ \text{altura} = 100 + 0,9 \cdot \text{peso} \]</span></p>
-<div id="7fdfe152" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">+</span> geom_abline(intercept<span class="op">=</span><span class="dv">100</span>, slope<span class="op">=</span><span class="fl">0.9</span>, color<span class="op">=</span><span class="st">'#04101b'</span>, size<span class="op">=</span><span class="fl">1.5</span>, linetype<span class="op">=</span><span class="st">'dashed'</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<div>
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-4-output-1.png" width="672" height="480" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>El problema es que normalmente la relación entre peso y altura no es tan perfecta.</p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div id="e227cefa" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.altura <span class="op">=</span> [</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fl">180.0</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fl">160.0</span>,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fl">145.0</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fl">175.0</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">165.0</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div><div class="column" style="width:50%;">
-<div id="b836b569" class="cell" data-fig-height="6" data-fig-width="4" data-execution_count="5">
-<div class="cell-output cell-output-display" data-execution_count="5">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-6-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="672" height="480"></p>
-</figure>
-</div>
-</div>
 </div>
 </div>
 </div>
 </section>
-<section id="qué-modelo-se-ajusta-mejor-a-los-datos" class="level2">
-<h2 class="anchored" data-anchor-id="qué-modelo-se-ajusta-mejor-a-los-datos">¿Qué modelo se ajusta mejor a los datos?</h2>
-<div class="quarto-layout-panel" data-layout-ncol="3">
-<div class="quarto-layout-row">
-<div id="c98555b9" class="cell quarto-layout-cell" data-execution_count="6" style="flex-basis: 33.3%;justify-content: flex-start;">
-<div class="cell-output cell-output-display" data-execution_count="6">
-<div>
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-7-output-1.png" width="288" height="384" class="figure-img"></p>
+<section id="suma-de-vectores" class="level2">
+<h2 class="anchored" data-anchor-id="suma-de-vectores">Suma de Vectores</h2>
+<p>Si tenemos <span class="math inline">\(\vec{v} = [4, 2]\)</span> y le sumamos el vector <span class="math inline">\(\vec{w} = [2, 4]\)</span>, estamos realizando una traslación en el espacio.La operación matemática es directa componente a componente:</p>
+<p><span class="math display">\[
+\vec{v} + \vec{w} = [4 + 2, 2 + 4] = [6, 6]
+\]</span></p>
+<div id="cell-fig-vector-suma" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div id="fig-vector-suma" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vector-suma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="20_matrices_files/figure-html/fig-vector-suma-output-1.png" width="384" height="384" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vector-suma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;2: Suma de vectores: El vector verde es el resultado de trasladar v usando w
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div id="2cdfdd0c" class="cell quarto-layout-cell" data-execution_count="7" style="flex-basis: 33.3%;justify-content: flex-start;">
+</section>
+<section id="escalado" class="level2">
+<h2 class="anchored" data-anchor-id="escalado">Escalado</h2>
+<p>Multiplicar un vector por un número real (llamado escalar) cambia su magnitud (longitud) y, si el número es negativo, invierte su dirección. La orientación de la línea sobre la que descansa el vector se mantiene igual.Hagamos la prueba multiplicando nuestro vector original por <span class="math inline">\(2\)</span> (lo estiramos) y por <span class="math inline">\(-0.5\)</span> (lo encogemos e invertimos).</p>
+<p><span class="math display">\[
+\vec{v}_{alto} = 2 \cdot [4, 2] = [8, 4]
+\]</span></p>
+<div id="cell-fig-vector-escalado" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div id="fig-vector-escalado" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vector-escalado-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="20_matrices_files/figure-html/fig-vector-escalado-output-1.png" width="384" height="384" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vector-escalado-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;3: Multiplicación por escalares: cambio de tamaño y sentido
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="magnitud-de-un-vector" class="level2">
+<h2 class="anchored" data-anchor-id="magnitud-de-un-vector">Magnitud de un Vector</h2>
+<p>La <strong>magnitud</strong> (o norma) de un vector representa su longitud geométrica desde el origen hasta su extremo. Si conocemos las componentes del vector <span class="math inline">\(\vec{v} = [v_1, v_2]\)</span>, podemos calcular su magnitud aplicando el <strong>Teorema de Pitágoras</strong>, donde las componentes del vector actúan como los catetos y la magnitud como la hipotenusa:</p>
+<p><span class="math display">\[
+\|\vec{v}\| = \sqrt{v_1^2 + v_2^2}
+\]</span></p>
+<p>Para nuestro vector <span class="math inline">\(\vec{v} = [4, 2]\)</span>, el cálculo matemático es: <span class="math display">\[
+\|\vec{v}\| = \sqrt{4^2 + 2^2} = \sqrt{16 + 4} = \sqrt{20} \approx 4.47
+\]</span></p>
+<p>Para entenderlo visualmente, podemos descomponer el vector en sus componentes horizontal y vertical. Esto forma un triángulo rectángulo perfecto en el plano cartesiano.</p>
+<div id="61a3b7f4" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 <figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-8-output-1.png" width="288" height="384" class="figure-img"></p>
+<p><img src="20_matrices_files/figure-html/cell-8-output-1.png" width="480" height="384" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="fcd7b61c" class="cell quarto-layout-cell" data-execution_count="8" style="flex-basis: 33.3%;justify-content: flex-start;">
-<div class="cell-output cell-output-display" data-execution_count="8">
-<div>
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-9-output-1.png" width="288" height="384" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-</div>
-<p>Para responder a esa pregunta, primero debemos entender para qué queremos construir un modelo. Un modelo se puede construir para tres propósitos principales no excluyentes:</p>
-<ol type="1">
-<li><p><strong>Predicción</strong>: El objetivo es construir un modelo que pueda predecir con precisión la <strong>variable de interés</strong> (en este caso, la altura) a partir de las <strong>variables explicativas</strong> (en este caso, el peso). En este contexto, el modelo que mejor se ajusta a los datos es aquel que minimiza el error de predicción en nuevos datos no vistos. Por ejemplo, ¿qué peso tendría una persona de 85 kg? El mejor modelo es el que <strong>generaliza</strong> mejor a nuevos datos. Posiblemente el segundo modelo generalice un poco mejor que el primero. Sin embargo, el tercer modelo, aunque se ajusta perfectamente a los <strong>datos de entrenamiento</strong>, pero no generaliza bien a nuevos datos debido al <strong>sobreajuste (overfitting)</strong>. Por eso para evaluar un modelo hay que hacerlo con datos que no se han utilizado para entrenar el modelo (<strong>datos de prueba</strong>).</p></li>
-<li><p><strong>Explicación</strong>: El objetivo es construir un modelo que nos permita entender la relación entre las variables. En este caso, el primer modelo es el más interpretable, ya que establece una relación lineal entre el peso y la altura. Es un modelo para el que hay que estimar únicamente dos parámetros (la pendiente y la ordenada en el origen, también llamada sesgo o intersección), lo que facilita la comprensión de cómo el peso afecta a la altura. La fórmula del modelo lineal es:</p></li>
-</ol>
-<p><span class="math display">\[ altura = b + m \cdot peso \]</span></p>
-<p>El parámetro <span class="math inline">\(b\)</span> representa la altura cuando el peso es cero, lo cual no tiene sentido en este contexto y no es interpretable directamente, pero es necesario para ajustar la línea a los datos. Por otro lado, el parámetro <span class="math inline">\(m\)</span> representa la pendiente de la línea, es decir, el cambio en la altura por cada unidad de cambio en el peso. Los valores de <span class="math inline">\(b\)</span> y <span class="math inline">\(m\)</span> ajustados son:</p>
-<div id="f383ffca" class="cell" data-execution_count="9">
-<div class="cell-output cell-output-stdout">
-<pre><code>Pendiente (m): 0.6757
-Sesgo (b): 116.3514
-La ecuación es: altura = 116.35 + 0.68 * peso</code></pre>
-</div>
-</div>
-<p>En este caso, con valor de <span class="math inline">\(m\)</span> igual a 0.68 indica que por cada kilogramo adicional de peso, se espera que la altura aumente en 0.68 centímetros.</p>
-<p>Si quisiéramos utilizar este modelo para predecir la altura de una persona que pesa 85.0 kg, simplemente sustituimos el valor del peso en la ecuación:</p>
-<div id="a674aae7" class="cell" data-execution_count="10">
-<div class="cell-output cell-output-display cell-output-markdown" data-execution_count="10">
-<p><span class="math display">\[altura =  116.35 +0.68 \cdot  85 = 174 \text{ cm}\]</span></p>
-</div>
-</div>
-<p>Lo podemos mostrar gráficamente:</p>
-<div id="93cf6404" class="cell" data-execution_count="11">
-<div class="cell-output cell-output-display" data-execution_count="11">
-<div>
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-12-output-1.png" width="672" height="480" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>El que el peso y la altura estén correlacionados no implica que el peso cause la altura. Esta correlación lo que indica es que si conozco el peso de una persona puedo decir algo sobre su altura, ya que normalmente las personas más altas suelen pesar más. Es importante tener en cuenta que la <strong>correlación no implica causalidad</strong>. La causalidad es una hipótesis del investigador que se puede probar con experimentos controlados, pero no se puede inferir directamente a partir de la correlación observada en los datos. Por ejemplo, un modelo en que la variable explicativa y explicada están correlacionadas con causalidad es las horas de estudio y la nota obtenida en un examen. En este caso, es razonable suponer que estudiar más horas causa una mejor nota en el examen, aunque también podría haber otros factores que influyan en la nota, como la calidad del estudio o el nivel de dificultad del examen. En ocasiones, la correlación entre dos variables puede ser causada por una tercera <strong>variable oculta</strong>. Por ejemplo, la correlación entre el consumo de helados y el número de ahogamientos podría ser causada por la variable oculta “temperatura”, ya que en los meses más cálidos se consume más helado y también hay más personas nadando, lo que aumenta el riesgo de ahogamiento. Por último, en ocasiones, la <strong>correlación</strong> entre dos variables puede ser <strong>negativa</strong>, lo que significa que a medida que una variable aumenta, la otra disminuye. Por ejemplo, existe una correlación negativa entre los goles que recibe un equipo y sus puntos en la clasificación, ya que a medida que un equipo recibe más goles, es probable que pierda más partidos y, por lo tanto, tenga menos puntos en la clasificación.</p>
-<p>El segundo modelo, aunque es mejor para predecir, introduce una relación cuadrática, lo que complica la interpretación ya que tiene un tercer parámetro que no es fácil de interpretar:</p>
-<p><span class="math display">\[ altura = \theta_0 + \theta_1 \cdot peso + \theta_2 \cdot peso^2 \]</span></p>
-<p>En este caso, <span class="math inline">\(\theta_1\)</span> representa el cambio en la altura por cada unidad de cambio en el peso (lo mismo que <span class="math inline">\(m\)</span> en el modelo lineal), pero este efecto no es constante debido al término cuadrático. El parámetro <span class="math inline">\(\theta_2\)</span> representa la curvatura de la relación entre el peso y la altura, lo que hace que la interpretación sea más compleja.</p>
-<p>3.- <strong>Generación</strong>: El objetivo es construir un modelo que pueda generar nuevos datos que sean similares a los datos de entrenamiento.</p>
 </section>
-<section id="best_model" class="level2">
-<h2 class="anchored" data-anchor-id="best_model">¿Qué modelo modelo lineal es mejor?</h2>
-<p>Aunque hemos visto que el modelo lineal en el caso planteado es más interpretable, no todos los modelos son igual de buenos. Por ejemplo, en la figura siguiente se muestra el modelo lineal (línea verde) y un modelo con curvatura (línea azul) ajustados a los datos. ¿Cuál de los dos modelos es mejor?</p>
-<div id="83cbef1b" class="cell" data-execution_count="12">
-<div class="cell-output cell-output-display" data-execution_count="12">
-<div>
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-13-output-1.png" width="672" height="480" class="figure-img"></p>
+<section id="producto-escalar" class="level2">
+<h2 class="anchored" data-anchor-id="producto-escalar">Producto Escalar</h2>
+<p>El <strong>producto escalar</strong> (también conocido como producto punto o <em>dot product</em>) es una operación entre dos vectores que devuelve un <strong>único número real (un escalar)</strong>.</p>
+<p>Algebraicamente, si tenemos dos vectores en <span class="math inline">\(\mathbb{R}^2\)</span>, <span class="math inline">\(\vec{v} = [v_1, v_2]\)</span> y <span class="math inline">\(\vec{w} = [w_1, w_2]\)</span>, el producto escalar se calcula multiplicando componente a componente y sumando los resultados:</p>
+<p><span class="math display">\[
+\vec{v} \cdot \vec{w} = v_1 \cdot w_1 + v_2 \cdot w_2
+\]</span></p>
+<p>Geométricamente, el producto escalar nos indica cuánto de un vector se extiende en la dirección de otro. Está íntimamente ligado a la proyección y al ángulo <span class="math inline">\(\theta\)</span> entre ambos vectores mediante la fórmula:</p>
+<p><span class="math display">\[
+\vec{v} \cdot \vec{w} = \|\vec{v}\| \|\vec{w}\| \cos(\theta)
+\]</span></p>
+<p>Donde <span class="math inline">\(\|\vec{v}\|\)</span> y <span class="math inline">\(\|\vec{w}\|\)</span> son las magnitudes (longitudes) de los vectores. Si el producto escalar es positivo, los vectores apuntan en direcciones similares; si es negativo, apuntan en direcciones opuestas; y si es cero, son ortogonales (perpendiculares).</p>
+<div id="cell-fig-producto-escalar" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-stdout">
+<pre><code>El producto escalar de v y w es: 19</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div id="fig-producto-escalar" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-producto-escalar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="20_matrices_files/figure-html/fig-producto-escalar-output-2.png" width="480" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-producto-escalar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;4: Representación de vectores v (rojo) y w (azul). La línea discontinua marca la proyección geométrica.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>Obviamente la línea verde es mejor que la azul, pero ¿por qué? Para responder a esta pregunta, necesitamos entender el concepto de <strong>error</strong>. El error es la diferencia entre las predicciones del modelo y los valores reales de los datos. En este caso, el error se puede calcular como la distancia vertical entre cada punto de datos y la línea verde (modelo lineal). El modelo que minimiza el error total es el que mejor se ajusta a los datos. En este caso, el modelo lineal (línea verde) tiene un error total menor que el modelo con curvatura (línea azul), lo que indica que el modelo lineal es una mejor representación de la relación entre el peso y la altura en este conjunto de datos específico.</p>
-<p>Por ejemplo, para uno de los puntos con los que hemos ajustado los modelos, vemos que la línea verde tiene un error menor que la línea azul, lo que indica que el modelo lineal representado en verde se ajusta mejor a ese punto específico. Si tuviéramos en cuenta todos los puntos, podríamos calcular el error total para cada modelo y comparar cuál tiene el menor error total para determinar cuál es el mejor modelo en términos de ajuste a los datos.</p>
-<div id="37131c8f" class="cell" data-execution_count="13">
-<div class="cell-output cell-output-display" data-execution_count="13">
-<div>
-<figure class="figure">
-<p><img src="10_intro_files/figure-html/cell-14-output-1.png" width="672" height="480" class="figure-img"></p>
+</section>
+<section id="matrices" class="level2">
+<h2 class="anchored" data-anchor-id="matrices">Matrices</h2>
+<p>Tradicionalmente se enseña que una matriz es una simple “tabla de números”, y que multiplicar una matriz por un vector es una tediosa regla de cálculo (multiplicar filas por columnas).</p>
+<p>Sin embargo, la perspectiva más poderosa del álgebra lineal es geométrica: una matriz es una función que transforma el espacio. Toma un vector de entrada, lo mueve, lo rota, lo estira o lo deforma, y nos devuelve un vector de salida.</p>
+<p><span class="math display">\[f(\vec{v}) = A\vec{v}\]</span></p>
+<p>El Secreto: El destino de las Bases (<span class="math inline">\(\hat{i}\)</span> y <span class="math inline">\(\hat{j}\)</span>)</p>
+<p>Cualquier vector en el plano cartesiano es una combinación de los vectores unitarios básicos:</p>
+<p><span class="math inline">\(\hat{i} = [1, 0]\)</span> (un paso a la derecha)</p>
+<p><span class="math inline">\(\hat{j} = [0, 1]\)</span> (un paso hacia arriba)</p>
+<p>Si aplicamos una transformación lineal al espacio, todo el plano se deforma, pero las líneas paralelas siguen siendo paralelas y el origen <span class="math inline">\((0,0)\)</span> no se mueve. Debido a esta propiedad, si sabemos exactamente a dónde van a parar <span class="math inline">\(\hat{i}\)</span> y <span class="math inline">\(\hat{j}\)</span> tras la transformación, sabremos a dónde irá a parar absolutamente cualquier otro vector.</p>
+<p>Una matriz de <span class="math inline">\(2 \times 2\)</span> no es más que el registro de esos dos destinos:</p>
+<p><span class="math display">\[A = \begin{pmatrix} | &amp; | \\ \text{Destino de } \hat{i} &amp; \text{Destino de } \hat{j} \\ | &amp; | \end{pmatrix} = \begin{pmatrix} a &amp; b \\ c &amp; d \end{pmatrix}\]</span></p>
+<p>Donde:</p>
+<p>El nuevo destino de <span class="math inline">\(\hat{i}\)</span> es la primera columna: <span class="math inline">\([a, c]^T\)</span></p>
+<p>El nuevo destino de <span class="math inline">\(\hat{j}\)</span> es la segunda columna: <span class="math inline">\([b, d]^T\)</span></p>
+<p>Ejemplo Práctico: Una Deformación (Shear)</p>
+<p>Definamos una matriz de transformación <span class="math inline">\(T\)</span> que deforma el espacio lateralmente:</p>
+<p><span class="math display">\[
+\begin{aligned}
+T &amp;= \begin{pmatrix} 1 &amp; 1.5 \\ 0.5 &amp; 1 \end{pmatrix} \\
+T\hat{i} &amp;= \begin{pmatrix} 1 &amp; 1.5 \\ 0.5 &amp; 1 \end{pmatrix} \begin{pmatrix} 1 \\ 0 \end{pmatrix} = \begin{pmatrix} 1 \\ 0.5 \end{pmatrix} \\
+T\hat{j} &amp;= \begin{pmatrix} 1 &amp; 1.5 \\ 0.5 &amp; 1 \end{pmatrix} \begin{pmatrix} 0 \\ 1 \end{pmatrix} = \begin{pmatrix} 1.5 \\ 1 \end{pmatrix}
+\end{aligned}
+\]</span></p>
+<p>Esto significa que:</p>
+<p><span class="math inline">\(\hat{i} = [1, 0]\)</span> se moverá a su nueva posición: <span class="math inline">\([1, 0.5]\)</span></p>
+<p><span class="math inline">\(\hat{j} = [0, 1]\)</span> se moverá a su nueva posición: <span class="math inline">\([1.5, 1]\)</span></p>
+<p>Veamos que podemos transformar cualquier vector usando esta matriz. Por ejemplo, el vector <span class="math inline">\(\vec{v} = [2, 1.5]\)</span> se puede expresar como:</p>
+<p><span class="math display">\[
+\begin{aligned}
+T\vec{v} = \begin{pmatrix} 1 &amp; 1.5 \\ 0.5 &amp; 1 \end{pmatrix} \begin{pmatrix} 2 \\ 1.5 \end{pmatrix} \\
+&amp;= \begin{pmatrix} 1 \cdot 2 + 1.5 \cdot 1.5 \\ 0.5 \cdot 2 + 1 \cdot 1.5 \end{pmatrix} \\
+&amp;= \begin{pmatrix} 2 + 2.25 \\ 1 + 1.5 \end{pmatrix} \\
+&amp;= \begin{pmatrix} 4.25 \\ 2.5 \end{pmatrix}
+\end{aligned}
+\]</span></p>
+<p>O, si lo pensamos en términos de las bases:</p>
+<p><span class="math display">\[
+\begin{aligned}
+T\vec{v} &amp;= 2\hat{i} + 1.5\hat{j} \\
+&amp;= 2\hat{i} + 1.5\hat{j} \\
+&amp;= 2\begin{pmatrix} 1 \\ 0.5 \end{pmatrix} + 1.5\begin{pmatrix} 1.5 \\ 1 \end{pmatrix} \\
+&amp;= \begin{pmatrix} 2 \\ 1 \end{pmatrix} + \begin{pmatrix} 2.25 \\ 1.5 \end{pmatrix} \\
+&amp;= \begin{pmatrix} 4.25 \\ 2.5 \end{pmatrix}
+\end{aligned}
+\]</span></p>
+<div id="cell-fig-transformacion-lineal" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div id="fig-transformacion-lineal" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-transformacion-lineal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="20_matrices_files/figure-html/fig-transformacion-lineal-output-1.png" width="864" height="432" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-transformacion-lineal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;5: Izquierda: Espacio original con sus bases unitarias. Derecha: El espacio transformado por la matriz T.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
+</section>
+<section id="simulación" class="level2">
+<h2 class="anchored" data-anchor-id="simulación">Simulación</h2>
+<p>Utiliza el siguiente <a href="../../linear_transformations.html" target="_blank">laboratorio interactivo</a> para visualizar en tiempo real cómo la matriz de transformación deforma el espacio.</p>
+<p>Puedes cambiar los valores numéricos de la matriz directamente o arrastrar los sliders para realizar transformaciones personalizadas.</p>
+<p>Haz clic en “Transformar” para ver la transición animada desde el plano cartesiano estándar, o en “Espacio Original” para regresar a la identidad.</p>
+<p>Explora los Presets Rápidos para entender casos clave como las rotaciones puras, los cizallamientos (shearing) o el caso crítico de la pérdida de dimensión.</p>
+<p>Al interactuar con la simulación, presta especial atención a los siguientes fenómenos matemáticos:</p>
+<ol type="1">
+<li>La Deformación Lateral (Shear)</li>
+</ol>
+<p>Si configuras la matriz como <span class="math inline">\(\begin{pmatrix} 1 &amp; 1.2 \\ 0 &amp; 1 \end{pmatrix}\)</span>, notarás que los puntos a lo largo del eje X no cambian su componente Y, pero se desplazan horizontalmente de forma proporcional a su altura. Esto es un ejemplo de cómo una transformación lineal puede alterar los ángulos entre líneas sin curvarlas.</p>
+<ol start="2" type="1">
+<li>El Determinante como Escalador de Área</li>
+</ol>
+<p>El determinante de la matriz <span class="math inline">\(A\)</span> (calculado automáticamente en el panel inferior) tiene un significado geométrico absoluto: es el factor por el cual se multiplican todas las áreas en el plano.</p>
+<p>Si dibujas un cuadrado de área <span class="math inline">\(1 \times 1\)</span> en el espacio original, tras aplicar una transformación con un determinante de <span class="math inline">\(2.5\)</span>, el polígono de la estrella y el fondo se estirarán cubriendo exactamente un área <span class="math inline">\(2.5\)</span> veces mayor.</p>
+<p>Si el determinante es negativo, significa que el espacio se ha “invertido” tridimensionalmente (reflejado como en un espejo).</p>
+</section>
+<section id="transformaciones-multidimensionales-mathbbrn-to-mathbbrm" class="level2">
+<h2 class="anchored" data-anchor-id="transformaciones-multidimensionales-mathbbrn-to-mathbbrm">Transformaciones Multidimensionales (<span class="math inline">\(\mathbb{R}^n \to \mathbb{R}^m\)</span>)</h2>
+<p>Hasta ahora, hemos explorado transformaciones donde la dimensión del espacio de entrada es la misma que la del espacio de salida (<span class="math inline">\(\mathbb{R}^2 \to \mathbb{R}^2\)</span>), lo que geométricamente se traduce en deformar, rotar o escalar un plano manteniéndonos dentro del mismo plano. Esto requiere matrices cuadradas de <span class="math inline">\(2 \times 2\)</span>.</p>
+<p>Sin embargo, el álgebra lineal despliega todo su poder cuando las matrices no son cuadradas. Una transformación lineal puede tomar un vector de una dimensión y proyectarlo o mapearlo de forma limpia a un espacio dimensional completamente diferente (<span class="math inline">\(\mathbb{R}^n \to \mathbb{R}^m\)</span>).</p>
+<ol type="1">
+<li>Inmersión en Mayor Dimensión: De 2D a 3D (<span class="math inline">\(\mathbb{R}^2 \to \mathbb{R}^3\)</span>)</li>
+</ol>
+<p>Imagina que tienes una hoja de papel bidimensional (nuestro plano <span class="math inline">\(\mathbb{R}^2\)</span> de entrada) y deseas suspenderla, rotarla o doblarla de forma rígida dentro de una habitación tridimensional (<span class="math inline">\(\mathbb{R}^3\)</span>). Para lograr este viaje dimensional, necesitamos una matriz de <span class="math inline">\(3 \times 2\)</span> (3 filas, 2 columnas).</p>
+<p><span class="math display">\[A = \begin{pmatrix} a &amp; b \\ c &amp; d \\ e &amp; f \end{pmatrix}\]</span></p>
+<p>Esta matriz toma un vector de entrada de dos dimensiones <span class="math inline">\(\vec{v} = [x, y]^T\)</span> y produce un vector de salida de tres dimensiones <span class="math inline">\(\vec{v}' = [x', y', z']^T\)</span>:</p>
+<p><span class="math display">\[\vec{v}' = A\vec{v} = \begin{pmatrix} a &amp; b \\ c &amp; d \\ e &amp; f \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} ax + by \\ cx + dy \\ ex + fy \end{pmatrix}\]</span></p>
+<p>La Intuición Geométrica</p>
+<p>¿Recuerdas el “secreto” de los vectores unitarios base <span class="math inline">\(\hat{i}\)</span> y <span class="math inline">\(\hat{j}\)</span>? Aquí se aplica exactamente el mismo principio:</p>
+<p>La primera columna de la matriz, <span class="math inline">\([a, c, e]^T\)</span>, representa las coordenadas tridimensionales de destino del vector unitario <span class="math inline">\(\hat{i}\)</span>.</p>
+<p>La segunda columna, <span class="math inline">\([b, d, f]^T\)</span>, representa el destino en el espacio 3D del vector unitario <span class="math inline">\(\hat{j}\)</span>.</p>
+<p>Dado que dos vectores solo pueden generar, a lo sumo, un plano (un subespacio de dimensión 2), el espacio de salida de esta transformación no llenará las tres dimensiones de la habitación, sino que representará un plano perfectamente plano flotando o inclinado en el espacio tridimensional.</p>
+<ol start="2" type="1">
+<li>Reducción de Dimensión: De 3D a 2D (<span class="math inline">\(\mathbb{R}^3 \to \mathbb{R}^2\)</span>)</li>
+</ol>
+<p>El caso inverso es igualmente fascinante. Consiste en tomar un espacio tridimensional de entrada (como un objeto en un videojuego o el propio mundo real) y “aplastarlo” o proyectarlo sobre una pantalla plana bidimensional. Esta es la base de los motores gráficos de renderizado y el análisis de reducción de dimensiones (como PCA).</p>
+<p>Para proyectar de <span class="math inline">\(\mathbb{R}^3 \to \mathbb{R}^2\)</span>, utilizamos una matriz de <span class="math inline">\(2 \times 3\)</span> (2 filas, 3 columnas):</p>
+<p><span class="math display">\[B = \begin{pmatrix} a &amp; b &amp; c \\ d &amp; e &amp; f \end{pmatrix}\]</span></p>
+<p>La matriz actúa sobre un vector de entrada en 3D <span class="math inline">\(\vec{u} = [x, y, z]^T\)</span>, dando como resultado un vector en 2D <span class="math inline">\(\vec{u}' = [x', y']^T\)</span>:</p>
+<p><span class="math display">\[\vec{u}' = B\vec{u} = \begin{pmatrix} a &amp; b &amp; c \\ d &amp; e &amp; f \end{pmatrix} \begin{pmatrix} x \\ y \\ z \end{pmatrix} = \begin{pmatrix} ax + by + cz \\ dx + ey + fz \end{pmatrix}\]</span></p>
+<p>La Intuición de la Sombra</p>
+<p>Geométricamente, esta transformación calcula una proyección (similar a cómo la luz de una linterna proyecta la sombra de un objeto 3D sobre una pared plana). Las columnas de la matriz nos indican a qué punto del lienzo 2D va a parar cada uno de los tres vectores unitarios tridimensionales:</p>
+<p><span class="math inline">\(\hat{i} = [1, 0, 0]^T \to [a, d]^T\)</span></p>
+<p><span class="math inline">\(\hat{j} = [0, 1, 0]^T \to [b, e]^T\)</span></p>
+<p><span class="math inline">\(\hat{k} = [0, 0, 1]^T \to [c, f]^T\)</span></p>
+<p>Este salto dimensional demuestra que las matrices son, en esencia, traductores geométricos que nos permiten conectar y modelar mundos matemáticos de diferentes dimensiones de forma extremadamente limpia y compacta.</p>
 
 
 </section>

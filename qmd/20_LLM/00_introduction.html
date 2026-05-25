@@ -106,7 +106,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">¿Qué es un modelo de lenguaje grande (LLM)?</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">¿Qué es LLM?</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
@@ -179,7 +179,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../qmd/20_LLM/00_introduction.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">¿Qué es un modelo de lenguaje grande (LLM)?</span></a>
+ <span class="menu-text">¿Qué es LLM?</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -192,6 +192,18 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="../../qmd/20_LLM/20_word2vec.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/30_similarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Similitud entre palabras</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/40_attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mecanismo de Atención</span></a>
   </div>
 </li>
       </ul>
@@ -213,6 +225,18 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/20_matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Álgebra Lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../linear_transformations.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Transformaciones lineales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../presentacion_2025.html" class="sidebar-item-text sidebar-link" target="_blank">
  <span class="menu-text">Presentación 2025</span></a>
   </div>
@@ -229,7 +253,7 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">En esta página</h2>
    
   <ul>
-  <li><a href="#qué-es-un-modelo-de-lenguaje-grande-llm" id="toc-qué-es-un-modelo-de-lenguaje-grande-llm" class="nav-link active" data-scroll-target="#qué-es-un-modelo-de-lenguaje-grande-llm">¿Qué es un modelo de lenguaje grande (LLM)?</a></li>
+  <li><a href="#qué-es-llm" id="toc-qué-es-llm" class="nav-link active" data-scroll-target="#qué-es-llm">¿Qué es LLM?</a></li>
   <li><a href="#definiciones" id="toc-definiciones" class="nav-link" data-scroll-target="#definiciones">Definiciones</a>
   <ul class="collapse">
   <li><a href="#nlp" id="toc-nlp" class="nav-link" data-scroll-target="#nlp">NLP</a></li>
@@ -255,13 +279,13 @@ ul.task-list li input[type="checkbox"] {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">¿Qué es un modelo de lenguaje grande (LLM)?</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">¿Qué es LLM?</a></li></ol></nav></header>
 
 
 
 
-<section id="qué-es-un-modelo-de-lenguaje-grande-llm" class="level2">
-<h2 class="anchored" data-anchor-id="qué-es-un-modelo-de-lenguaje-grande-llm">¿Qué es un modelo de lenguaje grande (LLM)?</h2>
+<section id="qué-es-llm" class="level2">
+<h2 class="anchored" data-anchor-id="qué-es-llm">¿Qué es LLM?</h2>
 <p>En noviembre de 2022, OpenAI lanzó ChatGPT, un modelo de lenguaje grande (LLM) que se hizo viral casi de inmediato. Desde entonces, los LLM se han convertido en una de las tecnologías más disruptivas en el campo de la inteligencia artificial, con aplicaciones que van desde la generación de texto hasta la traducción automática y la creación de aplicaciones. Hoy todos estamos usando modelos de lenguaje en nuestro día a día para infinidad de tareas. El campo del desarrollo de software es uno de los más afectados por esta tecnología, y es fundamental que los programadores comprendan cómo funcionan los LLM para aprovechar al máximo su potencial.</p>
 <p>Cuando un LLM responde a una petición de un usuario, da la impresión de que ha comprendido la tarea que se le ha encomendado y que sabe construir una respuesta adecuada. En definitiva, que el LLM conoce el significado de las palabras y las reglas que gramaticales que rigen el lenguaje en el que se está comunicando. En realidad, no es así, el LLM no ha aprendido en su entrenamiento reglas, sino asociaciones entre palabras. Sabe, por ejemplo, que la palabra “gato” a menudo se asocia con palabras como “maullar”, “pelaje”, “ratón”, etc., pero no sabe qué es un gato ni por qué esas palabras están asociadas con él. A diferencia de los humanos, los LLM no tienen experiencia directa con el mundo físico, por lo que no pueden aprender el significado de las palabras a través de la experiencia. En cambio, los LLM aprenden a asociar palabras con otras palabras a través de un proceso de entrenamiento en el que se les muestra una gran cantidad de texto y se les pide que predigan la siguiente palabra en una secuencia. A través de este proceso, los LLM aprenden a asignar números a las palabras, y estas asociaciones numéricas les permiten generar texto coherente y relevante en respuesta a las solicitudes de los usuarios. Sin embargo, también hay parecidos entre el proceso de aprendizaje de los LLM y el de los humanos. Cuando un niño aprende a hablar no necesita saber lo que es el sujeto y el predicado ni conjugar verbos cara construir oraciones gramaticalmente correctas. En cambio, aprende a asociar palabras con otras palabras a través de la exposición al lenguaje en su entorno.</p>
 </section>

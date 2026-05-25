@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Matriz como Transformación Lineal</title>
+    <!-- Tailwind CSS para el diseño premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Plotly.js para gráficos científicos e interactivos -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <!-- Google Fonts para tipografía moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .math-font {
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header de la aplicación -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 py-4 px-6 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-indigo-600 rounded-lg text-white shadow-md shadow-indigo-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-white">Visualizador de Álgebra Lineal</h1>
+                    <p class="text-xs text-slate-400">Las matrices como transformaciones del espacio bidimensional</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <span class="px-3 py-1 bg-slate-800 border border-slate-700 rounded-full text-xs font-semibold text-slate-300">Plotly.js Active</span>
+                <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-xs font-semibold text-indigo-400">Interactivo</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Panel de Control Izquierdo (4 columnas en pantallas grandes) -->
+        <section class="lg:col-span-4 space-y-6">
+            
+            <!-- Tarjeta 1: Control de Estado de Transformación -->
+            <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700/60 shadow-xl space-y-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Estado de la Transformación
+                </h2>
+                <p class="text-sm text-slate-400">
+                    Cambia instantáneamente entre el espacio original y la transformación aplicada con una transición matemática interpolada.
+                </p>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button id="btn-orig" class="px-4 py-3 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white rounded-xl font-bold transition-all border border-slate-600 flex flex-col items-center justify-center gap-1">
+                        <span class="text-xs text-slate-300">Identidad</span>
+                        <span class="text-sm">Espacio Original</span>
+                    </button>
+                    <button id="btn-trans" class="px-4 py-3 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-xl font-bold transition-all border border-indigo-500 shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center gap-1">
+                        <span class="text-xs text-indigo-200">Matriz A</span>
+                        <span class="text-sm">Transformar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tarjeta 2: Editor de la Matriz 2x2 -->
+            <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700/60 shadow-xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-white">Matriz de Transformación A</h2>
+                    <span class="text-xs font-mono text-indigo-400">A · [x, y]ᵀ</span>
+                </div>
+                
+                <!-- Inputs de la Matriz en formato matricial real -->
+                <div class="flex items-center justify-center gap-3 py-4">
+                    <span class="text-5xl font-extralight text-slate-500 scale-y-150">[</span>
+                    <div class="grid grid-cols-2 gap-4 w-48">
+                        <div>
+                            <label class="block text-xs text-center text-slate-400 font-mono mb-1">a (i_x)</label>
+                            <input type="number" id="mat-a" step="0.1" value="1.0" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-center text-white font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-center text-slate-400 font-mono mb-1">b (j_x)</label>
+                            <input type="number" id="mat-b" step="0.1" value="1.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-center text-white font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-center text-slate-400 font-mono mb-1">c (i_y)</label>
+                            <input type="number" id="mat-c" step="0.1" value="0.5" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-center text-white font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-center text-slate-400 font-mono mb-1">d (j_y)</label>
+                            <input type="number" id="mat-d" step="0.1" value="1.0" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-center text-white font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <span class="text-5xl font-extralight text-slate-500 scale-y-150">]</span>
+                </div>
+
+                <!-- Sliders para ajustar de forma interactiva y ver el movimiento instantáneo -->
+                <div class="space-y-3 pt-2">
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span>Componente a (Estiramiento X de i-hat)</span>
+                            <span id="val-a" class="text-indigo-400 font-mono font-bold">1.0</span>
+                        </div>
+                        <input type="range" id="slide-a" min="-3" max="3" step="0.1" value="1.0" class="w-full accent-indigo-500">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span>Componente b (Desplazamiento X de j-hat)</span>
+                            <span id="val-b" class="text-indigo-400 font-mono font-bold">1.5</span>
+                        </div>
+                        <input type="range" id="slide-b" min="-3" max="3" step="0.1" value="1.5" class="w-full accent-indigo-500">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span>Componente c (Desplazamiento Y de i-hat)</span>
+                            <span id="val-c" class="text-indigo-400 font-mono font-bold">0.5</span>
+                        </div>
+                        <input type="range" id="slide-c" min="-3" max="3" step="0.1" value="0.5" class="w-full accent-indigo-500">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-400 mb-1">
+                            <span>Componente d (Estiramiento Y de j-hat)</span>
+                            <span id="val-d" class="text-indigo-400 font-mono font-bold">1.0</span>
+                        </div>
+                        <input type="range" id="slide-d" min="-3" max="3" step="0.1" value="1.0" class="w-full accent-indigo-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 3: Presets de Transformaciones Comunes -->
+            <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700/60 shadow-xl space-y-4">
+                <h2 class="text-lg font-bold text-white">Casos de Estudio (Presets)</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <button class="preset-btn px-3 py-2 bg-slate-900 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700/60 text-left transition-colors" data-a="1" data-b="1.5" data-c="0" data-d="1">
+                        🌾 Deformación (Shear)
+                    </button>
+                    <button class="preset-btn px-3 py-2 bg-slate-900 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700/60 text-left transition-colors" data-a="0.7" data-b="-0.7" data-c="0.7" data-d="0.7">
+                        🔄 Rotación (45°)
+                    </button>
+                    <button class="preset-btn px-3 py-2 bg-slate-900 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700/60 text-left transition-colors" data-a="1.5" data-b="0" data-c="0" data-d="1.5">
+                        🔍 Escalado Homogéneo
+                    </button>
+                    <button class="preset-btn px-3 py-2 bg-slate-900 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700/60 text-left transition-colors" data-a="1" data-b="0" data-c="0" data-d="-1">
+                        🪞 Reflexión en Y
+                    </button>
+                    <button class="preset-btn px-3 py-2 bg-rose-950/40 hover:bg-rose-900/40 text-rose-300 rounded-lg border border-rose-900/50 text-left transition-colors font-semibold col-span-2" data-a="1" data-b="2" data-c="1" data-d="2">
+                        💥 Colapso Dimensional (Det = 0)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tarjeta 4: El Determinante como Escalador de Áreas -->
+            <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700/60 shadow-xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold tracking-widest uppercase text-slate-400">Propiedades del Espacio</h2>
+                    <span id="det-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase"></span>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <span class="text-sm text-slate-300">Determinante de A:</span>
+                    <span id="det-value" class="text-2xl font-black font-mono text-indigo-400">1.00</span>
+                </div>
+                <p id="det-explanation" class="text-xs text-slate-400 leading-relaxed pt-1">
+                    El determinante mide el factor de escala por el cual se multiplican todas las áreas tras la transformación.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- Panel del Gráfico (8 columnas en pantallas grandes) -->
+        <section class="lg:col-span-8 bg-slate-800 rounded-2xl border border-slate-700/60 shadow-xl overflow-hidden flex flex-col">
+            
+            <div class="p-6 border-b border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-800/50">
+                <div>
+                    <h2 class="text-lg font-extrabold text-white">Visualización del Plano Euclidiano</h2>
+                    <p class="text-xs text-slate-400">Observa cómo la estrella y la cuadrícula entera se deforma bajo la matriz A</p>
+                </div>
+                <!-- Mini-leyenda personalizada -->
+                <div class="flex flex-wrap gap-4 text-xs font-medium">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-red-500 rounded-full inline-block"></span>i-hat (Base X)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-green-500 rounded-full inline-block"></span>j-hat (Base Y)</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-amber-500/20 border border-amber-400 rounded inline-block"></span>Estrella</span>
+                </div>
+            </div>
+
+            <!-- Div del lienzo de Plotly -->
+            <div class="flex-grow w-full h-[550px]" id="plotly-canvas"></div>
+            
+            <div class="p-4 bg-slate-900/50 border-t border-slate-700/60 flex flex-col sm:flex-row justify-between text-xs text-slate-400 gap-2">
+                <div>
+                    <span class="font-bold text-slate-300">Fórmula de Transformación:</span> 
+                    <span class="font-mono text-indigo-300">[x', y']ᵀ = [ax + by, cx + dy]ᵀ</span>
+                </div>
+                <div>
+                    <span>Usa los sliders de la izquierda para ver el movimiento en tiempo real.</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Declaración de variables globales de coordenadas
+        const GRID_LIMIT = 5;
+        let origGrid = [];
+        let origAxes = [];
+        let origStar = [];
+
+        // Generar las líneas de la cuadrícula originales
+        function buildOriginalCoordinates() {
+            origGrid = [];
+            // Líneas verticales
+            for (let x = -GRID_LIMIT; x <= GRID_LIMIT; x++) {
+                origGrid.push({x: x, y: -GRID_LIMIT}, {x: x, y: GRID_LIMIT}, {x: null, y: null});
+            }
+            // Líneas horizontales
+            for (let y = -GRID_LIMIT; y <= GRID_LIMIT; y++) {
+                origGrid.push({x: -GRID_LIMIT, y: y}, {x: GRID_LIMIT, y: y}, {x: null, y: null});
+            }
+
+            // Ejes centrales principales (X e Y para destacarlos)
+            origAxes = [
+                {x: -GRID_LIMIT, y: 0}, {x: GRID_LIMIT, y: 0}, {x: null, y: null},
+                {x: 0, y: -GRID_LIMIT}, {x: 0, y: GRID_LIMIT}
+            ];
+
+            // Generar los puntos de una estrella de 5 puntas alrededor del origen
+            origStar = [];
+            const pointsCount = 10;
+            for (let i = 0; i <= pointsCount; i++) {
+                // Rotar para que la estrella apunte hacia arriba
+                const angle = (i * Math.PI) / 5 - Math.PI / 2;
+                const r = (i % 2 === 0) ? 1.8 : 0.7; // Alterna entre radios exteriores e interiores
+                origStar.push({
+                    x: r * Math.cos(angle),
+                    y: r * Math.sin(angle)
+                });
+            }
+        }
+
+        // Lógica matemática de transformación lineal: M * v
+        function transformPoint(p, M) {
+            if (p.x === null || p.y === null) return {x: null, y: null};
+            return {
+                x: M[0][0] * p.x + M[0][1] * p.y,
+                y: M[1][0] * p.x + M[1][1] * p.y
+            };
+        }
+
+        // Generar coordenadas de vectores con cabezas de flecha que giran con la transformación
+        function getArrowPoints(startX, startY, endX, endY) {
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const len = Math.sqrt(dx*dx + dy*dy);
+            if (len === 0) return { x: [startX], y: [startY] };
+            
+            const arrowLength = 0.25; // Tamaño del pico de la flecha
+            const angle = Math.atan2(dy, dx);
+            
+            // Alas de la flecha orientadas hacia atrás
+            const x1 = endX - arrowLength * Math.cos(angle - 0.3);
+            const y1 = endY - arrowLength * Math.sin(angle - 0.3);
+            const x2 = endX - arrowLength * Math.cos(angle + 0.3);
+            const y2 = endY - arrowLength * Math.sin(angle + 0.3);
+            
+            return {
+                x: [startX, endX, x1, null, endX, x2],
+                y: [startY, endY, y1, null, endY, y2]
+            };
+        }
+
+        // Inicialización de Plotly
+        const plotContainer = document.getElementById('plotly-canvas');
+        
+        // Matrices de estado
+        let matrixA = [[1.0, 1.5], [0.5, 1.0]]; // Matriz actual editada por el usuario
+        let currentMatrix = [[1.0, 0.0], [0.0, 1.0]]; // Estado geométrico actual del gráfico
+        let targetMatrix = [[1.0, 0.0], [0.0, 1.0]];  // Hacia dónde queremos ir
+        let startMatrix = [[1.0, 0.0], [0.0, 1.0]];   // Dónde empezamos la transición
+        
+        let animationStart = null;
+        const animationDuration = 750; // Duración de la animación en ms
+
+        buildOriginalCoordinates();
+
+        // Estructura inicial del layout del gráfico de Plotly
+        const layout = {
+            autosize: true,
+            showlegend: false,
+            plot_bgcolor: '#0f172a', // Fondo pizarra oscuro
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            margin: { l: 20, r: 20, t: 20, b: 20 },
+            xaxis: {
+                range: [-6, 6],
+                showgrid: false,
+                zeroline: false,
+                tickfont: { color: '#64748b' },
+                fixedrange: true // Evita zooms raros accidentados en móvil
+            },
+            yaxis: {
+                range: [-6, 6],
+                showgrid: false,
+                zeroline: false,
+                tickfont: { color: '#64748b' },
+                fixedrange: true
+            }
+        };
+
+        // Generamos los objetos de datos vacíos iniciales para Plotly
+        const traceData = [
+            // Trace 0: Cuadrícula principal (líneas delgadas)
+            { x: [], y: [], mode: 'lines', line: { color: '#334155', width: 1 }, hoverinfo: 'none' },
+            // Trace 1: Ejes centrales destacables
+            { x: [], y: [], mode: 'lines', line: { color: '#475569', width: 2 }, hoverinfo: 'none' },
+            // Trace 2: Estrella (Polígono relleno)
+            { 
+                x: [], y: [], 
+                mode: 'lines+markers', 
+                fill: 'toself', 
+                fillcolor: 'rgba(245, 158, 11, 0.25)', // Naranja traslúcido
+                line: { color: '#f59e0b', width: 3 }, 
+                marker: { color: '#fbbf24', size: 6 },
+                name: 'Estrella' 
+            },
+            // Trace 3: Vector base i-hat (Rojo)
+            { x: [], y: [], mode: 'lines', line: { color: '#ef4444', width: 4 }, name: 'i-hat' },
+            // Trace 4: Vector base j-hat (Verde)
+            { x: [], y: [], mode: 'lines', line: { color: '#10b981', width: 4 }, name: 'j-hat' }
+        ];
+
+        // Crear el gráfico vacío de Plotly
+        Plotly.newPlot(plotContainer, traceData, layout, { displayModeBar: false, responsive: true });
+
+        // Función para recalcular todo y actualizar el gráfico con un estado de matriz M dado
+        function updatePlotData(M) {
+            // 1. Transformar cuadrícula
+            const transGrid = origGrid.map(p => transformPoint(p, M));
+            const gridX = transGrid.map(p => p.x);
+            const gridY = transGrid.map(p => p.y);
+
+            // 2. Transformar ejes centrales
+            const transAxes = origAxes.map(p => transformPoint(p, M));
+            const axesX = transAxes.map(p => p.x);
+            const axesY = transAxes.map(p => p.y);
+
+            // 3. Transformar estrella
+            const transStar = origStar.map(p => transformPoint(p, M));
+            const starX = transStar.map(p => p.x);
+            const starY = transStar.map(p => p.y);
+
+            // 4. Transformar vectores base i-hat y j-hat
+            const destI = transformPoint({x: 1, y: 0}, M);
+            const destJ = transformPoint({x: 0, y: 1}, M);
+
+            const arrowI = getArrowPoints(0, 0, destI.x, destI.y);
+            const arrowJ = getArrowPoints(0, 0, destJ.x, destJ.y);
+
+            // Actualizar datos del gráfico en Plotly
+            Plotly.restyle(plotContainer, {
+                x: [gridX, axesX, starX, arrowI.x, arrowJ.x],
+                y: [gridY, axesY, starY, arrowI.y, arrowJ.y]
+            }, [0, 1, 2, 3, 4]);
+        }
+
+        // Motor de animación (Interpolación no lineal de fotogramas usando cubic-bezier aproximado)
+        function performTransition(timestamp) {
+            if (!animationStart) animationStart = timestamp;
+            const elapsed = timestamp - animationStart;
+            const progress = Math.min(elapsed / animationDuration, 1);
+            
+            // Curva de aceleración (Cubic ease-in-out) para máxima suavidad visual
+            const ease = progress < 0.5 
+                ? 4 * progress * progress * progress 
+                : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+            // Interpolar cada una de las componentes de la matriz 2x2
+            const a = startMatrix[0][0] + (targetMatrix[0][0] - startMatrix[0][0]) * ease;
+            const b = startMatrix[0][1] + (targetMatrix[0][1] - startMatrix[0][1]) * ease;
+            const c = startMatrix[1][0] + (targetMatrix[1][0] - startMatrix[1][0]) * ease;
+            const d = startMatrix[1][1] + (targetMatrix[1][1] - startMatrix[1][1]) * ease;
+            
+            currentMatrix = [[a, b], [c, d]];
+            
+            updatePlotData(currentMatrix);
+            
+            if (progress < 1) {
+                requestAnimationFrame(performTransition);
+            } else {
+                animationStart = null;
+            }
+        }
+
+        // Activa la animación hacia una matriz objetivo
+        function triggerAnimationTo(target) {
+            startMatrix = [
+                [currentMatrix[0][0], currentMatrix[0][1]],
+                [currentMatrix[1][0], currentMatrix[1][1]]
+            ];
+            targetMatrix = target;
+            animationStart = null;
+            requestAnimationFrame(performTransition);
+        }
+
+        // Obtener elementos UI
+        const inputA = document.getElementById('mat-a');
+        const inputB = document.getElementById('mat-b');
+        const inputC = document.getElementById('mat-c');
+        const inputD = document.getElementById('mat-d');
+
+        const slideA = document.getElementById('slide-a');
+        const slideB = document.getElementById('slide-b');
+        const slideC = document.getElementById('slide-c');
+        const slideD = document.getElementById('slide-d');
+
+        const valA = document.getElementById('val-a');
+        const valB = document.getElementById('val-b');
+        const valC = document.getElementById('val-c');
+        const valD = document.getElementById('val-d');
+
+        const detValueLabel = document.getElementById('det-value');
+        const detBadge = document.getElementById('det-badge');
+        const detExplanation = document.getElementById('det-explanation');
+
+        // Recalcular métricas de determinante en la UI
+        function updateDeterminantUI() {
+            const a = matrixA[0][0];
+            const b = matrixA[0][1];
+            const c = matrixA[1][0];
+            const d = matrixA[1][1];
+
+            const det = a * d - b * c;
+            detValueLabel.textContent = det.toFixed(2);
+
+            if (Math.abs(det) < 0.01) {
+                detBadge.textContent = "Singular (Dim=1)";
+                detBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/10 text-rose-400 border border-rose-500/30";
+                detExplanation.textContent = "¡Colapso espacial! El determinante es 0. El plano 2D ha sido aplastado a una sola línea unidimensional. Se ha perdido información irrecuperable.";
+            } else if (det < 0) {
+                detBadge.textContent = "Invertido";
+                detBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/30";
+                detExplanation.textContent = "El determinante es negativo. Además de escalar las áreas, la orientación del espacio se ha invertido (espejo).";
+            } else {
+                detBadge.textContent = "Preservado";
+                detBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/30";
+                detExplanation.textContent = `Las áreas del plano se multiplican por un factor de ${Math.abs(det).toFixed(2)}. La orientación espacial se mantiene normal.`;
+            }
+        }
+
+        // Actualizar matriz desde sliders o inputs y re-evaluar estados
+        function syncMatrixFromSliders() {
+            matrixA = [
+                [parseFloat(slideA.value), parseFloat(slideB.value)],
+                [parseFloat(slideC.value), parseFloat(slideD.value)]
+            ];
+
+            inputA.value = slideA.value;
+            inputB.value = slideB.value;
+            inputC.value = slideC.value;
+            inputD.value = slideD.value;
+
+            valA.textContent = parseFloat(slideA.value).toFixed(1);
+            valB.textContent = parseFloat(slideB.value).toFixed(1);
+            valC.textContent = parseFloat(slideC.value).toFixed(1);
+            valD.textContent = parseFloat(slideD.value).toFixed(1);
+
+            updateDeterminantUI();
+
+            // Si estamos en vista de transformación activa, actualizar el gráfico de inmediato
+            if (targetMatrix[0][0] !== 1.0 || targetMatrix[0][1] !== 0.0 || targetMatrix[1][0] !== 0.0 || targetMatrix[1][1] !== 1.0) {
+                targetMatrix = matrixA;
+                currentMatrix = matrixA;
+                updatePlotData(currentMatrix);
+            }
+        }
+
+        function syncMatrixFromInputs() {
+            matrixA = [
+                [parseFloat(inputA.value) || 0, parseFloat(inputB.value) || 0],
+                [parseFloat(inputC.value) || 0, parseFloat(inputD.value) || 0]
+            ];
+
+            slideA.value = matrixA[0][0];
+            slideB.value = matrixA[0][1];
+            slideC.value = matrixA[1][0];
+            slideD.value = matrixA[1][1];
+
+            valA.textContent = matrixA[0][0].toFixed(1);
+            valB.textContent = matrixA[0][1].toFixed(1);
+            valC.textContent = matrixA[1][0].toFixed(1);
+            valD.textContent = matrixA[1][1].toFixed(1);
+
+            updateDeterminantUI();
+
+            if (targetMatrix[0][0] !== 1.0 || targetMatrix[0][1] !== 0.0 || targetMatrix[1][0] !== 0.0 || targetMatrix[1][1] !== 1.0) {
+                targetMatrix = matrixA;
+                currentMatrix = matrixA;
+                updatePlotData(currentMatrix);
+            }
+        }
+
+        // Añadir escuchadores de sliders
+        slideA.addEventListener('input', syncMatrixFromSliders);
+        slideB.addEventListener('input', syncMatrixFromSliders);
+        slideC.addEventListener('input', syncMatrixFromSliders);
+        slideD.addEventListener('input', syncMatrixFromSliders);
+
+        // Añadir escuchadores de inputs directos
+        inputA.addEventListener('change', syncMatrixFromInputs);
+        inputB.addEventListener('change', syncMatrixFromInputs);
+        inputC.addEventListener('change', syncMatrixFromInputs);
+        inputD.addEventListener('change', syncMatrixFromInputs);
+
+        // Botones de Estado Principal
+        document.getElementById('btn-orig').addEventListener('click', () => {
+            // Desactiva temporalmente el color de selección de transformar y activa identidad
+            document.getElementById('btn-orig').classList.add('bg-slate-700', 'border-slate-500');
+            document.getElementById('btn-orig').classList.remove('bg-slate-800');
+            document.getElementById('btn-trans').classList.add('bg-slate-800');
+            document.getElementById('btn-trans').classList.remove('bg-indigo-600', 'border-indigo-500');
+
+            triggerAnimationTo([[1.0, 0.0], [0.0, 1.0]]);
+        });
+
+        document.getElementById('btn-trans').addEventListener('click', () => {
+            // Activa visual de transformar
+            document.getElementById('btn-trans').classList.add('bg-indigo-600', 'border-indigo-500');
+            document.getElementById('btn-trans').classList.remove('bg-slate-800');
+            document.getElementById('btn-orig').classList.add('bg-slate-800');
+            document.getElementById('btn-orig').classList.remove('bg-slate-700', 'border-slate-500');
+
+            triggerAnimationTo(matrixA);
+        });
+
+        // Configuración de botones de presets
+        document.querySelectorAll('.preset-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const a = parseFloat(e.target.dataset.a);
+                const b = parseFloat(e.target.dataset.b);
+                const c = parseFloat(e.target.dataset.c);
+                const d = parseFloat(e.target.dataset.d);
+
+                inputA.value = a;
+                inputB.value = b;
+                inputC.value = c;
+                inputD.value = d;
+
+                syncMatrixFromInputs();
+
+                // Forzar animación al preset
+                document.getElementById('btn-trans').click();
+            });
+        });
+
+        // Inicializar pintando el espacio original en el primer renderizado
+        syncMatrixFromSliders();
+        updatePlotData(currentMatrix);
+
+        // Ajustar tamaño del plot de Plotly al cambiar el tamaño del navegador
+        window.addEventListener('resize', () => {
+            Plotly.Plots.resize(plotContainer);
+        });
+
+    </script>
+</body>
+</html>
