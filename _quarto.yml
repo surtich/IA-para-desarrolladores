@@ -24,6 +24,7 @@ website:
         - section: "LLM"
           contents:
             - qmd/20_LLM/00_introduction.qmd
+            - qmd/20_LLM/05_tokenization.qmd
             - qmd/20_LLM/10_word_embeddings.qmd
             - qmd/20_LLM/20_word2vec.qmd
             - qmd/20_LLM/30_similarity.qmd
@@ -33,7 +34,7 @@ website:
           contents:
               - qmd/90_apendices/10_derivadas.qmd
               - qmd/90_apendices/20_matrices.qmd
-              - text: "Transformaciones lineales"
+              - text: "Demo: Transformaciones lineales"
                 href: linear_transformations.html
                 target: _blank
               - text: "Presentación 2025"

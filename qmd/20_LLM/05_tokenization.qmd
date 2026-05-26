@@ -1,0 +1,400 @@
+---
+title: Tokenización
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+Para que un modelo de lenguaje (LLM) procese información, primero debe transformar el lenguaje humano en una representación matemática. El proceso comienza con el **corpus**, un conjunto vasto de datos textuales (libros, artículos, código, etc.) que sirve como "base de conocimiento" durante el entrenamiento.
+
+Sin embargo, las máquinas no procesan caracteres o palabras directamente, sino números. La **tokenización** es el puente fundamental: es el proceso de segmentar una secuencia de texto en unidades discretas llamadas **tokens**.
+
+Es importante notar que el token no es el destino final, sino un paso intermedio. El objetivo final de la tokenización es asignar a cada token un **ID único** (un número entero), que luego servirá para buscar un **vector de embeddings** (una representación numérica densa) que el modelo sí puede procesar matemáticamente (este segundo proceso de vera en el [siguiente tema](./10_word_embeddings.qmd)).
+
+
+
+## Métodos de tokenización
+
+La elección del método de tokenización afecta directamente al rendimiento del modelo, al tamaño del vocabulario y a la eficiencia en el procesamiento de palabras desconocidas (*Out-of-Vocabulary* o OOV).
+
+* **Tokenización basada en palabras**: Divide el texto usando espacios en blanco como delimitadores.
+    * *Ventaja:* Intuitiva y directa.
+    * *Desventaja:* Crea un vocabulario masivo (incluyendo variantes como "casa", "casas", "casita"), lo que consume mucha memoria y aumenta la dispersión de datos.
+* **Tokenización basada en caracteres**: Descompone el texto letra por letra.
+    * *Ventaja:* El vocabulario es minúsculo (solo el alfabeto más puntuación), por lo que nunca tendrás palabras desconocidas.
+    * *Desventaja:* Las secuencias resultantes son extremadamente largas, lo que hace que el modelo pierda contexto global y sea computacionalmente muy costoso de entrenar.
+* **Tokenización basada en subpalabras**: El estándar actual. Descompone palabras raras en fragmentos comunes y mantiene las palabras frecuentes intactas.
+    * *Ventaja:* Equilibra el tamaño del vocabulario y la longitud de las secuencias. Permite al modelo inferir el significado de palabras compuestas (p. ej., "re-iniciar") aunque nunca haya visto la palabra completa durante el entrenamiento.
+
+## Algoritmos de Subpalabras
+
+### 1. Byte Pair Encoding (BPE)
+El algoritmo BPE es el motor detrás de modelos como GPT. Su objetivo es encontrar la compresión más eficiente del vocabulario. Funciona de manera iterativa:
+
+1. **Inicialización**: Se divide el corpus en palabras individuales^[Aunque el BPE original requiere una pre-tokenización (dividir por espacios) para identificar las palabras iniciales antes de empezar a fusionar caracteres, los métodos modernos como SentencePiece eliminan esta necesidad tratando el espacio como un carácter más. Esto permite que el modelo sea agnóstico al idioma, ya que no asume que las palabras siempre están separadas por espacios.]. Se empieza con un vocabulario base formado por todos los caracteres únicos presentes en el corpus.
+2. **Conteos de pares**: Se cuentan los pares de tokens adyacentes más frecuentes en todo el corpus.
+3. **Fusión (Merge)**: Se selecciona el par más frecuente y se crea un **nuevo token** que represente a ese par. Por ejemplo, si "t" y "e" aparecen juntos constantemente, se crea el token "te".
+4. **Iteración**: Se repiten los pasos 2 y 3 hasta alcanzar un **tamaño de vocabulario objetivo** predefinido por el usuario.
+
+**Resultado**: Las palabras frecuentes quedan como un solo token (p. ej., "casa"), mientras que las raras se desglosan en subpalabras comunes (p. ej., "des" + "aprovechado").
+
+### 2. WordPiece
+Utilizado originalmente en BERT, es similar a BPE pero con una diferencia clave: en lugar de elegir el par más frecuente basándose puramente en la frecuencia bruta, WordPiece elige el par que **maximiza la verosimilitud (likelihood)** del modelo de lenguaje sobre el corpus de entrenamiento. Esto significa que prefiere fusiones que realmente "ayuden" al modelo a predecir mejor el lenguaje.
+
+### 3. SentencePiece
+Es una mejora moderna que soluciona un problema de los anteriores: la dependencia de pre-tokenización (como separar por espacios).
+* SentencePiece trata el texto como un flujo continuo, incluyendo los espacios como un carácter más (usualmente representado como `_` o ` `).
+* Esto lo hace **agnóstico al idioma**: funciona igual de bien en español (donde hay espacios) que en idiomas como el japonés o chino (donde no se usan espacios para separar palabras).
+
+### ¿Qué sucede después de la tokenización?
+
+Una vez que el texto ha sido convertido en una lista de IDs de tokens, ocurre lo siguiente:
+
+1. **Lookup Table**: Cada ID de token se mapea a un vector numérico (Embedding) en un espacio multidimensional ([ver tema siguente](./10_word_embeddings.qmd)).
+2. **Contexto**: Estos vectores son procesados por el modelo (normalmente una arquitectura Transformer) mediante mecanismos de **atención** ([ver tema](./40_attention.qmd)), que permiten al modelo entender la relación semántica entre tokens lejanos, no solo la posición literal.
+
+## Byte Pair Encoding (BPE) paso a paso
+
+Para entender cómo funciona el algoritmo BPE, utilizaremos un corpus muy simplificado. El objetivo es reducir la longitud de las secuencias convirtiendo pares de caracteres frecuentes en un solo token.
+
+### Corpus de ejemplo
+Imagina que tenemos un conjunto de datos (corpus) con la siguiente frecuencia de palabras:
+* `casa` (10 veces)
+* `caza` (5 veces)
+* `pasa` (3 veces)
+
+
+### Paso 0: Tokenización Inicial
+Al inicio, el algoritmo descompone todas las palabras en sus unidades más pequeñas: caracteres individuales.
+
+* **Vocabulario inicial:** {c, a, s, z, p}
+* **Corpus tokenizado:**
+    * `c a s a` (10)
+    * `c a z a` (5)
+    * `p a s a` (3)
+
+
+### Paso 1: Buscar la pareja más frecuente
+Contamos cuántas veces aparecen pares de caracteres adyacentes en el corpus actual:
+
+* **`ca`**: 10 (en casa) + 5 (en caza) = **15**
+* **`as`**: 10 (en casa) + 3 (en pasa) = **13**
+* **`sa`**: 10 (en casa) + 3 (en pasa) = **13**
+* **`az`**: 5 (en caza) = **5**
+* **`za`**: 5 (en caza) = **5**
+* **`pa`**: 3 (en pasa) = **3**
+
+**Acción:** La pareja más frecuente es **`ca`** (15). Creamos el nuevo token `ca`.
+* **Vocabulario:** {c, a, s, z, p, **ca**}
+* **Corpus actualizado:** `ca s a` (10), `ca z a` (5), `p a s a` (3).
+
+### Paso 2: Segunda iteración
+Recalculamos los pares en el nuevo estado del corpus:
+* **`sa`**: 13 (10 en `ca s a` + 3 en `p a s a`)
+* **`ca`+`s`**: 10
+* **`ca`+`z`**: 5
+* **`z`+`a`**: 5
+* **`p`+`a`**: 3
+* **`a`+`s`**: 3 (en `pasa`)
+
+**Acción:** La pareja con mayor frecuencia es **`sa`** (13). Creamos el token `sa`.
+* **Vocabulario:** {..., ca, **sa**}
+* **Corpus actualizado:** `ca sa` (10), `ca z a` (5), `p a sa` (3).
+
+### Paso 3: Tercera iteración
+Recalculamos los pares:
+* **`ca`+`sa`**: 10 (fusión de "casa")
+* **`ca`+`z`**: 5
+* **`z`+`a`**: 5
+* **`p`+`a`**: 3
+* **`a`+`sa`**: 3
+
+**Acción:** La pareja con mayor frecuencia es **`ca`+`sa`** (10). Creamos el token `casa`.
+* **Resultado:** Las palabras más frecuentes han sido comprimidas eficientemente, mientras que las menos frecuentes o compuestas se mantienen en fragmentos lógicos.
+
+### ¿Qué hemos logrado?
+
+1. **Compresión:** Hemos reducido el número de tokens necesarios para representar el texto. Por ejemplo, "casa" pasó de necesitar 4 tokens (`c`, `a`, `s`, `a`) a necesitar solo 1 (`casa`).
+2. **Eficiencia:** A medida que el algoritmo avanza, las secuencias de texto se vuelven más cortas, lo que permite al modelo procesar más información con menos "esfuerzo" computacional.
+3. **Generalización:** Si aparece una palabra nueva como "capa", el modelo ya tiene los tokens `ca` `p` y `a`, lo que le permite construir significados incluso si no vio la palabra completa exactamente en el entrenamiento.
+
+El algoritmo seguiría repitiendo estos pasos hasta alcanzar un límite de tamaño de vocabulario definido previamente (por ejemplo, 32,000 o 50,000 tokens).
+
+
+## Implementación de BPE en Python
+
+El siguiente código es una implementación simplificada del algoritmo BPE. Comprobamos que el proceso de tokenización produce el mismo resultado que el que se realizó manualmente en la sección anterior.
+
+```{python}
+import re
+from collections import defaultdict
+
+class BPETokenizer:
+    def __init__(self):
+        self.merges = []
+
+    def _get_stats(self, vocab):
+        """Calcula la frecuencia de los pares en el vocabulario actual."""
+        pairs = defaultdict(int)
+        for word, freq in vocab.items():
+            symbols = word.split()
+            for i in range(len(symbols) - 1):
+                pairs[symbols[i], symbols[i+1]] += freq
+        return pairs
+
+    def _merge_vocab(self, pair, vocab):
+        """Aplica la fusión de un par en el vocabulario."""
+        v_out = {}
+        # Escapamos el par para evitar problemas con caracteres especiales en regex
+        bigram = re.escape(' '.join(pair))
+        p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
+        
+        for word in vocab:
+            w_out = p.sub(''.join(pair), word)
+            v_out[w_out] = vocab[word]
+        return v_out
+
+    def fit(self, corpus, num_merges=3):
+        """Entrena el tokenizador aprendiendo las reglas de fusión."""
+        # Inicialización: separar caracteres
+        vocab = {" ".join(list(word)): freq for word, freq in corpus.items()}
+        
+        print(f"Iniciando entrenamiento con {num_merges} fusiones...")
+        
+        for i in range(num_merges):
+            pairs = self._get_stats(vocab)
+            if not pairs:
+                break
+            
+            best = max(pairs, key=pairs.get)
+            vocab = self._merge_vocab(best, vocab)
+            self.merges.append(best)
+            print(f"Iteración {i+1}: Fusionando {best} -> {''.join(best)}")
+        
+        print("Entrenamiento completado.")
+
+    def tokenize(self, word):
+        """Tokeniza una palabra usando las reglas aprendidas."""
+        # Convertimos la palabra en caracteres iniciales
+        tokens = list(word)
+        
+        # Aplicamos las reglas de fusión en el mismo orden que fueron aprendidas
+        for pair in self.merges:
+            i = 0
+            while i < len(tokens) - 1:
+                # Comprobamos si el par actual coincide
+                if tokens[i] == pair[0] and tokens[i+1] == pair[1]:
+                    # Fusionamos
+                    tokens[i:i+2] = [''.join(pair)]
+                else:
+                    i += 1
+        return tokens
+
+# --- Uso de la clase ---
+
+# Datos
+corpus = {"casa": 10, "caza": 5, "pasa": 3}
+
+# Instanciamos la clase
+tokenizer = BPETokenizer()
+
+# Entrenamos
+tokenizer.fit(corpus, num_merges=3)
+
+# Probamos la tokenización
+print("\n--- Resultados ---")
+print(f"Tokenización de 'casa': {tokenizer.tokenize('casa')}")
+print(f"Tokenización de 'capa': {tokenizer.tokenize('capa')}")
+```
+
+## titoken
+
+**tiktoken** es la biblioteca oficial y de alto rendimiento desarrollada por OpenAI para la tokenización. Es compatible con los modelos de OpenAI y es ampliamente utilizada para tokenizar texto de manera eficiente, especialmente en aplicaciones que requieren un procesamiento rápido y una gestión precisa del número de tokens (como el conteo de tokens para evitar exceder los límites de los modelos).
+
+El siguiente es un ejemplo de de uso:
+
+
+```{python}
+import tiktoken
+
+# 1. Elegir la codificación (encoding)
+# "cl100k_base" es la codificación estándar para GPT-4 y GPT-3.5-turbo
+encoding = tiktoken.get_encoding("cl100k_base")
+
+# 2. Tokenizar (texto a números)
+texto = "¡La tokenización es fascinante!"
+tokens = encoding.encode(texto)
+
+print(f"Texto original: {texto}")
+print(f"IDs de tokens: {tokens}")
+print(f"Cantidad de tokens: {len(tokens)}")
+
+# 3. Detallar qué representa cada token (opcional, para depuración)
+for token_id in tokens:
+    # Decodificar un solo ID para ver su representación textual
+    subtoken = encoding.decode([token_id])
+    print(f"ID: {token_id} -> Token: '{subtoken}'")
+
+# 4. Decodificar (números a texto)
+texto_recuperado = encoding.decode(tokens)
+print(f"\nTexto recuperado: {texto_recuperado}")
+```
+
+O más visualmente:
+
+```{python}
+import tiktoken
+
+def visualizar_tokenizacion(texto):
+    # Cargamos el codificador para GPT-4
+    encoding = tiktoken.get_encoding("cl100k_base")
+    tokens = encoding.encode(texto)
+    
+    # Lista de colores ANSI para la terminal
+    colores = [
+        "\033[91m", # Rojo
+        "\033[92m", # Verde
+        "\033[93m", # Amarillo
+        "\033[94m", # Azul
+        "\033[95m", # Magenta
+        "\033[96m"  # Cian
+    ]
+    reset = "\033[0m"
+    
+    print(f"Texto original: {texto}\n")
+    print("Tokenización:")
+    
+    for i, token_id in enumerate(tokens):
+        # Decodificamos el token para verlo como texto
+        token_str = encoding.decode([token_id])
+        # Asignamos un color cíclico basado en el índice
+        color = colores[i % len(colores)]
+        # Imprimimos usando repr() para que se vean espacios o caracteres invisibles
+        print(f"{color}{repr(token_str)}{reset}", end=" ")
+    print("\n")
+
+# Ejemplo con un texto complejo
+texto_ejemplo = "La tokenización es fascinante y fundamental para los modelos de lenguaje."
+visualizar_tokenizacion(texto_ejemplo)
+```
+
+## Tokenizadores online
+
+Para profundizar en el aprendizaje y visualizar cómo los modelos realmente descomponen el texto, existen herramientas interactivas que permiten "ver" la tokenización en tiempo real. Estas son las tres más recomendadas para fines educativos y de desarrollo:
+
+
+### 1. Tiktokenizer (Vercel)
+
+Esta herramienta es ampliamente recomendada por expertos en el campo (incluyendo a Andrej Karpathy) por su simplicidad y claridad visual. Es un proyecto de código abierto alojado en Vercel que se centra exclusivamente en visualizar cómo los modelos de OpenAI procesan el texto.
+
+[enlace](https://tiktokenizer.vercel.app/)
+
+### 2. OpenAI Tokenizer (Oficial)
+Esta es la herramienta de referencia de OpenAI. Es el estándar de oro si está trabajando específicamente con arquitecturas GPT (GPT-4o, GPT-3.5, etc.).
+
+[enlace](https://platform.openai.com/tokenizer)
+
+### 3. Hugging Face Tokenizer Playground
+A diferencia de los anteriores, que se centran en el ecosistema de OpenAI, este *playground* es una herramienta versátil para comparar diferentes arquitecturas.
+
+[enlace](https://huggingface.co/spaces/Xenova/tokenizer-playground)
+
+## Eficiencia en la tokenización
+
+Uno de los aspectos más importantes en la tokenización es es el fenómeno de **"Cross-Language Prompting"** (interacción entre idiomas). Aunque los modelos modernos como GPT-4 o Claude son políglotas, su "lengua materna" suele ser el inglés, ya que es el idioma predominante en el que fueron entrenados.
+
+Cuando habla con el modelo en un idioma distinto al principal (o en uno menos común), ocurre un efecto dominó que afecta a todo el sistema.
+
+
+### 1. El problema de la "Tokenización Ineficiente"
+Recuerde que el tokenizador es un diccionario. Si el modelo fue entrenado mayoritariamente con inglés, su diccionario está optimizado para "fragmentar" el inglés de manera muy eficiente (palabras completas, raíces comunes, sufijos lógicos).
+
+* **En inglés:** Una palabra compleja suele ser un solo token.
+* **En otros idiomas:** Una palabra que en inglés sería un token, en otro idioma podría romperse en 3 o 4 piezas porque el modelo no tiene esa combinación de letras en su "diccionario principal".
+
+### 2. El efecto dominó: Costes y Contexto
+
+Esta ineficiencia tiene tres consecuencias directas que afectan al usuario:
+
+* **Mayor coste de API:** Como la empresa que provee la IA (como OpenAI o Anthropic) cobra por **número de tokens** procesados, escribir en un idioma donde cada palabra se divide en muchos pedacitos le costará más dinero que escribir en inglés. Básicamente, está "pagando" por la ineficiencia de la tokenización de ese idioma.
+* **Reducción de la Ventana de Contexto:** Imagine que la "ventana de contexto" (la capacidad del modelo para recordar lo que ha dicho) es una maleta. Si habla en un idioma ineficiente, cada frase ocupa más espacio en la maleta (más tokens). Esto significa que la "maleta" se llenará antes y el modelo empezará a olvidar las primeras partes de tu conversación mucho más rápido.
+* **Latencia (Velocidad de respuesta):** Al haber más tokens que procesar para entender la misma idea, el modelo tarda ligeramente más en generar la respuesta.
+
+### 3. El modelo "piensa" en inglés
+Aunque el modelo le responda correctamente en su idioma, internamente suele realizar un proceso de traducción. El modelo "entiende" el concepto en su espacio vectorial (que está muy ligado al inglés) y luego lo traduce a su idioma de salida.
+
+* **¿Tiene riesgos?** Sí. A veces, al traducir conceptos complejos, el modelo puede perder matices culturales o técnicos que son específicos de su idioma, ya que la "lógica" interna del modelo fue moldeada por datos en inglés.
+
+### Ejemplo práctico
+
+El siguiente ejemplo muestra cómo la misma frase tokenizada en diferente idiomas puede resultar en un número de tokens muy distinto, lo que afecta directamente al coste y a la eficiencia de la interacción con el modelo.
+
+```{python}
+import tiktoken
+import random
+import pandas as pd
+from IPython.display import HTML, display
+from plotnine import ggplot, aes, geom_col, coord_flip, theme_minimal, labs
+from IPython.display import Markdown,display
+
+textos = {
+    "Inglés": "Tokenization is fascinating and fundamental for language models.",
+    "Español": "La tokenización es fascinante y fundamental para los modelos de lenguaje.",
+    "Alemán": "Tokenisierung ist faszinierend und grundlegend für Sprachmodelle.",
+    "Chino": "标记化在语言模型中既迷人又基础。",
+    "Tagalo": "Ang tokenization ay kamangha-mangha at mahalaga para sa mga modelo ng wika."
+}
+
+def obtener_luminosidad(hex_color):
+    # Convierte hex a RGB para calcular si el fondo es claro u oscuro
+    hex_color = hex_color.lstrip('#')
+    r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    # Fórmula de luminosidad relativa
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255
+
+def obtener_tokens_datos(texto, modelo="gpt-4o"):
+    enc = tiktoken.encoding_for_model(modelo)
+    tokens = enc.encode(texto)
+    lista = []
+    for t in tokens:
+        token_str = enc.decode_single_token_bytes(t).decode('utf-8', errors='replace')
+        color = f"#{random.randint(0, 0xFFFFFF):06x}"
+        luminosidad = obtener_luminosidad(color)
+        fuente = "black" if luminosidad > 0.5 else "white"
+        lista.append((token_str, color, fuente))
+    return lista
+
+# --- 1. Visualización Coloreada ---
+for idioma, texto in textos.items():
+    tokens_data = obtener_tokens_datos(texto)
+    display(Markdown(f"$$\mathbf{{{idioma}}}$$"))
+    html_output = "".join([
+        f'<span style="background-color: {c}; color: {f}; padding: 3px 6px; border-radius: 4px; margin: 2px; display: inline-block; font-family: sans-serif;">{t.replace(" ", "&nbsp;")}</span>' 
+        for t, c, f in tokens_data
+    ])
+    display(HTML(html_output))
+    print("\n")
+
+# --- 2. Tabla de Eficiencia ---
+datos = []
+for idioma, texto in textos.items():
+    num_tokens = len(tiktoken.encoding_for_model("gpt-4o").encode(texto))
+    datos.append({
+        "Idioma": idioma,
+        "Palabras": len(texto.split()),
+        "Caracteres": len(texto),
+        "Tokens": num_tokens
+    })
+
+df = pd.DataFrame(datos)
+df["Ratio Tokens/Palabra"] = (df["Tokens"] / df["Palabras"]).round(2)
+display(df)
+```
