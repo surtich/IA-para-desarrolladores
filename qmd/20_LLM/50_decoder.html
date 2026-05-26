@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Decoder-Only Transformers – IA para desarrolladores</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5c7b0344403fcc0d3486fe5a6450fa50.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">IA para desarrolladores</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../qmd/index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/50_decoder.html">Decoder-Only Transformers</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Buscar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal simple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal múltiple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/40_logistic_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/50_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Redes neuronales</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">LLM</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/00_introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">¿Qué es LLM?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/05_tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tokenización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/20_word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/30_similarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Similitud entre palabras</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/40_attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mecanismo de Atención</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/50_decoder.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Decoder-Only Transformers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Apéndices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/10_derivadas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derivadas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/20_matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Álgebra Lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../linear_transformations.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Demo: Transformaciones lineales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../presentacion_2025.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Presentación 2025</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#conceptos-fundamentales" id="toc-conceptos-fundamentales" class="nav-link active" data-scroll-target="#conceptos-fundamentales">Conceptos fundamentales</a></li>
+  <li><a href="#arquitecturas-transformer" id="toc-arquitecturas-transformer" class="nav-link" data-scroll-target="#arquitecturas-transformer">Arquitecturas transformer</a></li>
+  <li><a href="#decoder-only-transformers" id="toc-decoder-only-transformers" class="nav-link" data-scroll-target="#decoder-only-transformers">Decoder-Only Transformers</a>
+  <ul class="collapse">
+  <li><a href="#crear-la-entrada-la-salida-y-los-datos" id="toc-crear-la-entrada-la-salida-y-los-datos" class="nav-link" data-scroll-target="#crear-la-entrada-la-salida-y-los-datos">Crear la entrada, la salida y los datos</a></li>
+  <li><a href="#position-encoding-codificación-de-posición" id="toc-position-encoding-codificación-de-posición" class="nav-link" data-scroll-target="#position-encoding-codificación-de-posición">Position Encoding (Codificación de Posición)</a></li>
+  <li><a href="#atención-attention" id="toc-atención-attention" class="nav-link" data-scroll-target="#atención-attention">Atención (Attention)</a></li>
+  <li><a href="#decoder-only-transformer" id="toc-decoder-only-transformer" class="nav-link" data-scroll-target="#decoder-only-transformer">Decoder-Only Transformer</a></li>
+  <li><a href="#entrenamiento-del-transformer-solo-decodificador" id="toc-entrenamiento-del-transformer-solo-decodificador" class="nav-link" data-scroll-target="#entrenamiento-del-transformer-solo-decodificador">Entrenamiento del Transformer “Solo Decodificador”</a></li>
+  <li><a href="#prueba-del-transformer-entrenado" id="toc-prueba-del-transformer-entrenado" class="nav-link" data-scroll-target="#prueba-del-transformer-entrenado">Prueba del Transformer entrenado</a></li>
+  </ul></li>
+  <li><a href="#simulador-de-un-transformer-solo-decodificador" id="toc-simulador-de-un-transformer-solo-decodificador" class="nav-link" data-scroll-target="#simulador-de-un-transformer-solo-decodificador">Simulador de un Transformer “Solo Decodificador”</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/20_LLM/00_introduction.html">LLM</a></li><li class="breadcrumb-item"><a href="../../qmd/20_LLM/50_decoder.html">Decoder-Only Transformers</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Decoder-Only Transformers</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="conceptos-fundamentales" class="level2">
+<h2 class="anchored" data-anchor-id="conceptos-fundamentales">Conceptos fundamentales</h2>
+<p>En la <a href="../../qmd/20_LLM/40_attention.html">lección anterior</a> vimos cómo el mecanismo de atención permite a los modelos de lenguaje capturar las relaciones entre palabras en una secuencia. Sin embargo, para construir un modelo de lenguaje completo, necesitamos entender cómo se organiza la arquitectura del modelo.</p>
+<p>La <strong>arquitectura Transformer</strong> es un diseño de red neuronal profunda que revolucionó la inteligencia artificial al permitir el procesamiento de datos secuenciales (como texto) de forma paralela en lugar de secuencial. Fue introducida por Google en 2017 en el artículo “Attention Is All You Need”.</p>
+<p>A diferencia de modelos anteriores (como las RNN o LSTMs) que procesaban las palabras una por una y a menudo olvidaban el inicio de una frase al llegar al final, el Transformer utiliza el mecanismo de atención para analizar la relación entre todos los elementos de una secuencia simultáneamente.</p>
+<p>El Transformer se compone de dos partes principales: el <strong>encoder</strong> y el <strong>decoder</strong>:</p>
+<ul>
+<li><p>El <strong>encoder (Codificador)</strong>: Su función es comprender y representar. Recibe una secuencia de entrada y la transforma en una representación numérica (vectores contextualizados) que captura el significado profundo, la semántica y las relaciones gramaticales del texto. Uso principal: Tareas donde necesitas “entender” todo el contexto antes de actuar, como la clasificación de texto, análisis de sentimiento o extracción de entidades (NER).</p></li>
+<li><p>El <strong>decoder (Decodificador)</strong>: Su función es generar y predecir. Recibe una representación (o un inicio de secuencia) y predice, paso a paso, cuál es el siguiente elemento (token) más probable. Uso principal: Tareas de generación de texto, resumen creativo, diálogos o traducción automática.</p></li>
+</ul>
+</section>
+<section id="arquitecturas-transformer" class="level2">
+<h2 class="anchored" data-anchor-id="arquitecturas-transformer">Arquitecturas transformer</h2>
+<p>Existen diferentes arquitecturas de Transformer, dependiendo de cómo se utilicen el encoder y el decoder:</p>
+<ul>
+<li><strong>Encoder-Decoder (Seq2Seq)</strong>: Es la arquitectura original presentada en el paper <em>Attention Is All You Need</em>. Combina ambas partes: el Encoder procesa la entrada y el Decoder genera la salida basándose en esa representación.</li>
+</ul>
+<p>Ejemplo: Traducción automática (ej. T5, BART). El modelo “entiende” la frase en inglés (Encoder) y “escribe” la traducción en español (Decoder).</p>
+<p><img src="../../img/transformer_architecture.svg" class="img-fluid"></p>
+<ul>
+<li><strong>Encoder-Only (Auto-encoding)</strong>: El modelo se centra exclusivamente en la comprensión profunda. No tiene capacidad nativa para generar texto largo de forma coherente. Arquitectura: Utiliza el mecanismo de auto-atención bidireccional (cada palabra puede “ver” tanto las palabras a su izquierda como a su derecha simultáneamente).</li>
+</ul>
+<p>Ejemplo: BERT, RoBERTa. Son excelentes para clasificar o etiquetar texto.</p>
+<ul>
+<li><strong>Decoder-Only (Autoregressive)</strong>: Es la arquitectura que domina la era actual de la Inteligencia Artificial Generativa. Aquí, no hay un Encoder separado. Arquitectura: Utiliza auto-atención causal (o enmascarada). Para predecir el siguiente token, el modelo solo tiene permitido “ver” los tokens anteriores; no puede mirar hacia el futuro (la derecha).</li>
+</ul>
+<p>Ejemplo: La serie GPT (OpenAI), Llama (Meta), Mistral. Al entrenarse para predecir la siguiente palabra en una enorme cantidad de datos, desarrollan una capacidad emergente de razonamiento, programación y creatividad.</p>
+</section>
+<section id="decoder-only-transformers" class="level2">
+<h2 class="anchored" data-anchor-id="decoder-only-transformers">Decoder-Only Transformers</h2>
+<p>En esta lección aprenderemos a implementar un modelo de lenguaje basado en la arquitectura Decoder-Only. Este tutorial es una traducción del tutorial de StatQuest, que puede encontrar en el repositorio de GitHub: <a href="https://github.com/statquest/StatQuest-Decoder-Only-Transformer">StatQuest-Decoder-Only-Transformer</a></p>
+<div id="ff9e224a" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch <span class="co"># torch nos permite crear tensores y también proporciona funciones auxiliares</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn <span class="co"># torch.nn nos proporciona nn.Module(), nn.Embedding() y nn.Linear()</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F <span class="co"># Esto nos da softmax() y argmax()</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.optim <span class="im">import</span> Adam <span class="co"># Usaremos el optimizador Adam, que es, esencialmente,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                             <span class="co"># una versión ligeramente menos estocástica del descenso de gradiente estocástico.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> TensorDataset, DataLoader <span class="co"># Almacenaremos nuestros datos en DataLoaders</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> lightning <span class="im">as</span> L <span class="co"># Lightning facilita escribir, optimizar y escalar nuestro código</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="crear-la-entrada-la-salida-y-los-datos" class="level3">
+<h3 class="anchored" data-anchor-id="crear-la-entrada-la-salida-y-los-datos">Crear la entrada, la salida y los datos</h3>
+<p>En este tutorial construiremos un Transformer “solo decodificador” (Decoder-Only) sencillo que puede responder dos preguntas muy simples: <strong>¿Qué es StatQuest?</strong> y <strong>¿StatQuest es qué?</strong>, y dar a ambas la misma respuesta: <strong>¡¡¡Asombroso!!!</strong></p>
+<p>Crearemos un diccionario que asocie las palabras y los tokens con números de identificación (ID). Esto se debe a que la clase que usaremos para realizar el word embedding, <code>nn.Embedding()</code>, solo acepta números de ID como entrada, en lugar de palabras o tokens. Luego, usaremos el diccionario para crear un <strong>Dataloader</strong> que contenga las preguntas y las respuestas deseadas codificadas como números de ID. Finalmente, utilizaremos el <strong>Dataloader</strong> para entrenar el transformer.</p>
+<p><strong>NOTA:</strong> Los Dataloaders están diseñados para escalar a conjuntos de datos muy grandes, por lo que este ejemplo sencillo debería ser útil incluso cuando tengas un terabyte de texto.</p>
+<p><strong>NOTA ADICIONAL:</strong> Las <strong>entradas</strong> (inputs) y <strong>etiquetas</strong> (labels) para los datos de entrenamiento utilizados con un Transformer “solo decodificador” pueden parecer un poco extrañas al principio. Esto se debe a que un Transformer “solo decodificador” genera gran parte de la entrada del usuario además de la respuesta. Para entender qué significa esto, imaginemos que queremos entrenar a nuestro Transformer para responder a la pregunta <strong>¿Qué es StatQuest?</strong> con la respuesta <strong>Asombroso</strong>. Si al modelo lo alimentamos con el primer, <strong>Qué</strong>, debe generar la salida <strong>es</strong>. Durante el entrenamiento, podemos comparar esta salida con el segundo token conocido en la entrada y, si es diferente, utilizar esa diferencia para modificar los pesos y sesgos del modelo. Por lo tanto, aunque <strong>es</strong> forma parte de la <strong>entrada</strong>, también es parte de la <strong>etiqueta</strong> que usamos para evaluar si está está funcionando el Transformer y si los pesos y sesgos deben cambiarse o no. Del mismo modo, <strong>StatQuest</strong>, <strong>&lt;&gt;</strong> y <strong>asombroso</strong> también deben estar tanto en la <strong>entrada</strong> como en la <strong>etiqueta</strong>, porque sabemos que queremos que el Transformer los utilice como entradas y los genere como salidas.</p>
+<div id="8d66f7b8" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Primero, creamos un diccionario que mapea tokens de vocabulario a números de ID...</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>token_to_id <span class="op">=</span> {<span class="st">'qué'</span> : <span class="dv">0</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">'es'</span> : <span class="dv">1</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>               <span class="st">'statquest'</span> : <span class="dv">2</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>               <span class="st">'asombroso'</span>: <span class="dv">3</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">'&lt;EOS&gt;'</span> : <span class="dv">4</span>, <span class="co">## &lt;EOS&gt; = fin de secuencia</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>              }</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">## ...luego creamos un diccionario que mapea los IDs a tokens. Esto nos ayudará a interpretar la salida.</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">## Usamos la función "map()" para aplicar la función "reversed()" a cada tupla (ej. ('qué', 0))</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">## almacenada en el diccionario token_to_id. Luego usamos dict() para crear un nuevo diccionario</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">## a partir de las tuplas invertidas.</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>id_to_token <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">map</span>(<span class="bu">reversed</span>, token_to_id.items()))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">## NOTA: Debido a que estamos usando un Transformer "solo decodificador", las entradas contienen</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">##       las preguntas ("qué es statquest?" y "statquest es qué?") seguidas</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">##       por un token &lt;EOS&gt; y luego la respuesta, "asombroso".</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">##       Esto es porque todos esos tokens se usarán como entradas para el Transformer</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">##       durante el entrenamiento.</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">## NOTA ADICIONAL: Cuando entrenamos de esta manera, se llama "teacher forcing" (entrenamiento supervisado).</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">##       El "teacher forcing" nos ayuda a entrenar la red neuronal más rápido.</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> torch.tensor([[token_to_id[<span class="st">"qué"</span>], <span class="co">## entrada #1: qué es statquest &lt;EOS&gt; asombroso</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"es"</span>],</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"statquest"</span>],</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"&lt;EOS&gt;"</span>],</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"asombroso"</span>]],</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>                       [token_to_id[<span class="st">"statquest"</span>], <span class="co"># entrada #2: statquest es qué &lt;EOS&gt; asombroso</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"es"</span>],</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"qué"</span>],</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"&lt;EOS&gt;"</span>],</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"asombroso"</span>]]])</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">## NOTA: Debido a que usamos un Transformer "solo decodificador", las salidas, o</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">##       las predicciones, son las preguntas de entrada (menos la primera palabra) seguidas por</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">##       &lt;EOS&gt; asombroso &lt;EOS&gt;. El primer &lt;EOS&gt; significa que terminamos de procesar la pregunta</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">##       de entrada y el segundo &lt;EOS&gt; significa que terminamos de generar la salida.</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> torch.tensor([[token_to_id[<span class="st">"es"</span>],</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"statquest"</span>],</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"&lt;EOS&gt;"</span>],</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"asombroso"</span>],</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"&lt;EOS&gt;"</span>]],</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>                       [token_to_id[<span class="st">"es"</span>],</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"qué"</span>],</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"&lt;EOS&gt;"</span>],</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"asombroso"</span>],</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>                        token_to_id[<span class="st">"&lt;EOS&gt;"</span>]]])</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">## Ahora empaquetamos todo en un DataLoader...</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> TensorDataset(inputs, labels)</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>dataloader <span class="op">=</span> DataLoader(dataset)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Para verificar que el DataLoader se ha creado correctamente, podemos imprimir su contenido:</p>
+<div id="03ae7b54" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> dataloader:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(batch)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[tensor([[0, 1, 2, 4, 3]]), tensor([[1, 2, 4, 3, 4]])]
+[tensor([[2, 1, 0, 4, 3]]), tensor([[1, 0, 4, 3, 4]])]</code></pre>
+</div>
+</div>
+<p>Podemos ver que el DataLoader contiene dos lotes (batches), cada uno con entrada y una etiqueta. Cada entrada es una secuencia de números de ID que representan las palabras y tokens, y cada etiqueta es la secuencia de números de ID que el modelo debe aprender a generar a partir de la entrada correspondiente.</p>
+<p>Mostramos la secuencia de tokens correspondiente a cada lote utilizando el diccionario id_to_token para convertir los números de ID de vuelta a palabras y tokens:</p>
+<div id="4a788a34" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> dataloader:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    input_ids, label_ids <span class="op">=</span> batch</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    input_tokens <span class="op">=</span> [id_to_token[<span class="bu">id</span>.item()] <span class="cf">for</span> <span class="bu">id</span> <span class="kw">in</span> input_ids[<span class="dv">0</span>]]  <span class="co"># Convertimos el primer lote de entrada a tokens</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    label_tokens <span class="op">=</span> [id_to_token[<span class="bu">id</span>.item()] <span class="cf">for</span> <span class="bu">id</span> <span class="kw">in</span> label_ids[<span class="dv">0</span>]]  <span class="co"># Convertimos el primer lote de etiqueta a tokens</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Entrada:"</span>, input_tokens)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Etiqueta:"</span>, label_tokens)    </span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Entrada: ['qué', 'es', 'statquest', '&lt;EOS&gt;', 'asombroso']
+Etiqueta: ['es', 'statquest', '&lt;EOS&gt;', 'asombroso', '&lt;EOS&gt;']
+Entrada: ['statquest', 'es', 'qué', '&lt;EOS&gt;', 'asombroso']
+Etiqueta: ['es', 'qué', '&lt;EOS&gt;', 'asombroso', '&lt;EOS&gt;']</code></pre>
+</div>
+</div>
+</section>
+<section id="position-encoding-codificación-de-posición" class="level3">
+<h3 class="anchored" data-anchor-id="position-encoding-codificación-de-posición">Position Encoding (Codificación de Posición)</h3>
+<p>La codificación de posición ayuda al transformer a realizar un seguimiento del orden de las palabras en la entrada y en la salida. Por ejemplo, en la frase <strong>El gato persigue al ratón</strong> y <strong>El ratón persigue al gato</strong> tienen exactamente las mismas palabras, pero debido a las diferencias en el orden de las palabras, tienen significados muy distintos. Por lo tanto, realizar un seguimiento del orden de las palabras es muy importante. El mecanismo de atención por sí solo no puede realizar un seguimiento del orden de las palabras, ya que se basa únicamente en la similitud entre los embeddings de las palabras. Por lo tanto, necesitamos un método adicional para codificar la posición de cada palabra en la secuencia.</p>
+<p>Hay varias formas de que un transformer realice un seguimiento del orden de las palabras, pero un método popular es utilizar una serie de curvas alternas de seno y coseno (que se muestran a continuación). El número de curvas de seno y coseno depende de cuántos números, o valores de word embedding, usemos para representar cada token. En el contexto de los Transformers, el número de números, o valores de word embedding, que usamos para representar cada token es la <strong>dimensión</strong> del transformer. Entonces, si la dimensión del transformer es 2, lo que significa que usa 2 números para representar cada token, entonces solo necesitamos un seno y un coseno para generar dos valores de codificación de posición.</p>
+<div id="d8bfba59" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajustamos el periodo para que coincida con la visualización (posiciones 1, 2, 3...)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Usamos un periodo donde las curvas se crucen en los puntos de posición</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>x_linea <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="fl">4.25</span>, <span class="dv">200</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>posiciones_x <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]) </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>etiquetas_x <span class="op">=</span> [<span class="st">'1ra'</span>, <span class="st">'2da'</span>, <span class="st">'3ra'</span>, <span class="st">'etc...'</span>]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Datos para las líneas</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co"># La 1ra dimensión (Seno) comienza en 0, la 2da (Coseno) comienza en 1</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>df_lineas <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x'</span>: np.concatenate([x_linea, x_linea]),</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span>: np.concatenate([np.sin(x_linea <span class="op">*</span> np.pi<span class="op">*</span><span class="fl">2.5</span>), np.cos(x_linea <span class="op">*</span> np.pi<span class="op">*</span><span class="fl">2.5</span>)]),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Embedding'</span>: np.repeat([<span class="st">'1ra Dimensión (Seno)'</span>, <span class="st">'2da Dimensión (Coseno)'</span>], <span class="dv">200</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Datos para los puntos en las posiciones 1, 2, 3, 4</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>df_puntos <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x'</span>: np.concatenate([posiciones_x, posiciones_x]),</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span>: np.concatenate([np.sin(posiciones_x <span class="op">*</span> np.pi<span class="op">*</span><span class="fl">2.5</span>), np.cos(posiciones_x <span class="op">*</span> np.pi<span class="op">*</span><span class="fl">2.5</span>)]),</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Embedding'</span>: np.repeat([<span class="st">'1ra Dimensión (Seno)'</span>, <span class="st">'2da Dimensión (Coseno)'</span>], <span class="dv">4</span>),</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">'tipo'</span>: <span class="st">'Position encoding value'</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Graficar</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>plot <span class="op">=</span> (</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    ggplot()</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(df_lineas, aes(x<span class="op">=</span><span class="st">'x'</span>, y<span class="op">=</span><span class="st">'y'</span>, color<span class="op">=</span><span class="st">'Embedding'</span>), size<span class="op">=</span><span class="fl">1.2</span>, show_legend<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_vline(xintercept<span class="op">=</span>posiciones_x, color<span class="op">=</span><span class="st">"grey"</span>, linetype<span class="op">=</span><span class="st">"dotted"</span>)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(df_puntos, aes(x<span class="op">=</span><span class="st">'x'</span>, y<span class="op">=</span><span class="st">'y'</span>, shape<span class="op">=</span><span class="st">'tipo'</span>), size<span class="op">=</span><span class="dv">4</span>, fill<span class="op">=</span><span class="st">'white'</span>, stroke<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> facet_wrap(<span class="st">'~Embedding'</span>, ncol<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_y_continuous(breaks<span class="op">=</span>[<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], limits<span class="op">=</span>[<span class="op">-</span><span class="fl">1.2</span>, <span class="fl">1.2</span>])</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_x_continuous(breaks<span class="op">=</span>posiciones_x, labels<span class="op">=</span>etiquetas_x)</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_shape_manual(values<span class="op">=</span>{<span class="st">'Position encoding value'</span>: <span class="st">'o'</span>}) <span class="co"># 'o' es un círculo</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_minimal()</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(x<span class="op">=</span><span class="st">"Posición del Token en la entrada"</span>, y<span class="op">=</span><span class="st">"Valor"</span>, shape<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(legend_position<span class="op">=</span><span class="st">"bottom"</span>, strip_background<span class="op">=</span>element_rect(fill<span class="op">=</span><span class="st">"#eeeeee"</span>))</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+<figure class="figure">
+<p><img src="50_decoder_files/figure-html/cell-6-output-1.png" width="672" height="480" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Por el contrario, como vemos en la ilustración a continuación, si la dimensión del transformer es 4, necesitaremos 2 curvas de seno alternadas con 2 curvas de coseno, para un total de 4 curvas.</p>
+<div id="326b6db7" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Definir posiciones y datos</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>posiciones_x <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]) </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>etiquetas_x <span class="op">=</span> [<span class="st">'1ra'</span>, <span class="st">'2da'</span>, <span class="st">'3ra'</span>, <span class="st">'etc...'</span>]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>x_linea <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="fl">4.25</span>, <span class="dv">200</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Frecuencias</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>y1 <span class="op">=</span> np.sin(x_linea <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">1.5</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>y2 <span class="op">=</span> np.cos(x_linea <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">1.5</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>y3 <span class="op">=</span> np.sin(x_linea <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">0.75</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>y4 <span class="op">=</span> np.cos(x_linea <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">0.75</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Datos de líneas</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>df_lineas <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x'</span>: np.tile(x_linea, <span class="dv">4</span>),</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span>: np.concatenate([y1, y2, y3, y4]),</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Embedding'</span>: np.repeat([<span class="st">'Dim 0 (Seno)'</span>, <span class="st">'Dim 1 (Coseno)'</span>, <span class="st">'Dim 2 (Seno)'</span>, <span class="st">'Dim 3 (Coseno)'</span>], <span class="dv">200</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Datos de puntos (una fila por cada combinación de posición y dimensión)</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>df_puntos <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x'</span>: np.tile(posiciones_x, <span class="dv">4</span>),</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span>: np.concatenate([</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        np.sin(posiciones_x <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">1.5</span>),</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        np.cos(posiciones_x <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">1.5</span>),</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        np.sin(posiciones_x <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">0.75</span>),</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        np.cos(posiciones_x <span class="op">*</span> np.pi <span class="op">*</span> <span class="fl">0.75</span>)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    ]),</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Embedding'</span>: np.repeat([<span class="st">'Dim 0 (Seno)'</span>, <span class="st">'Dim 1 (Coseno)'</span>, <span class="st">'Dim 2 (Seno)'</span>, <span class="st">'Dim 3 (Coseno)'</span>], <span class="dv">4</span>),</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">'tipo'</span>: <span class="st">'Position encoding value'</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Graficar</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>plot <span class="op">=</span> (</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    ggplot()</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(df_lineas, aes(x<span class="op">=</span><span class="st">'x'</span>, y<span class="op">=</span><span class="st">'y'</span>, color<span class="op">=</span><span class="st">'Embedding'</span>), size<span class="op">=</span><span class="fl">1.0</span>, show_legend<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Al mapear el mismo 'Embedding' aquí, plotnine automáticamente filtra los puntos por facet</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point(df_puntos, aes(x<span class="op">=</span><span class="st">'x'</span>, y<span class="op">=</span><span class="st">'y'</span>, shape<span class="op">=</span><span class="st">'tipo'</span>), size<span class="op">=</span><span class="dv">3</span>, fill<span class="op">=</span><span class="st">'white'</span>, stroke<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_vline(xintercept<span class="op">=</span>posiciones_x, color<span class="op">=</span><span class="st">"grey"</span>, linetype<span class="op">=</span><span class="st">"dotted"</span>)</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> facet_wrap(<span class="st">'~Embedding'</span>, ncol<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_y_continuous(breaks<span class="op">=</span>[<span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], limits<span class="op">=</span>[<span class="op">-</span><span class="fl">1.2</span>, <span class="fl">1.2</span>])</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_x_continuous(breaks<span class="op">=</span>posiciones_x, labels<span class="op">=</span>etiquetas_x)</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_shape_manual(values<span class="op">=</span>{<span class="st">'Position encoding value'</span>: <span class="st">'o'</span>})</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_minimal()</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(x<span class="op">=</span><span class="st">"Posición del Token"</span>, y<span class="op">=</span><span class="st">"Valor"</span>, shape<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(legend_position<span class="op">=</span><span class="st">"bottom"</span>, strip_background<span class="op">=</span>element_rect(fill<span class="op">=</span><span class="st">"#eeeeee"</span>))</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+<figure class="figure">
+<p><img src="50_decoder_files/figure-html/cell-7-output-1.png" width="672" height="480" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Como vemos en la ilustración anterior, el par adicional de curvas de seno y coseno tiene un periodo más amplio (se repiten con menos frecuencia) que el primer par. Aumentar el periodo para cada par adicional de curvas asegura que cada posición esté representada por una combinación única de valores.</p>
+<p><strong>NOTA:</strong> La razón por la que nos tomamos la molestia de crear una clase para realizar la codificación posicional, en lugar de simplemente añadir este código directamente al transformer, es que podemos reutilizarla fácilmente en un Transformer “solo codificador” (Encoder-Only) o en un Transformer “codificador-decodificador” (Encoder-Decoder). Así, al crear una clase que realice la codificación posicional, podemos programarla una vez y luego simplemente crear instancias cuando y donde las necesitemos.</p>
+<p><strong>NOTA ADICIONAL:</strong> Dado que los valores de codificación de posición nunca cambian, lo que significa que el primer token siempre utiliza los mismos valores de codificación de posición independientemente de cuál sea ese token, los precalculamos y los guardamos en una tabla de búsqueda (lookup table). Esto hace que añadir los valores de codificación de posición sea muy rápido.</p>
+<p>Ahora que entendemos las ideas que queremos implementar en la clase de Codificación de Posición, ¡vamos a programarla!</p>
+<div id="1e5cd8b5" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PositionEncoding(nn.Module):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model<span class="op">=</span><span class="dv">2</span>, max_len<span class="op">=</span><span class="dv">6</span>):</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">## d_model = La dimensión del transformer, que también es el número de valores de embedding por token.</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">##           d_model=2, así que eso es lo que usaremos por defecto por ahora.</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">##           Sin embargo, en "Attention Is All You Need", d_model=512.</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">## max_len = número máximo de tokens que permitimos como entrada.</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">##           Como estamos precalculando los valores de codificación posicional y almacenándolos en una </span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">##           tabla de consulta (lookup table), podemos usar d_model y max_len para determinar el número </span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">##           de filas y columnas en dicha tabla.</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">##           En este ejemplo sencillo, solo estamos usando frases cortas, por lo que usamos</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">##           max_len=6 como configuración predeterminada.</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Llamamos al init de la superclase porque al crear nuestro propio método __init__(), sobrescribimos el que</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">## heredamos de nn.Module. Por tanto, debemos llamar explícitamente al __init__() de nn.Module, de lo contrario </span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">## no se inicializará. NOTA: Si no escribiéramos nuestro propio __init__(), no tendríamos que llamar a super().__init__().</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Alternativamente, si no quisiéramos acceder a ninguno de los métodos de nn.Module, tampoco tendríamos que llamarlo.</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Ahora creamos una tabla de consulta, pe, de valores de codificación posicional e inicializamos todos a 0.</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Para hacer esto, crearemos una matriz de ceros que tenga max_len filas y d_model columnas.</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">## por ejemplo...</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">## torch.zeros(3, 2)</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...devuelve una matriz de 0s con 3 filas y 2 columnas...</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">## tensor([[0., 0.],</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">##         [0., 0.],</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">##         [0., 0.]])</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        pe <span class="op">=</span> torch.zeros(max_len, d_model)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Ahora creamos una secuencia de números para cada posición que un token puede tener en la entrada (o salida).</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Por ejemplo, si los tokens de entrada fueran "I'm happy today!", entonces "I'm" obtendría la primera</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">## posición, 0; "happy" obtendría la segunda, 1; y "today!" obtendría la tercera, 2.</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: Dado que vamos a hacer cálculos matemáticos con estos índices de posición para crear la</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">## codificación posicional para cada uno, necesitamos que sean flotantes (floats) en lugar de enteros (ints).</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: Dos formas de crear flotantes son...</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">## torch.arange(start=0, end=3, step=1, dtype=torch.float)</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...y...</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>        <span class="co">## torch.arange(start=0, end=3, step=1).float()</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...pero la última es igual de clara y requiere menos escritura.</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Por último, .unsqueeze(1) convierte la lista única de números que crea torch.arange en una matriz con</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">## una fila para cada índice y todos los índices en una sola columna. Entonces, si "max_len" = 3, crearíamos</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">## una matriz con 3 filas y 1 columna así...</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>        <span class="co">## torch.arange(start=0, end=3, step=1, dtype=torch.float).unsqueeze(1)</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...devuelve...</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>        <span class="co">## tensor([[0.],</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>        <span class="co">##         [1.],</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        <span class="co">##         [2.]])</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>        position <span class="op">=</span> torch.arange(start<span class="op">=</span><span class="dv">0</span>, end<span class="op">=</span>max_len, step<span class="op">=</span><span class="dv">1</span>).<span class="bu">float</span>().unsqueeze(<span class="dv">1</span>)</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Aquí es donde empezamos a hacer los cálculos para determinar las coordenadas del eje Y en las</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>        <span class="co">## curvas de seno y coseno.</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Las ecuaciones de codificación posicional utilizadas en "Attention is all you need" son...</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>        <span class="co">## PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>        <span class="co">## PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>        <span class="co">## ...y vemos, dentro de las funciones sin() y cos(), que dividimos "pos" por un número que depende</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>        <span class="co">## del índice (i) y del número total de valores PE que queremos por token (d_model).</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: Cuando el índice i es 0, estamos calculando las coordenadas del eje Y en el **primer par**</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       de curvas de seno y coseno. Cuando i=1, calculamos las coordenadas en el **segundo par**, etc.</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Ahora, casi todo el mundo calcula primero el término que usamos para dividir "pos", con un código así...</span></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>        <span class="co">## div_term = torch.exp(torch.arange(start=0, end=d_model, step=2).float() * -(math.log(10000.0) / d_model))</span></span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Creemos un índice para las posiciones de embedding para simplificar un poco el código...</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>        embedding_index <span class="op">=</span> torch.arange(start<span class="op">=</span><span class="dv">0</span>, end<span class="op">=</span>d_model, step<span class="op">=</span><span class="dv">2</span>).<span class="bu">float</span>()</span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: Establecer step=2 da como resultado la misma secuencia de números que obtendríamos si multiplicáramos i por 2.</span></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       Así que nos ahorramos un poco de matemáticas solo configurando step=2.</span></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Y ahora, finalmente, creemos div_term...</span></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>        div_term <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>torch.tensor(<span class="fl">10000.0</span>)<span class="op">**</span>(embedding_index <span class="op">/</span> d_model)</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Ahora calculamos los valores reales de la codificación posicional. Recuerda que 'pe' se inicializó como </span></span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>        <span class="co">## una matriz de 0s con max_len filas y d_model columnas.</span></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>        pe[:, <span class="dv">0</span>::<span class="dv">2</span>] <span class="op">=</span> torch.sin(position <span class="op">*</span> div_term) <span class="co">## cada dos columnas, empezando por la 1ª, tiene valores sin()</span></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>        pe[:, <span class="dv">1</span>::<span class="dv">2</span>] <span class="op">=</span> torch.cos(position <span class="op">*</span> div_term) <span class="co">## cada dos columnas, empezando por la 2ª, tiene valores cos()</span></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Ahora "registramos" 'pe'.</span></span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">'pe'</span>, pe) <span class="co">## "register_buffer()" asegura que 'pe' se moverá adonde sea que se mueva el modelo.</span></span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>                                       <span class="co">## Entonces, si el modelo se mueve a una GPU, 'pe' también se moverá a esa GPU,</span></span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>                                       <span class="co">## lo que hace que acceder a 'pe' sea relativamente rápido.</span></span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>    <span class="co">## Debido a que esta clase hereda de nn.Module, el método forward() se llama por defecto cuando usamos un objeto</span></span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>    <span class="co">## PositionEncoding(). Así, pe(word_embeddings) llamará a forward(), que es donde añadiremos los </span></span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>    <span class="co">## valores de codificación posicional a los valores de word embedding.</span></span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, word_embeddings):</span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> word_embeddings <span class="op">+</span> <span class="va">self</span>.pe[:word_embeddings.size(<span class="dv">0</span>), :]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Observe que los embeddings posicionales se añaden a los embeddings de las palabras. Esto se debe a que el mecanismo de atención solo puede realizar un seguimiento de la similitud entre los embeddings de las palabras, por lo que al añadir los embeddings posicionales a los embeddings de las palabras, el mecanismo de atención también puede realizar un seguimiento del orden de las palabras. Por ejemplo, si el primer token en la entrada es “qué”, el segundo token es “es” y el tercer token es “statquest”, entonces el embedding posicional para “qué” se añadirá al embedding de “qué”, el embedding posicional para “es” se añadirá al embedding de “es”, etc. De esta manera, cada token tiene una representación única que combina tanto su significado (a través del embedding de la palabra) como su posición en la secuencia (a través del embedding posicional).</p>
+<p>Podemos probar qué valores de codificación posicional se añaden a los embeddings de las palabras para cada token en la entrada. Para hacer esto, crearemos una instancia de la clase PositionEncoding() y luego llamaremos a forward() con un tensor de word embeddings de ejemplo.</p>
+<div id="4556f5b3" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Crear una instancia de PositionEncoding</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>position_encoding <span class="op">=</span> PositionEncoding(d_model<span class="op">=</span><span class="dv">4</span>, max_len<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Crear un tensor de word embeddings de ejemplo (6 tokens, cada uno con un embedding de dimensión 4)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>word_embeddings <span class="op">=</span> torch.tensor([[<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>],</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                                [<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>],</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                                [<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>],</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                                [<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>],</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                                [<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>],</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                                [<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>]])  <span class="co"># shape: (6, 4)</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Llamar a forward() para obtener los embeddings con codificación posicional añadida</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>embeddings_con_posicion <span class="op">=</span> position_encoding(word_embeddings)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(embeddings_con_posicion)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([[ 0.0000,  1.0000,  0.0000,  1.0000],
+        [ 0.8415,  0.5403,  0.0100,  0.9999],
+        [ 0.9093, -0.4161,  0.0200,  0.9998],
+        [ 0.1411, -0.9900,  0.0300,  0.9996],
+        [-0.7568, -0.6536,  0.0400,  0.9992],
+        [-0.9589,  0.2837,  0.0500,  0.9988]])</code></pre>
+</div>
+</div>
+</section>
+<section id="atención-attention" class="level3">
+<h3 class="anchored" data-anchor-id="atención-attention">Atención (Attention)</h3>
+<p>Vamos a programar una clase <code>Attention</code> para realizar todos los tipos de atención que un transformer podría necesitar: <strong>Auto-Atención (Self-Attention)</strong>, <strong>Auto-Atención Enmascarada (Masked Self-Attention)</strong> (la cual es utilizada por el Decodificador durante el entrenamiento) y <strong>Atención Codificador-Decodificador (Encoder-Decoder Attention)</strong>.</p>
+<p>La <strong>Auto-Atención</strong> es un tipo de atención utilizada en transformers de tipo “Codificador-Decodificador” y “Solo Codificador”. Permite que cada palabra en una frase defina una relación con cualquier otra palabra en la misma frase, independientemente del orden de las palabras. En otras palabras, si la frase es <strong>Buy an apple and an orange</strong>, entonces la palabra <strong>apple</strong> puede definir su relación con cada palabra en esa frase, incluyendo palabras que vinieron después, como <strong>orange</strong> y antes, como <strong>buy</strong>, tal como ilustran las flechas azules en la figura a continuación.</p>
+<p><img src="../../img/atencion_apple2.svg" class="img-fluid"></p>
+<p>La <strong>Auto-Atención Enmascarada</strong> es utilizada por transformers de tipo “Codificador-Decodificador” y “Solo Decodificador”, y permite que cada palabra en una frase defina una relación consigo misma y con las palabras que vinieron antes. En otras palabras, la <strong>Auto-Atención Enmascarada</strong> evita que el transformer “mire hacia adelante”. Esto se ilustra a continuación, donde la palabra <strong>apple</strong> puede definir relaciones consigo misma y con todo lo que vino anteriormente en la entrada. En los transformers de tipo “Codificador-Decodificador”, la <strong>Auto-Atención Enmascarada</strong> se utiliza durante el entrenamiento, cuando sabemos cuál debería ser la salida, pero aun así forzamos al decodificador a generarla un token a la vez, limitando así la atención solo a las palabras de salida que aparecieron antes. Por el contrario, los transformers de tipo “Solo Decodificador” utilizan la <strong>Auto-Atención Enmascarada</strong> todo el tiempo, tanto en la entrada como en la salida, durante el entrenamiento y la inferencia. Por lo tanto, aunque el transformer “Solo Decodificador” puede ver toda la entrada durante el entrenamiento y la inferencia, sigue permitiendo que los valores de atención para cada palabra dependan únicamente de las palabras que vinieron antes.</p>
+<p><img src="../../img/atencion_apple4.svg" class="img-fluid"></p>
+<p>La <strong>Atención Codificador-Decodificador</strong> se utiliza únicamente en transformers de tipo “Codificador-Decodificador”, donde existe una separación clara entre la parte del transformer que procesa la entrada (el codificador) y la parte que genera la salida (el decodificador). La <strong>Atención Codificador-Decodificador</strong> permite que cada palabra en la salida (en el decodificador) defina relaciones con todas las palabras en la entrada (en el codificador).</p>
+<p>Ahora que tenemos una idea general de los tres tipos de atención utilizados en los transformers, podemos hablar de cómo se calcula. Ya vimos en la <a href="../../qmd/20_LLM/40_attention.html">lección anterior</a> que el mecanismo de atención se calcula utilizando la siguiente fórmula:</p>
+<p><span class="math display">\[
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right)V
+\]</span></p>
+<p>La fórmula para la atención enmascarada es muy similar, pero con un término adicional, <span class="math inline">\(M\)</span>, que representa la máscara que se aplica a los valores de atención para evitar que el transformer “mire hacia adelante”. Lo que se hace es poner un valor muy negativo en las posiciones que no deben ser consideradas. Así, al aplicar softmax, esas posiciones tendrán valores muy pequeños tendrán probabilidad cero y no influirán en la atención:</p>
+<p><span class="math display">\[
+\text{Masked Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}} + M\right)V
+\]</span></p>
+<p>En el siguiente ejemplo se muestra cómo se aplica una máscara a los valores de atención antes de aplicar softmax. Vemos que la primera fila del tensor, que representa a la primera palabra, sólo puede prestar atención así misma, ya que no tiene palabras anteriores. La segunda fila, que representa a la segunda palabra, puede prestar atención a la primera y a sí misma, pero no a la tercera. La tercera fila, que representa a la tercera palabra, puede prestar atención a las dos palabras anteriores y a sí misma:</p>
+<div id="26e93614" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> torch.tensor([[<span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">3.0</span>],</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                   [<span class="fl">4.0</span>, <span class="fl">5.0</span>, <span class="fl">6.0</span>],</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                   [<span class="fl">7.0</span>, <span class="fl">8.0</span>, <span class="fl">9.0</span>]])</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> torch.tensor([[<span class="va">False</span>, <span class="va">True</span>, <span class="va">True</span>],</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                    [<span class="va">False</span>, <span class="va">False</span>, <span class="va">True</span>],</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                    [<span class="va">False</span>, <span class="va">False</span>, <span class="va">False</span>]])</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>masked_scores <span class="op">=</span> scores.masked_fill(mask<span class="op">=</span>mask, value<span class="op">=-</span><span class="fl">1e9</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>attention_percents <span class="op">=</span> F.softmax(masked_scores, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Scores originales:"</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(scores)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Scores enmascarados:"</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(masked_scores)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Porcentajes de atención después de aplicar softmax:"</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(attention_percents)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Scores originales:
+tensor([[1., 2., 3.],
+        [4., 5., 6.],
+        [7., 8., 9.]])
+
+Scores enmascarados:
+tensor([[ 1.0000e+00, -1.0000e+09, -1.0000e+09],
+        [ 4.0000e+00,  5.0000e+00, -1.0000e+09],
+        [ 7.0000e+00,  8.0000e+00,  9.0000e+00]])
+
+Porcentajes de atención después de aplicar softmax:
+tensor([[1.0000, 0.0000, 0.0000],
+        [0.2689, 0.7311, 0.0000],
+        [0.0900, 0.2447, 0.6652]])</code></pre>
+</div>
+</div>
+<p>Programamos una capa capaz de calcular todos los tipos de atención que un transformer podría necesitar, incluyendo la atención enmascarada:</p>
+<div id="286b14d1" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Attention(nn.Module):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model<span class="op">=</span><span class="dv">2</span>):</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">## d_model = el número de valores de embedding por token.</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_model <span class="op">=</span> d_model</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Inicializamos los pesos (W) que usaremos para crear los números de </span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">## consulta (q), clave (k) y valor (v) para cada token.</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_q <span class="op">=</span> nn.Linear(in_features<span class="op">=</span>d_model, out_features<span class="op">=</span>d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_k <span class="op">=</span> nn.Linear(in_features<span class="op">=</span>d_model, out_features<span class="op">=</span>d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.W_v <span class="op">=</span> nn.Linear(in_features<span class="op">=</span>d_model, out_features<span class="op">=</span>d_model, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: En este ejemplo simple, no estamos entrenando con los datos en "lotes" (batches).</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       Sin embargo, al definir variables para row_dim y col_dim, podríamos </span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       permitir lotes configurando row_dim a 1 y col_dim a 2.</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.row_dim <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.col_dim <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, encodings_for_q, encodings_for_k, encodings_for_v, mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Creamos las consultas, claves y valores usando las codificaciones</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">## asociadas con cada token.</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">##</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: Para la Atención Codificador-Decodificador, las codificaciones para q provienen</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       del decodificador y las codificaciones para k y v provienen de la salida</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       del codificador.</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       En todos los demás tipos de atención, las codificaciones provienen </span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       de la misma fuente.</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>        q <span class="op">=</span> <span class="va">self</span>.W_q(encodings_for_q)</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        k <span class="op">=</span> <span class="va">self</span>.W_k(encodings_for_k)</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>        v <span class="op">=</span> <span class="va">self</span>.W_v(encodings_for_v)</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Calculamos las puntuaciones de atención</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">## la ecuación es (q * k^T) / sqrt(d_model)</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: Parece que la mayoría de la gente usa "indexación inversa" para las dimensiones al trasponer k.</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       k.transpose(dim0, dim1) traspondrá k intercambiando dim0 y dim1.</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       En notación matricial estándar, querríamos intercambiar filas (dim=0) con columnas (dim=1).</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>        sims <span class="op">=</span> torch.matmul(q, k.transpose(dim0<span class="op">=</span><span class="va">self</span>.row_dim, dim1<span class="op">=</span><span class="va">self</span>.col_dim))</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>        scaled_sims <span class="op">=</span> sims <span class="op">/</span> torch.tensor(k.size(<span class="va">self</span>.col_dim)<span class="op">**</span><span class="fl">0.5</span>)</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>            <span class="co">## Aquí estamos enmascarando elementos a los que no queremos prestar atención,</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>            <span class="co">## como los tokens que vienen después del token actual.</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>            <span class="co">## También podemos usar el enmascaramiento para bloquear el token &lt;PAD&gt;,</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>            <span class="co">## que se utiliza cuando tenemos un lote de secuencias de entrada y no </span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>            <span class="co">## todas tienen exactamente la misma longitud.</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>            <span class="co">##</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>            <span class="co">## Reemplazamos &lt;PAD&gt;, o los tokens que vienen después del actual,</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>            <span class="co">## con un número negativo muy grande para que la función SoftMax() </span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>            <span class="co">## asigne a todos los elementos enmascarados un valor de salida </span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>            <span class="co">## (o "probabilidad") de 0.</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>            scaled_sims <span class="op">=</span> scaled_sims.masked_fill(mask<span class="op">=</span>mask, value<span class="op">=-</span><span class="fl">1e9</span>)</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Aplicamos softmax para determinar qué porcentaje del valor de cada token</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>        <span class="co">## usar en los valores de atención finales.</span></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>        attention_percents <span class="op">=</span> F.softmax(scaled_sims, dim<span class="op">=</span><span class="va">self</span>.col_dim)</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Escalamos los valores por sus porcentajes asociados y los sumamos.</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>        attention_scores <span class="op">=</span> torch.matmul(attention_percents, v)</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> attention_scores</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="decoder-only-transformer" class="level3">
+<h3 class="anchored" data-anchor-id="decoder-only-transformer">Decoder-Only Transformer</h3>
+<p>En esta sección vamos a construir un Transformer “solo decodificador” (Decoder-Only) simplificado. Se compone de los siguientes elementos:</p>
+<ul>
+<li>Word Embedding</li>
+<li>Position Encoding</li>
+<li>Masked Self-Attention</li>
+<li>Residual Connections</li>
+<li>A fully connected layer</li>
+<li>SoftMax (la función de pérdida utilizada <code>nn.CrossEntropyLoss()</code>, ya aplica sofmax, con lo que no es necesaria).</li>
+</ul>
+<p>Los tres primeros elementos deberían ya ser conocidos:</p>
+<ul>
+<li><p>Word Embedding: es una capa que convierte los números de ID de los tokens en vectores de números flotantes (floats) que representan el significado de cada token.</p></li>
+<li><p>Position Encoding: es una capa que añade información sobre la posición de cada token en la secuencia.</p></li>
+<li><p>Masked Self-Attention: es una capa que permite que cada token preste atención a sí mismo y a los tokens anteriores en la secuencia.</p></li>
+<li><p><strong>Residual Connections</strong>: son conexiones que permiten que la información fluya directamente a través de la red sin ser modificada por las capas intermedias, lo que ayuda a prevenir el problema del gradiente desaparecido. También preservan la identidad. Ya que permiten que la red aprenda a realizar mejoras sobre la información existente en lugar de intentar recrearla desde cero en cada capa. Si una capa no tiene nada útil que aportar, la red simplemente puede aprender a ignorarla, haciendo que la salida de esa capa sea cercana a cero (aprendiendo la función identidad). Por último, aportan estabilidad al ayudar a que el entrenamiento sea posible en modelos con cientos de capas; sin ellas, el entrenamiento sería inestable o simplemente no convergería.</p></li>
+<li><p><strong>Fully connected layer</strong>: es una capa que toma la salida del Masked Self-Attention y la transforma en un vector del mismo tamaño que el vocabulario, donde cada valor representa la probabilidad de que ese token sea el siguiente en la secuencia. Puede haber varias capas fully connected con una función de activación entre ellas, pero en este ejemplo simple solo usaremos una. La justificación para usar una capa fully connected es que si la atención es el mecanismo de búsqueda (¿a qué información debo prestar atención?), la capa FFN es el mecanismo de procesamiento (¿qué significa esta información?). Es donde el modelo realmente “razona” o integra la información que acaba de recopilar. El mecanismo de atención es principalmente una operación de mezcla lineal (un promedio ponderado). Las capas FFN añaden una no linealidad (usualmente mediante funciones como ReLU o GELU). Esto le da al modelo la capacidad de aprender funciones complejas y patrones que no son simples combinaciones lineales. Gran parte del conocimiento que el modelo “sabe” (datos, hechos, gramática) parece almacenarse en los pesos de estas capas FFN, funcionando como una base de conocimiento distribuida.</p></li>
+</ul>
+<div id="4a50ae9a" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DecoderOnlyTransformer(L.LightningModule):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_tokens<span class="op">=</span><span class="dv">4</span>, d_model<span class="op">=</span><span class="dv">2</span>, max_len<span class="op">=</span><span class="dv">6</span>):</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: En este ejemplo simple, solo usamos un decodificador de "una sola capa".</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       Si quisiéramos tener múltiples capas de decodificador, tomaríamos</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       la salida de un módulo decodificador y la usaríamos como entrada</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       para el siguiente módulo.</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.we <span class="op">=</span> nn.Embedding(num_embeddings<span class="op">=</span>num_tokens,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                               embedding_dim<span class="op">=</span>d_model)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pe <span class="op">=</span> PositionEncoding(d_model<span class="op">=</span>d_model,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>                                   max_len<span class="op">=</span>max_len)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.self_attention <span class="op">=</span> Attention(d_model<span class="op">=</span>d_model)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: En este ejemplo simple, no estamos haciendo atención multi-cabezal (multi-head).</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       Si quisiéramos hacerla, podríamos inicializar más objetos Attention </span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">##       y usar una capa lineal para reducir la dimensión de vuelta a d_model.</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc_layer <span class="op">=</span> nn.Linear(in_features<span class="op">=</span>d_model, out_features<span class="op">=</span>num_tokens)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, token_ids):</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        word_embeddings <span class="op">=</span> <span class="va">self</span>.we(token_ids)</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>        position_encoded <span class="op">=</span> <span class="va">self</span>.pe(word_embeddings)</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Para el transformer solo decodificador (decoder-only), necesitamos usar </span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">## "auto-atención enmascarada" para que, durante el entrenamiento, el modelo </span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">## no pueda hacer trampa mirando qué palabras vienen después de la actual.</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Creamos una matriz donde el triángulo inferior tiene 1s y el resto 0s.</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> torch.tril(torch.ones((token_ids.size(dim<span class="op">=</span><span class="dv">0</span>), token_ids.size(dim<span class="op">=</span><span class="dv">0</span>)), device<span class="op">=</span><span class="va">self</span>.device))</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">## NOTA: device=self.device asegura que la máscara esté en el mismo dispositivo (CPU/GPU) que el modelo.</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Reemplazamos los 0s (que representan palabras futuras que queremos enmascarar) </span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>        <span class="co">## con "True", y los 1s del triángulo inferior con "False".</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> mask <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>        self_attention_values <span class="op">=</span> <span class="va">self</span>.self_attention(position_encoded,</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>                                                    position_encoded,</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>                                                    position_encoded,</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>                                                    mask<span class="op">=</span>mask)</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Conexión residual: sumamos la entrada original a la salida de la atención</span></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>        residual_connection_values <span class="op">=</span> position_encoded <span class="op">+</span> self_attention_values</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>        <span class="co">## Capa totalmente conectada para proyectar de vuelta al tamaño del vocabulario</span></span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>        fc_layer_output <span class="op">=</span> <span class="va">self</span>.fc_layer(residual_connection_values)</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fc_layer_output</span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> configure_optimizers(<span class="va">self</span>):</span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>        <span class="co">## configuramos el optimizador y la tasa de aprendizaje</span></span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Adam(<span class="va">self</span>.parameters(), lr<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> training_step(<span class="va">self</span>, batch, batch_idx):</span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a>        <span class="co">## training_step() es llamado por el trainer de Lightning durante el entrenamiento.</span></span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>        input_tokens, labels <span class="op">=</span> batch <span class="co"># recoger entrada y etiquetas</span></span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> <span class="va">self</span>.forward(input_tokens[<span class="dv">0</span>])</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">self</span>.loss(output, labels[<span class="dv">0</span>])</span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Ahora que hemos programado la clase <code>DecoderOnlyTransformer()</code>, veamos si funciona correctamente sin necesidad de entrenamiento. ¡Nunca se sabe, podría funcionar así tal cual!</p>
+<p>Para usar el transformer, pasamos una frase de entrada, ya sea <strong>qué es statquest <eos></eos></strong> o <strong>statquest es qué <eos></eos></strong>, a través del transformer para obtener el siguiente token predicho. Si el siguiente token predicho no es <strong><eos></eos></strong>, entonces agregamos el token predicho a los tokens de entrada, volvemos a pasarlo por el transformer y repetimos el proceso hasta que obtengamos el token <strong><eos></eos></strong> o alcancemos la longitud máxima de la secuencia.</p>
+<div id="c05f3739" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Establecemos la semilla reproducir los resultados.</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>L.seed_everything(seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">## Primero, creamos una instancia del modelo DecoderOnlyTransformer()</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> DecoderOnlyTransformer(num_tokens<span class="op">=</span><span class="bu">len</span>(token_to_id), d_model<span class="op">=</span><span class="dv">2</span>, max_len<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">## Ahora creamos la entrada para el transformer...</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>model_input <span class="op">=</span> torch.tensor([token_to_id[<span class="st">"qué"</span>],</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"es"</span>],</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"statquest"</span>],</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"&lt;EOS&gt;"</span>]])</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>input_length <span class="op">=</span> model_input.size(dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">## Obtenemos las predicciones del modelo</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> model(model_input)</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="co">## NOTA: "predictions" es la salida de la capa totalmente conectada,</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">##       no de una función softmax(). Como vamos a seleccionar el elemento </span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">##       con el valor más alto, podemos usar argmax directamente.</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="co">## NOTA: "predictions" es una matriz, con una fila de valores predichos</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">##       por cada token de entrada. Como solo queremos la predicción de la</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co">##       última fila (la predicción más reciente), usamos el índice -1.</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>predicted_id <span class="op">=</span> torch.tensor([torch.argmax(predictions[<span class="op">-</span><span class="dv">1</span>, :])])</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="co">## Almacenaremos predicted_id en un array, predicted_ids, al que </span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="co">## añadiremos cada vez que predigamos un nuevo token.</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>predicted_ids <span class="op">=</span> predicted_id</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="co">## Usamos un bucle para predecir tokens hasta obtener un token &lt;EOS&gt;.</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>max_length <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(input_length, max_length):</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (predicted_id <span class="op">==</span> token_to_id[<span class="st">"&lt;EOS&gt;"</span>]): <span class="co"># si la predicción es &lt;EOS&gt;, terminamos</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    model_input <span class="op">=</span> torch.cat((model_input, predicted_id))</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    predictions <span class="op">=</span> model(model_input)</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    predicted_id <span class="op">=</span> torch.tensor([torch.argmax(predictions[<span class="op">-</span><span class="dv">1</span>, :])])</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    predicted_ids <span class="op">=</span> torch.cat((predicted_ids, predicted_id))</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="co">## Imprimimos la frase resultante.</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Tokens predichos:</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="bu">id</span> <span class="kw">in</span> predicted_ids:</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, id_to_token[<span class="bu">id</span>.item()])</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tokens predichos:
+
+     &lt;EOS&gt;</code></pre>
+</div>
+</div>
+<p>Y, sin entrenamiento, el transformer predice <strong><eos></eos></strong>, pero queríamos que predijera <strong>awesome <eos></eos></strong>. Por lo tanto, dado que el transformer no respondió correctamente al <em>prompt</em>, tendremos que entrenarlo.</p>
+</section>
+<section id="entrenamiento-del-transformer-solo-decodificador" class="level3">
+<h3 class="anchored" data-anchor-id="entrenamiento-del-transformer-solo-decodificador">Entrenamiento del Transformer “Solo Decodificador”</h3>
+<p>Simplementa llamamos a <code>trainer.fit()</code> para entrenar el modelo. Dado que nuestro modelo es muy simple, no necesitamos entrenarlo durante muchas épocas.</p>
+<div id="5220ca04" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> L.Trainer(max_epochs<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>trainer.fit(model, train_dataloaders<span class="op">=</span>dataloader)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"bf42e7cb284749d88f06189b1c303508","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+</section>
+<section id="prueba-del-transformer-entrenado" class="level3">
+<h3 class="anchored" data-anchor-id="prueba-del-transformer-entrenado">Prueba del Transformer entrenado</h3>
+<p>Para utilizar el transformer que acabamos de entrenar, simplemente repetimos lo que hicimos anteriormente, solo que esta vez usamos el transformer entrenado en lugar de uno sin entrenar. Primero, veremos si responde correctamente al prompt <strong>¿qué es statquest?</strong>?</p>
+<div id="d513c33e" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model_input <span class="op">=</span> torch.tensor([token_to_id[<span class="st">"qué"</span>],</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"es"</span>],</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"statquest"</span>],</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"&lt;EOS&gt;"</span>]])</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>input_length <span class="op">=</span> model_input.size(dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> model(model_input)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>predicted_id <span class="op">=</span> torch.tensor([torch.argmax(predictions[<span class="op">-</span><span class="dv">1</span>,:])])</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>predicted_ids <span class="op">=</span> predicted_id</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(input_length, max_length):</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (predicted_id <span class="op">==</span> token_to_id[<span class="st">"&lt;EOS&gt;"</span>]): <span class="co"># if the prediction is &lt;EOS&gt;, then we are done</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    model_input <span class="op">=</span> torch.cat((model_input, predicted_id))</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    predictions <span class="op">=</span> model(model_input)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    predicted_id <span class="op">=</span> torch.tensor([torch.argmax(predictions[<span class="op">-</span><span class="dv">1</span>,:])])</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    predicted_ids <span class="op">=</span> torch.cat((predicted_ids, predicted_id))</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Predicted Tokens:</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="bu">id</span> <span class="kw">in</span> predicted_ids:</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, id_to_token[<span class="bu">id</span>.item()])</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Predicted Tokens:
+
+     asombroso
+     &lt;EOS&gt;</code></pre>
+</div>
+</div>
+<p>Vemos que responde correctamente. Ahora probemos el otro prompt, <strong>statquest es qué?</strong>.</p>
+<div id="d0de869a" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model_input <span class="op">=</span> torch.tensor([token_to_id[<span class="st">"statquest"</span>],</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"es"</span>],</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"qué"</span>],</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                            token_to_id[<span class="st">"&lt;EOS&gt;"</span>]])</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>input_length <span class="op">=</span> model_input.size(dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> model(model_input)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>predicted_id <span class="op">=</span> torch.tensor([torch.argmax(predictions[<span class="op">-</span><span class="dv">1</span>,:])])</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>predicted_ids <span class="op">=</span> predicted_id</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(input_length, max_length):</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (predicted_id <span class="op">==</span> token_to_id[<span class="st">"&lt;EOS&gt;"</span>]): <span class="co"># if the prediction is &lt;EOS&gt;, then we are done</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    model_input <span class="op">=</span> torch.cat((model_input, predicted_id))</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    predictions <span class="op">=</span> model(model_input)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    predicted_id <span class="op">=</span> torch.tensor([torch.argmax(predictions[<span class="op">-</span><span class="dv">1</span>,:])])</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    predicted_ids <span class="op">=</span> torch.cat((predicted_ids, predicted_id))</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Predicted Tokens:</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="bu">id</span> <span class="kw">in</span> predicted_ids:</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, id_to_token[<span class="bu">id</span>.item()])</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Predicted Tokens:
+
+     asombroso
+     &lt;EOS&gt;</code></pre>
+</div>
+</div>
+<p>Vemos que también responde correctamente a este prompt. Por lo tanto, nuestro transformer “solo decodificador” funciona correctamente. Sin embargo, es un modelo muy simple y no es capaz de generar respuestas creativas o interesantes. Para eso, necesitaríamos un modelo más grande y entrenarlo con una gran cantidad de datos.</p>
+</section>
+</section>
+<section id="simulador-de-un-transformer-solo-decodificador" class="level2">
+<h2 class="anchored" data-anchor-id="simulador-de-un-transformer-solo-decodificador">Simulador de un Transformer “Solo Decodificador”</h2>
+<p>En el siguiente <a href="https://poloclub.github.io/transformer-explainer/">enlace</a> puedes encontrar un simulador interactivo de un Transformer “Solo Decodificador”</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script type="application/vnd.jupyter.widget-state+json">
+{"state":{"171756f20d5048cea4e15fda713fb719":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_db7ccbd3498749739fdfe9b878af88cb","placeholder":"​","style":"IPY_MODEL_3421f586304845fd8acd031e6b1f202c","tabbable":null,"tooltip":null,"value":" 2/2 [00:00&lt;00:00, 95.19it/s, v_num=47]"}},"1b9f34c3ba6b4fc58fcc9fada37b82ab":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":"2","flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"3421f586304845fd8acd031e6b1f202c":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"47a0fa19372b456987896a614fcc71f7":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"62b04da3962d4fc49737cb135f72e860":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"6931e6bfbfa0408f81a998bb34270bf2":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_1b9f34c3ba6b4fc58fcc9fada37b82ab","max":1,"min":0,"orientation":"horizontal","style":"IPY_MODEL_62b04da3962d4fc49737cb135f72e860","tabbable":null,"tooltip":null,"value":1}},"6c439e41a60042d8abca4bc4ccedcfa4":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"7040082420a141fe9dea51690544b320":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":"inline-flex","flex":null,"flex_flow":"row wrap","grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":"100%"}},"9435029610b44d8d92ab98b334c226ed":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_47a0fa19372b456987896a614fcc71f7","placeholder":"​","style":"IPY_MODEL_6c439e41a60042d8abca4bc4ccedcfa4","tabbable":null,"tooltip":null,"value":"Epoch 29: 100%"}},"bf42e7cb284749d88f06189b1c303508":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_9435029610b44d8d92ab98b334c226ed","IPY_MODEL_6931e6bfbfa0408f81a998bb34270bf2","IPY_MODEL_171756f20d5048cea4e15fda713fb719"],"layout":"IPY_MODEL_7040082420a141fe9dea51690544b320","tabbable":null,"tooltip":null}},"db7ccbd3498749739fdfe9b878af88cb":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}}},"version_major":2,"version_minor":0}
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/surtich\.github\.io\/IA-para-desarrolladores\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
