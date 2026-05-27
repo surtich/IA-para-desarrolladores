@@ -1,0 +1,459 @@
+---
+title: Hugging Face
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+
+## Introducción a Hugging Face:
+
+Hugging Face la plataforma más importante para la comunidad de **Inteligencia Artificial y Machine Learning** a nivel mundial. Si GitHub es el lugar donde los desarrolladores alojan su código, Hugging Face es el lugar donde la comunidad global aloja, comparte y colabora en modelos de IA.
+
+Se trata una empresa tecnológica que ha democratizado el acceso a la IA mediante herramientas de código abierto. Su valor reside en que permite a desarrolladores, investigadores y empresas:
+
+* **Acceder a modelos preentrenados:** Puede descargar modelos de última generación (como Llama, Mistral, Stable Diffusion, etc.) y usarlos de inmediato sin tener que entrenarlos desde cero, lo que ahorra miles de horas de cómputo.
+
+* **Colaborar en tiempo real:** Es un punto de encuentro donde se versiona tanto el código como los pesos del modelo y los datos, facilitando la transparencia y la reproducibilidad.
+
+* **Desplegar soluciones:** Ofrece infraestructura para poner modelos en producción de manera sencilla, eliminando la complejidad de gestionar servidores por cuenta propia.
+
+
+## Estructura de la plataforma
+
+La web de Hugging Face está organizada en secciones que facilitan el flujo de trabajo en un proyecto de IA. Los componentes principales son:
+
+| Componente | Función Principal |
+| :--- | :--- |
+| **Models** | Repositorio central de modelos preentrenados. Incluye filtros por tarea, métricas y documentación. |
+| **Datasets** | Biblioteca de conjuntos de datos listos para usar, etiquetados y procesados para entrenamiento. |
+| **Spaces** | Entorno para crear aplicaciones interactivas (demos) usando herramientas como Gradio o Streamlit. |
+| **Inference API** | Interfaz rápida para consultar modelos vía HTTP sin necesidad de gestionar servidores propios. |
+| **Endpoints** | Solución empresarial para despliegue en producción, escalable y segura. |
+
+## Detalle de los componentes clave
+
+* **Models:** Es el corazón del sitio. Cada modelo tiene una "card" (página de documentación) donde se explica para qué sirve, qué licencia tiene, cómo se cargó y qué limitaciones posee. Es el estándar actual para publicar investigación en IA.
+
+* **Datasets:** La calidad de la IA depende de la calidad de sus datos. En esta sección se encuentran conjuntos de datos limpios y organizados para tareas como NLP (procesamiento de lenguaje natural), visión artificial, audio, robótica, entre otros.
+
+* **Spaces:** Es fundamental para hacer *demos*. Tras crear un modelo, puede subirlo a un "Space" y cualquier persona en el mundo podrá probarlo directamente en su navegador, lo cual es vital para presentar prototipos sin configurar nada.
+
+* **Librerías (Ecosistema de Software):** Más allá de la web, Hugging Face provee librerías como `transformers`, `datasets` y `diffusers`. Estas son las herramientas de Python que permiten descargar y ejecutar casi cualquier modelo alojado en la plataforma con apenas unas líneas de código.
+
+En resumen, Hugging Face no es solo un repositorio; es un **ecosistema completo** que cubre todo el ciclo de vida de un modelo: desde la carga de datos y el entrenamiento, hasta la evaluación y el despliegue final.
+
+## La librería `transformers`
+
+La librería `transformers` es la herramienta más popular de Hugging Face para trabajar con modelos de lenguaje. Proporciona una interfaz unificada para cargar y usar modelos preentrenados, así como para entrenar nuevos modelos desde cero.
+
+Con `transformers`, puede:
+
+* Cargar modelos preentrenados con una sola línea de código.
+* Realizar tareas de NLP como clasificación, generación de texto, traducción, etc.
+* Personalizar modelos para tareas específicas mediante fine-tuning.
+* Acceder a una amplia variedad de modelos, desde BERT hasta GPT-3 y más allá.
+
+En las siguientes secciones, exploraremos cómo usar `transformers` para cargar modelos, realizar inferencias y entrenar nuevos modelos personalizados. También veremos cómo aprovechar otras herramientas de Hugging Face para mejorar su flujo de trabajo en IA.
+
+## Pipelines
+
+`pipelines()` es la forma más sencilla de usar modelos preentrenados para tareas comunes. Proporciona una interfaz de alto nivel que abstrae la complejidad de cargar modelos y tokenizadores, permitiéndole realizar tareas como clasificación, generación de texto, traducción, etc., con apenas unas líneas de código.
+
+
+Por ejemplo:
+
+```{python}
+from transformers import pipeline
+
+# Cargar un pipeline para clasificación de texto
+classifier = pipeline("sentiment-analysis")
+
+# Realizar una inferencia
+result = classifier("I love this product!")
+print(result)
+```
+
+Sino se indica lo contrario, `pipeline()` cargará el modelo predefinido para este tipo de tarea.
+
+Hay tres pasos que `pipeline()` realiza automáticamente:
+
+1- El texto es preprocesado en un formato que el modelo puede entender.
+2- La entrada preprocesada se pasa al modelo.
+3- La salida del modelo se postprocesa para devolver un resultado legible.
+
+Algunos pipelines disponibles son:
+
+| Pipeline | Descripción |
+| :--- | :--- |
+| `sentiment-analysis` | Clasificación de sentimientos en texto. |
+| `text-generation` | Generación de texto a partir de un prompt. |
+| `translation` | Traducción de texto entre idiomas. |
+| `question-answering` | Responder preguntas basadas en un contexto dado. | 
+| `summarization` | Resumir textos largos en versiones más cortas. |
+| `token-classification` | Etiquetado de tokens para tareas como NER (Reconocimiento de Entidades Nombradas). |
+| `text-classification` | Clasificación de texto en categorías predefinidas. |
+| `fill-mask` | Predicción de palabras faltantes en una oración. |
+| `zero-shot-classification` | Clasificación de texto sin necesidad de entrenamiento previo. |
+| `image-classification` | Clasificación de imágenes en categorías predefinidas. |
+| `object-detection` | Detección de objetos en imágenes. |
+| `text2image` | Generación de imágenes a partir de descripciones textuales. |
+| `text2text-generation` | Transformación de texto a texto, útil para tareas como traducción o resumen. |
+| `audio-classification` | Clasificación de audio en categorías predefinidas. |
+| `automatic-speech-recognition` | Transcripción de audio a texto. |
+| `text-to-speech` | Generación de audio a partir de texto. |
+| `feature-extraction` | Extracción de características de texto para tareas como clustering o visualización. |
+
+### Clasificación zero-shot
+
+El pipeline de clasificación zero-shot permite clasificar texto en categorías sin necesidad de entrenar un modelo específico para esas categorías. Esto se logra utilizando modelos de lenguaje que han sido preentrenados en una amplia variedad de tareas y pueden generalizar a nuevas tareas sin entrenamiento adicional.
+
+```{python}
+from transformers import pipeline
+
+classifier = pipeline("zero-shot-classification")
+classifier(
+    "This is a course about the Transformers library",
+    candidate_labels=["education", "politics", "business"],
+)
+```
+
+### Generación de texto
+
+El pipeline de generación de texto permite generar texto a partir de un prompt dado. Es útil para tareas como redacción automática, generación de contenido, entre otros.
+
+```{python}
+from transformers import pipeline
+
+generator = pipeline("text-generation")
+generator("Hugging Face es una plataforma de IA que", max_length=50, num_return_sequences=1)
+```
+
+### Utilizar un modelo específico
+
+Si desea utilizar un modelo específico en lugar del modelo predefinido para una tarea, puede indicarlo al crear el pipeline. 
+
+```{python}
+from transformers import pipeline
+
+generator = pipeline("text-generation", model="distilgpt2")
+generator(
+    "In this course, we will teach you how to",
+    max_length=30,
+    num_return_sequences=2,
+)
+```
+
+En el [hub de modelos](https://huggingface.co/models) están todos los disponibles, cada uno tiene una card con su documentación, incluyendo el nombre que se debe usar para cargarlo con `pipeline()`. El Hub de Modelos también contiene puntos de control (checkpoints) para modelos que soportan múltiples lenguajes. Algunos modelos su prueba en la propia web de Hugging Face.
+
+
+## Architectures vs. checkpoints
+
+En Hugging Face, es importante distinguir entre **architectures** y **checkpoints**:
+
+* **Architectures:** Se refiere a la estructura del modelo, es decir, cómo están organizadas las capas, los parámetros y la lógica interna. Por ejemplo, BERT, GPT-2 y T5 son diferentes architectures. Estas definen la forma general del modelo pero no contienen pesos específicos.
+
+* **Checkpoints:** Son los archivos que contienen los pesos entrenados de un modelo específico. Un checkpoint es el resultado de entrenar una architecture en un conjunto de datos particular. Por ejemplo, `bert-base-uncased` es un checkpoint de la architecture BERT que ha sido entrenado en un corpus específico.
+
+## ¿Cómo funciona una `pipeline()`?
+
+Es importante entender qué sucede internamente cuando se llama a `pipeline()`:
+
+```{python}
+from transformers import pipeline
+
+classifier = pipeline("sentiment-analysis")
+classifier(
+    [
+        "I've been waiting for a HuggingFace course my whole life.",
+        "I hate this so much!",
+    ]
+)
+```
+
+
+### 1. Preprocesamiento
+
+Los Transformers no pueden procesar texto directamente, así que lo primero que hace `pipeline()` es convertir el texto de entrada a números. Para eso se usa un `tokenizador` que se encarga de:
+
+* Dividir el texto en tokens (palabras, subpalabras o caracteres).
+* Convertir esos tokens en IDs numéricos que el modelo puede entender.
+* Agregar tokens especiales necesarios para el modelo (como [CLS], [SEP], etc.).
+
+Este preprocesamiento debe coincidir exactamente con el realizado por el modelo en el entrenamiento. Por eso, cada modelo tiene un tokenizador específico que se carga automáticamente con `pipeline()`. El objeto `AutoTokenizer` se encarga de obtener el tokenizador correcto para el modelo que se está utilizando.
+
+```{python}
+from transformers import AutoTokenizer
+
+checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+``` 
+
+Podemos pasar directamente el texto al tokenizador para obtener los IDs de los tokens. El tokenizador devuelve los IDs en formato tensor. Por ejemplo, para obtener un tensor de PyTorch^[]De momento no es importante conocer el uso de los argumentos `padding` y `truncation`.:
+
+```{python}
+raw_inputs = [
+    "I've been waiting for a HuggingFace course my whole life.",
+    "I hate this so much!",
+]
+
+inputs = tokenizer(
+    raw_inputs,
+    padding=True, truncation=True,
+    return_tensors="pt",
+)
+
+inputs
+```
+
+### 2. Usando el modelo para obtener los embeddings contextuales
+
+El siguiente paso es pasar los tensores de entrada al modelo para obtener las predicciones. El objeto `AutoModel se encarga de cargar el modelo correcto para el checkpoint que se está utilizando. Por ejemplo:
+
+```{python}
+from transformers import AutoModel
+
+checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+model = AutoModel.from_pretrained(checkpoint)
+```
+
+Podemos pasar los tensores de entrada al modelo para obtener las predicciones. Cuando pasamos los tensores al modelo, este realiza una serie de operaciones internas (como multiplicaciones de matrices, activaciones, etc.) para procesar la información y generar una salida. La salida del modelo es un diccionario que contiene las salidas de cada capa, incluyendo las predicciones finales, que están en la clave `last_hidden_state`. Este tensor tiene las siguientes dimensiones:
+
+* `batch_size`: el número de ejemplos en el lote (en este caso, 2).
+* `sequence_length`: la longitud de la secuencia de entrada (en este caso, 16 tokens).
+* `hidden_size`: el tamaño de la representación interna del modelo (en este caso, 768).
+
+```{python}
+outputs = model(**inputs)
+outputs.last_hidden_state.shape
+```
+
+### 3. La cabeza (head) del modelo
+
+La salida del modelo no es directamente la predicción de la tarea, sino una representación interna de la información. Para obtener la predicción final, se necesita una "cabeza" (head) que tome esta representación y la transforme en el formato adecuado para la tarea específica (por ejemplo, probabilidades de clases para clasificación). Esta cabeza es una capa adicional que añade al final del modelo y se entrena junto con el modelo para adaptar la arquitectura general a una tarea específica. Ahora la salida del modelo, en lugar de embeddings, son logits:
+
+```{python}
+from transformers import AutoModelForSequenceClassification
+
+checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
+outputs = model(**inputs)
+outputs.logits
+```
+
+Para obtener las probabilidades de cada clase, se aplica la función softmax a los logits:
+
+```{python}
+import torch
+
+predictions = torch.nn.functional.softmax(outputs.logits, dim=-1)
+predictions
+```
+
+Para obtener las `labels` de cada clase:
+
+```{python}
+labels = model.config.id2label
+labels
+```
+
+Podemos mapear las probabilidades a las etiquetas para obtener una salida más legible:
+
+```{python}
+predicted_labels = [labels[i.item()] for i in torch.argmax(predictions, dim=-1)]
+predicted_labels
+```
+
+## Modelos
+
+En esta sección veremos un modelo por dentro. Un modelo se puede cargar directamente con AutoModel a partir de su checkpoint. Por ejemplo, para cargar el modelo BERT base cased:
+
+```{python}
+from transformers import AutoModel
+
+model = AutoModel.from_pretrained("bert-base-cased")
+model
+```
+
+Este modelo tiene 12 capas (layers) y cada capa tiene 768 neuronas (hidden size). Cada capa se compone de dos subcomponentes principales: la atención (attention) y la red feed-forward (feed-forward network). 
+
+También se puede cargar un modelo a partir de su arquitectura. Por ejemplo, para cargar la arquitectura BERT base cased:
+
+```{python}
+from transformers import BertModel
+
+model = BertModel.from_pretrained("bert-base-cased")
+model
+```
+
+Un modelo se puede guardar en el disco duro:
+
+```{python}
+model.save_pretrained("/tmp/models/bert-base-cased")
+```
+
+Esto creará dos ficheros:
+
+```{bash}
+ls /tmp/models/bert-base-cased
+```
+
+El fichero `config.json` contiene la configuración del modelo, incluyendo la arquitectura, el número de capas, el tamaño de las capas, etc. El fichero `model.safetensors` contiene los pesos entrenados del modelo.
+
+```{bash}
+cat /tmp/models/bert-base-cased/config.json
+```
+
+Podemos leer el modelo desde el disco duro:
+
+```{python}
+from transformers import AutoModel
+model = AutoModel.from_pretrained("/tmp/models/bert-base-cased")
+model
+```
+
+Si disponemos de cuenta en Hugging Face, también podemos subir nuestro modelo al Hub para compartirlo con la comunidad. Para eso, se necesita instalar la librería `huggingface_hub` y autenticarse con el token de acceso:
+
+```{python}
+from dotenv import load_dotenv
+from huggingface_hub import login
+
+load_dotenv(override=True)
+HG_TOKEN = os.getenv("HUGGINGFACE_API_KEY")
+
+login(token=HG_TOKEN)
+```
+
+Y podemos subir el modelo al Hub:
+
+```{python}
+model.push_to_hub("my-awesome-model")
+```
+
+Para recuperar el modelo desde el Hub:
+
+```{python}
+from transformers import AutoModel
+
+load_dotenv(override=True)
+
+HG_USER = os.getenv("HUGGINGFACE_USER")
+model = AutoModel.from_pretrained(f"{HG_USER}/my-awesome-model")
+model
+```
+
+## Codificación de texto a números
+
+En la sección anterior vimos cómo el tokenizador convierte el texto en números para que el modelo pueda procesarlo. Ahora vamos a explicarlo con más detalle.
+
+```{python}
+from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+
+encoded_input = tokenizer("Hello, I'm a single sentence!")
+encoded_input
+```
+
+`encoded_input` es un diccionario que contiene los siguientes elementos:
+
+* `input_ids`: Es una lista de números que representan los tokens del texto. Cada número corresponde a un token específico en el vocabulario del modelo.
+
+* `token_type_ids`: Es una lista de números que indica a qué segmento pertenece cada token. En tareas de clasificación de texto, por ejemplo, se pueden tener dos segmentos (texto A y texto B) y esta lista indicará a cuál segmento pertenece cada token.
+
+* `attention_mask`: Es una lista de números que indica qué tokens deben ser atendidos por el modelo. Los tokens con un valor de 1 serán atendidos, mientras que los tokens con un valor de 0 serán ignorados. Esto es útil para manejar secuencias de longitud variable y para evitar que el modelo preste atención a los tokens de relleno (padding).
+
+
+Podemos usar el método `decode()` del tokenizador para convertir los números de vuelta a texto:
+
+```{python}
+decoded_input = tokenizer.decode(encoded_input["input_ids"])
+decoded_input
+```
+
+El tokenizador a añadido dos tokens especiales al principio y al final de la secuencia: `[CLS]` al principio y `[SEP]` al final. Estos tokens son necesarios para que el modelo pueda procesar la secuencia correctamente. No todos los modelos usan los mismos tokens especiales, por lo que es importante usar el tokenizador específico para cada modelo.
+
+Se pueden tokenizar varias frases a la vez:
+
+```{python}
+encoded_input = tokenizer("How are you?", "I'm fine, thank you!")
+encoded_input
+```
+
+Le podemos pedir al tokenizador que devuelva tensores en lugar de listas de números:
+
+```{python}
+encoded_input = tokenizer("How are you?", "I'm fine, thank you!", return_tensors="pt")
+encoded_input
+```
+
+El problema es que los tensores deben ser de la misma longitud para poder ser procesados por el modelo. Para eso, se puede usar el argumento `padding=True` para rellenar las secuencias más cortas con un token de relleno (padding)^[Observe que ahora las frases se pasan como una lista de string.]:
+
+```{python}
+encoded_input = tokenizer(
+    ["How are you?", "I'm fine, thank you!"],
+    padding=True, return_tensors="pt"
+)
+encoded_input
+```
+
+
+En ocasiones tenemos una sentencia muy large que no cabe en el modelo. Para eso, se puede usar el argumento `truncation=True` para truncar las secuencias más largas a la longitud máxima permitida por el modelo:
+
+```{python}
+encoded_input = tokenizer(
+    "This is a very long sentence that exceeds the maximum length of the model.",
+    truncation=True, padding=True, return_tensors="pt"
+)
+encoded_input
+```
+
+## Tokenizers
+
+La tokenización es el proceso de convertir texto en tokens, que son unidades más pequeñas que el modelo puede procesar. Existen diferentes tipos de tokenizadores, como WordPiece, Byte-Pair Encoding (BPE) y SentencePiece. Cada modelo utiliza un tokenizador específico que se ha entrenado junto con la arquitectura del modelo.
+
+Podemos usar el tokenizador para convertir texto a números y viceversa. Por ejemplo, para convertir texto a números:
+
+```{python}
+from transformers import AutoTokenizer
+tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+encoded_input = tokenizer("Using a Transformer network is simple", return_tensors="pt")
+encoded_input
+```
+
+También podemos convertir números a texto:
+
+```{python}
+decoded_input = tokenizer.decode(encoded_input["input_ids"][0])
+decoded_input
+```
+
+Si queremos token en lugar de números podemos usar el método `tokenize()`:
+
+```{python}
+tokens = tokenizer.tokenize("Using a Transformer network is simple")
+tokens
+```
+
+Observe que, con este método, no se añaden los tokens especiales al principio y al final de la secuencia.
+
+O también el método `tokenizer.convert_ids_to_tokens()`:
+
+```{python}
+tokens = tokenizer.convert_ids_to_tokens(encoded_input["input_ids"][0])
+tokens
+```
+
+Equivalentemente podemos convertir tokens a números con el método `tokenizer.convert_tokens_to_ids()`:
+
+```{python}
+token_ids = tokenizer.convert_tokens_to_ids(tokens)
+token_ids
+```
+

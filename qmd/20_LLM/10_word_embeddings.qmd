@@ -129,12 +129,15 @@ Como estas categorías son puramente nominales (ninguna palabra es "mayor" o "me
 Aunque la red procesa el vocabulario de forma simultánea, el One-Hot Encoding actúa como un **interruptor de activación**. Al contener un único $1$ y el resto ceros, anula matemáticamente el impacto de las palabras ausentes y aísla los pesos específicos de la palabra activa.
 
 Para entenderlo visualmente, supongamos que las dos neuronas de nuestra capa oculta tienen los siguientes pesos asignados:
+
 * **Neurona 1:** $[2.0, -2.2, -2.1, 1.7]$
+
 * **Neurona 2:** $[2.0,  2.5, -2.2,  2.0]$
 
 Cuando la red procesa la entrada para la palabra **"Javier"** (cuyo vector es $[1, 0, 0, 0]$), la magia de la multiplicación de matrices ocurre así:
 
 * **Salida Neurona 1:** $$(2.0 \times 1) + (-2.2 \times 0) + (-2.1 \times 0) + (1.7 \times 0) = \mathbf{2.0}$$
+
 * **Salida Neurona 2:** $$(2.0 \times 1) + (2.5 \times 0) + (-2.2 \times 0) + (2.0 \times 0) = \mathbf{2.0}$$
 
 Como resultado, el **embedding extraído para "Javier" es $[2.0, 2.0]$**. Gracias a los ceros del One-Hot Encoding, ninguna otra palabra del vocabulario puede interferir ni contaminar este vector en la capa actual.
