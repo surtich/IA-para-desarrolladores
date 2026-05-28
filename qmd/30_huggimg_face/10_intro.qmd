@@ -457,3 +457,97 @@ token_ids = tokenizer.convert_tokens_to_ids(tokens)
 token_ids
 ```
 
+## Obteniendo predicciones
+
+Como vimos en una sección anterior, para obtener predicciones de un modelo, primero debemos convertir el texto a números usando el tokenizador, luego pasar esos números al modelo para obtener las predicciones. Por ejemplo:
+
+```{python}
+
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
+
+sequence = "I've been waiting for a HuggingFace course my whole life."
+
+
+# Primera forma
+tokens = tokenizer.tokenize(sequence)
+ids = tokenizer.convert_tokens_to_ids(tokens)
+
+input_ids = torch.tensor([ids]) # Convertimos a tensor y añadimos una dimensión para el batch.
+print("Input IDs:", input_ids)
+
+output = model(input_ids)
+print("Logits:", output.logits)
+```
+
+Podemos hacerlo de otra forma:
+
+```{python}
+
+# Segunda forma (más sencilla)
+encoded_input = tokenizer(sequence, return_tensors="pt")
+print("Input IDs:", encoded_input["input_ids"])
+output = model(**encoded_input)
+print("Logits:", output.logits)
+```
+
+Vemos que no obtenemos los mismos `logits`. La razón es que antes no hemos alimentado el modelo que los tokens especiales.
+
+
+### Attention mask
+
+Supongamos que tenemos el siguiente input:
+
+```{python}
+input = [
+  [200,  200, 200],
+  [200,  200],
+]
+
+input
+```
+
+No podemos alimentar este input al modelo porque las secuencias tienen longitudes diferentes. Para solucionar esto, se añade un token de relleno (padding) a las secuencias más cortas para que todas tengan la misma longitud:
+
+```{python}
+input = [
+  [200,  200, 200],
+  [200,  200, tokenizer.pad_token_id], # Se añade un token de relleno (padding) al final de la secuencia más corta.
+]
+input
+```
+
+Vamos que si alimentamos el modelo sentencia a sentencia y sin padding, obtenemos estos logits:
+
+```{python}
+print(model(torch.tensor([[200, 200, 200]]))["logits"])
+print(model(torch.tensor([[200, 200]]))["logits"])
+```
+
+Pero si alimentamos el modelo con el input completo, obtenemos otros logits:
+
+```{python}
+print(model(torch.tensor(input))["logits"])
+```
+
+Los logits de la primera sentencia son los mismos en ambos casos, pero los logits de la segunda sentencia son diferentes. Esto se debe a que el modelo no sabe que el token de relleno (padding) no es un token real y le presta atención, lo que afecta a las predicciones. Para solucionar esto, se utiliza una `attention_mask` que indica al modelo qué tokens deben ser atendidos y cuáles deben ser ignorados:
+
+```{python}
+attention_mask = [
+  [1, 1, 1], # La primera sentencia tiene una máscara de atención de 1, lo que indica que todos los tokens deben ser atendidos.
+  [1, 1, 0], # La segunda sentencia tiene una máscara de atención de 0 para el token de relleno, lo que indica que debe ser ignorado.
+]
+
+
+input = [
+  [200,  200, 200],
+  [200,  200, tokenizer.pad_token_id],
+]
+
+model(torch.tensor(input), attention_mask=torch.tensor(attention_mask))["logits"]
+```
+

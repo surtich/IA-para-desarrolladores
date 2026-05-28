@@ -209,31 +209,31 @@ class WordEmbeddingFromScratch(L.LightningModule):
         super().__init__()
         ###################
         ##
-        ## Initialize the weights.
+        ## Inicializar los pesos.
         ##
-        ## NOTE: We're initializing the weights using values from a uniform distribtion
-        ##       that goes from -0.5 to 0.5 (this is notated as U(-0.5, 0.5).
-        ##       This is because of how nn.Linear() initializes weights -
-        ##       nn.Linear() uses U(-sqrt(k), sqrt(k)), where k=1/in_features.
-        ##       In our case, we have 4 inputs, so k=1/4 = 0.25. And the sqrt(0.25) = 0.5.
-        ##       Thus, nn.Linear() would use U(-0.5, 0.5) to initialize the weights, so
-        ##       that's what we'll do here as well.
+        ## NOTA: Estamos inicializando los pesos usando valores de una distribución uniforme
+        ##       que va de -0.5 a 0.5 (esto se denota como U(-0.5, 0.5)).
+        ##       Esto se debe a cómo nn.Linear() inicializa los pesos -
+        ##       nn.Linear() usa U(-sqrt(k), sqrt(k)), donde k=1/in_features.
+        ##       En nuestro caso, tenemos 4 entradas, por lo que k=1/4 = 0.25. Y la sqrt(0.25) = 0.5.
+        ##       Por lo tanto, nn.Linear() usaría U(-0.5, 0.5) para inicializar los pesos, así que
+        ##       eso es lo que haremos aquí también.
         ##
         ###################
         min_value = -0.5
         max_value = 0.5
 
-        ## Now we initialize the weights that feed 4 inputs (one for each unique word)
-        ##       into the 2 nodes in the hidden layer (top and bottom nodes)
+        ## Ahora inicializamos los pesos que alimentan 4 entradas (una para cada palabra única)
+        ##       hacia los 2 nodos en la capa oculta (nodos superior e inferior)
         ##
-        ## NOTE: Because we want words (or tokens) that are used in the same context to have similar
-        ##       weights, we are excluding bias terms from the connections from the inputs to the
-        ##       nodes in the hidden layer (alternatively, you could think that
-        ##       we set the bias terms to 0 and are not going to optimize them).
+        ## NOTA: Debido a que queremos que las palabras (o tokens) que se usan en el mismo contexto tengan pesos similares,
+        ##       estamos excluyendo los términos de sesgo (bias) de las conexiones desde las entradas a los
+        ##       nodos en la capa oculta (alternativamente, podrías pensar que
+        ##       establecemos los términos de sesgo en 0 y no los vamos a optimizar).
         ##
-        ## ALSO NOTE: We're using nn.Parameter() here instead of torch.tensor() because we want
-        ##       to easily print out the parameters before and after training. Parameters are just
-        ##       tensors that are added to model's parameter list.
+        ## ADEMÁS NOTA: Estamos usando nn.Parameter() aquí en lugar de torch.tensor() porque queremos
+        ##       poder imprimir fácilmente los parámetros antes y después del entrenamiento. Los parámetros son solo
+        ##       tensores que se añaden a la lista de parámetros del modelo.
         self.input1_w1 = nn.Parameter(Uniform(min_value, max_value).sample())
         self.input1_w2 = nn.Parameter(Uniform(min_value, max_value).sample())
 
@@ -246,9 +246,9 @@ class WordEmbeddingFromScratch(L.LightningModule):
         self.input4_w1 = nn.Parameter(Uniform(min_value, max_value).sample())
         self.input4_w2 = nn.Parameter(Uniform(min_value, max_value).sample())
 
-        ## Now we initialize the weights that come out of the hidden layer to the "output"
-        ## NOTE: Again, we are excluding bias terms. This time, we exclude them simply because
-        ##       we do not need them.
+        ## Ahora inicializamos los pesos que salen de la capa oculta hacia la "salida"
+        ## NOTA: De nuevo, estamos excluyendo los términos de sesgo. Esta vez, los excluimos simplemente porque
+        ##       no los necesitamos.
         self.output1_w1 = nn.Parameter(Uniform(min_value, max_value).sample())
         self.output1_w2 = nn.Parameter(Uniform(min_value, max_value).sample())
 
@@ -261,42 +261,42 @@ class WordEmbeddingFromScratch(L.LightningModule):
         self.output4_w1 = nn.Parameter(Uniform(min_value, max_value).sample())
         self.output4_w2 = nn.Parameter(Uniform(min_value, max_value).sample())
 
-        ## For the loss function, we'll use CrossEntropyLoss, which we'll use in training_step()
-        ## NOTE: The nn.CrossEntropyLoss automatically applies softmax for us, so we don't need to import it.
+        ## Para la función de pérdida, usaremos CrossEntropyLoss, que utilizaremos en training_step()
+        ## NOTA: La nn.CrossEntropyLoss aplica automáticamente softmax por nosotros, así que no necesitamos importarla.
         self.loss = nn.CrossEntropyLoss()
 
 
     def forward(self, input):
-        ## forward() is where we do the math associated with running the inputs through the
-        ## network
+        ## forward() es donde hacemos las operaciones matemáticas asociadas con ejecutar las entradas a través de la
+        ## red.
 
-        ## The input is delivered inside of a list, like this...
+        ## La entrada se entrega dentro de una lista, así...
         ##   [[1., 0., 0., 0.]]
-        ## ...and it's just easier if we remove the extra pair of brackets so we only have...
+        ## ...y es más fácil si eliminamos el par extra de corchetes para que solo tengamos...
         ##   [1., 0., 0., 0.]
-        ## ...so let's do it.
+        ## ...así que hagámoslo.
         input = input[0]
 
-        ## First, for the top node in the hidden layer,
-        ## we multiply each input by its weight,
-        ## and then calculate the sum of those products...
+        ## Primero, para el nodo superior en la capa oculta,
+        ## multiplicamos cada entrada por su peso,
+        ## y luego calculamos la suma de esos productos...
         inputs_to_top_hidden = ((input[0] * self.input1_w1) +
                                 (input[1] * self.input2_w1) +
                                 (input[2] * self.input3_w1) +
                                 (input[3] * self.input4_w1))
 
-        ## ...then, for the bottom node in the hidden layer,
-        ## we multiply each input by its weight,
-        ## and then calculate the sum of those products.
+        ## ...luego, para el nodo inferior en la capa oculta,
+        ## multiplicamos cada entrada por su peso,
+        ## y luego calculamos la suma de esos productos.
         inputs_to_bottom_hidden = ((input[0] * self.input1_w2) +
                                    (input[1] * self.input2_w2) +
                                    (input[2] * self.input3_w2) +
                                    (input[3] * self.input4_w2))
 
-        ## Now, in theory, we could run inputs_to_top_hidden and inputs_to_bottom_hidden through
-        ## linear activation functions, but the outputs would be the exact same as in the inputs,
-        ## so we can just skip that step and instead compute the 4 output values from the 2 nodes in hidden layer
-        ## by summing the products of the hidden layer values and a pair of weights for each output.
+        ## Ahora, en teoría, podríamos ejecutar inputs_to_top_hidden e inputs_to_bottom_hidden a través
+        ## de funciones de activación lineales, pero las salidas serían exactamente las mismas que las entradas,
+        ## así que podemos omitir ese paso y, en su lugar, calcular los 4 valores de salida desde los 2 nodos en la capa oculta
+        ## sumando los productos de los valores de la capa oculta y un par de pesos para cada salida.
         output1 = ((inputs_to_top_hidden * self.output1_w1) +
                    (inputs_to_bottom_hidden * self.output1_w2))
         output2 = ((inputs_to_top_hidden * self.output2_w1) +
@@ -306,33 +306,33 @@ class WordEmbeddingFromScratch(L.LightningModule):
         output4 = ((inputs_to_top_hidden * self.output4_w1) +
                    (inputs_to_bottom_hidden * self.output4_w2))
 
-        ## Now we need to concatenate the 4 output tensors so that we can run them through
-        ## the SoftMax function. However, because they are tensors (and have gradients attached to them),
-        ## we can't just combine them in a simple list like this...
-        # output_values = [output1, output2, output3, output4] ## THIS WILL NOT WORK
-        ## ...because that would strip off the gradients.
-        ## Instead, we use torch.stack(), which retains the gradients.
+        ## Ahora necesitamos concatenar los 4 tensores de salida para que podamos pasarlos a través
+        ## de la función SoftMax. Sin embargo, debido a que son tensores (y tienen gradientes adjuntos a ellos),
+        ## no podemos simplemente combinarlos en una lista simple como esta...
+        # output_values = [output1, output2, output3, output4] ## ESTO NO FUNCIONARÁ
+        ## ...porque eso eliminaría los gradientes.
+        ## En su lugar, usamos torch.stack(), que retiene los gradientes.
         output_presoftmax = torch.stack([output1, output2, output3, output4])
-        ## NOTE: The the loss function we are using, nn.CrossEntropyLoss, automatically applies softmax for us, so we
-        ##       need to do that ourselves. If we want to actually use this network to predict the next word
-        ##       (instead of just using it for the Word Embedding values), then we'll need to apply the softmax() function
-        ##       ourselves (or just look to see what output value is largest).
+        ## NOTA: La función de pérdida que estamos usando, nn.CrossEntropyLoss, aplica automáticamente softmax por nosotros, por lo que
+        ##       necesitamos hacerlo nosotros mismos. Si queremos realmente usar esta red para predecir la siguiente palabra
+        ##       (en lugar de solo usarla para los valores de Word Embedding), entonces tendremos que aplicar la función softmax()
+        ##       nosotros mismos (o simplemente mirar qué valor de salida es el más grande).
 
         return output_presoftmax
 
 
     def configure_optimizers(self):
-        # configure_optimizers() configures the optimizer we want to use for backpropagation.
+        # configure_optimizers() configura el optimizador que queremos usar para la retropropagación (backpropagation).
 
-        return Adam(self.parameters(), lr=0.1) # lr=0.1 sets the learning rate to 0.1
+        return Adam(self.parameters(), lr=0.1) # lr=0.1 establece la tasa de aprendizaje en 0.1
 
 
     def training_step(self, batch):
-        # training_step() takes a step of gradient descent.
+        # training_step() realiza un paso de descenso de gradiente.
 
-        input_i, label_i = batch # collect input
-        output_i = self.forward(input_i) # run input through the neural network
-        loss = self.loss(output_i, label_i[0]) ## loss = cross entropy
+        input_i, label_i = batch # recopilar entrada
+        output_i = self.forward(input_i) # ejecutar la entrada a través de la red neuronal
+        loss = self.loss(output_i, label_i[0]) ## loss = entropía cruzada (cross entropy)
 
         return loss
 ```
@@ -342,15 +342,15 @@ Ahora que hemos creado nuestra nueva clase, `WordEmbeddingFromScratch`, vamos a 
 
 
 ```{python}
-## The first thing we do is set the seed for the random number generorator.
-## This ensures that when someone creates a model from this class, that model
-## will start off with the exact same random numbers as I started out with when
-## I created this demo. At least, I hope that is what happens!!! :)
+## Lo primero que hacemos es establecer la semilla para el generador de números aleatorios.
+## Esto asegura que cuando alguien cree un modelo a partir de esta clase, ese modelo
+## comenzará exactamente con los mismos números aleatorios con los que yo comencé cuando
+## creé esta demostración. ¡Al menos, espero que eso sea lo que suceda! :)
 L.seed_everything(seed=42)
 
-modelFromScratch = WordEmbeddingFromScratch() # create the model...
+modelFromScratch = WordEmbeddingFromScratch() # crear el modelo...
 
-print("Before optimization, the parameters are...")
+print("Antes de la optimización, los parámetros son...")
 for name, param in modelFromScratch.named_parameters():
     print(name, torch.round(param.data, decimals=2))
 ```
@@ -466,32 +466,32 @@ Aunque hemos visto que el modelo ha asignado valores similares a "Javier" y "Car
 Por último, podemos verificar que cada token del vocabulario predice correctamente el token que le sigue ejecutando los valores de entrada de la **codificación de un solo uno (one-hot-encoded)** para cada token a través de la red neuronal.
 
 ```{python}
-## Let's see what the model predicts
+## Veamos qué predice el modelo
 
-## First, let's create a softmax object...
-softmax = nn.Softmax(dim=0) ## dim=0 applies softmax to rows, dim=1 applies softmax to columns
+## Primero, creemos un objeto softmax...
+softmax = nn.Softmax(dim=0) ## dim=0 aplica softmax a las filas, dim=1 aplica softmax a las columnas
 
-# Note that the forward() method is flattening the input, i.e., input = input[0].
-# Because we are stacking 4 scalar values, the shape of the output vector 
-# is a 1D tensor with shape (4), i.e., [val1, val2, val3, val4]:
+# Nota que el método forward() está aplanando la entrada, es decir, input = input[0].
+# Debido a que estamos apilando 4 valores escalares, la forma del vector de salida
+# es un tensor 1D con forma (4), es decir, [val1, val2, val3, val4]:
 # output_presoftmax = torch.stack([output1, output2, output3, output4])
-# Therefore dim=0 applies softmax to the only dimension (the list of values)
+# Por lo tanto, dim=0 aplica softmax a la única dimensión (la lista de valores)
 
-## Now let's...
+## Ahora vamos a...
 
-## print the predictions for "Javier"
+## imprimir las predicciones para "Javier"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[1., 0., 0., 0.]]))),
                   decimals=2))
 
-## print the predictions for "es"
+## imprimir las predicciones para "es"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[0., 1., 0., 0.]]))),
                   decimals=2))
 
-## print the predictions for "bueno"
+## imprimir las predicciones para "bueno"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[0., 0., 1., 0.]]))),
                   decimals=2))
 
-## print the predictions for "Carlos"
+## imprimir las predicciones para "Carlos"
 print(torch.round(softmax(modelFromScratch(torch.tensor([[0., 0., 0., 1.]]))),
                   decimals=2))
 ```
@@ -523,52 +523,52 @@ class WordEmbeddingWithLinear(L.LightningModule):
 
         super().__init__()
 
-        ## In order to initialize weights from the 4 inputs (one for each unique word)
-        ##       to the 2 nodes in the hidden layer (top and bottom nodes), we simply make
-        ##       one call to nn.Linear() where in_features specifies the number of
-        ##       inputs and out_features specifies the number of nodes we
-        ##       are connecting them to. Since we don't want to use bias terms,
-        ##       we set bias=False
+        ## Para inicializar los pesos desde las 4 entradas (una para cada palabra única)
+        ##       hacia los 2 nodos en la capa oculta (nodos superior e inferior), simplemente hacemos
+        ##       una llamada a nn.Linear() donde in_features especifica el número de
+        ##       entradas y out_features especifica el número de nodos a los que
+        ##       los estamos conectando. Como no queremos usar términos de sesgo (bias),
+        ##       establecemos bias=False
         self.input_to_hidden = nn.Linear(in_features=4, out_features=2, bias=False)
-        ## Now, in order to connect the 2 nodes in the hidden layer to the 4 outputs, we
-        ##       make one call to nn.Linear(), where in_features specifies the number of
-        ##       nodes in hidden layer and out_features specifies the number of output values we want.
-        ##       And again, we can set bias=False
+        ## Ahora, para conectar los 2 nodos en la capa oculta a las 4 salidas,
+        ##       hacemos una llamada a nn.Linear(), donde in_features especifica el número de
+        ##       nodos en la capa oculta y out_features especifica el número de valores de salida que queremos.
+        ##       Y de nuevo, podemos establecer bias=False
         self.hidden_to_output = nn.Linear(in_features=2, out_features=4, bias=False)
 
-        ## We'll use CrossEntropyLoss in training_step()
+        ## Usaremos CrossEntropyLoss en training_step()
         self.loss = nn.CrossEntropyLoss()
 
 
     def forward(self, input):
 
-        ## Unlike before, where we did all the math by hand, now we can
-        ## simply pass the input values to the weights we created with nn.Linear()
-        ## between the input and the hidden layer and save the result in "hidden"
+        ## A diferencia de antes, donde hacíamos toda la matemática a mano, ahora podemos
+        ## simplemente pasar los valores de entrada a los pesos que creamos con nn.Linear()
+        ## entre la entrada y la capa oculta y guardar el resultado en "hidden"
         ##
-        ## NOTE: Unlike before, we don't need to strip off the extra brackets from the
-        ##       input. the Linear ojbect knows what to do.
+        ## NOTA: A diferencia de antes, no necesitamos quitar los corchetes extra de la
+        ##       entrada. El objeto Linear sabe qué hacer.
         hidden = self.input_to_hidden(input)
 
-        ## Then we pass "hidden" to the weights we created with nn.Linear()
-        ## between the hidden layer and the output.
+        ## Luego pasamos "hidden" a los pesos que creamos con nn.Linear()
+        ## entre la capa oculta y la salida.
         output_values = self.hidden_to_output(hidden)
 
         return(output_values)
 
 
     def configure_optimizers(self):
-        # this configures the optimizer we want to use for backpropagation.
+        # esto configura el optimizador que queremos usar para la retropropagación.
 
         return Adam(self.parameters(), lr=0.1)
 
 
     def training_step(self, batch):
-        # take a step during gradient descent.
+        # realizar un paso durante el descenso de gradiente.
 
-        input_i, label_i = batch # collect input
-        output_i = self.forward(input_i) # run input through the neural network
-        loss = self.loss(output_i, label_i) ## loss = cross entropy
+        input_i, label_i = batch # recopilar entrada
+        output_i = self.forward(input_i) # ejecutar entrada a través de la red neuronal
+        loss = self.loss(output_i, label_i) ## loss = entropía cruzada
 
         return loss
 ```
@@ -629,6 +629,111 @@ from plotnine import *
     + theme(legend_position="none")
 )
 ```
+
+Para entender mejor cómo funciona `nn.Linear()` podemos hacer la misma implementación con matrices:
+
+```{python}
+import torch
+import torch.nn as nn
+import lightning as L
+from torch.optim import Adam
+from torch.distributions import Uniform
+
+class WordEmbeddingWithMatrix(L.LightningModule):
+
+    def __init__(self):
+        super().__init__()
+        
+        # Inicializamos manualmente las matrices de pesos:
+        # W1: 4 entradas x 2 neuronas ocultas
+        # W2: 2 neuronas ocultas x 4 salidas
+        self.W1 = nn.Parameter(torch.rand(4, 2) - 0.5)
+        self.W2 = nn.Parameter(torch.rand(2, 4) - 0.5)
+
+        self.loss = nn.CrossEntropyLoss()
+
+
+    def forward(self, input):
+        # Operación matricial: Capa oculta = input * W1
+        # input tiene forma (1, 4), W1 tiene (4, 2)
+        hidden = torch.matmul(input, self.W1)
+        
+        # Capa de salida = hidden * W2
+        # hidden tiene (1, 2), W2 tiene (2, 4)
+        output = torch.matmul(hidden, self.W2)
+        
+        return output
+
+    def configure_optimizers(self):
+        return Adam(self.parameters(), lr=0.1)
+
+    def training_step(self, batch):
+        # realizar un paso durante el descenso de gradiente.
+
+        input_i, label_i = batch # recopilar entrada
+        output_i = self.forward(input_i) # ejecutar entrada a través de la red neuronal
+        loss = self.loss(output_i, label_i) ## loss = entropía cruzada
+
+        return loss
+```
+
+Entrenamos:
+
+```{python}
+L.seed_everything(seed=42)
+modelWithMatrix = WordEmbeddingWithMatrix() # create the model...
+trainer = L.Trainer(max_epochs=100)
+trainer.fit(modelWithMatrix, train_dataloaders=dataloader)
+```
+
+Mostramos los pesos:
+
+```{python}
+# Accedemos a la matriz de pesos de la capa input_to_hidden
+# Usamos .detach() para quitar los gradientes antes de convertirlos a floats
+weights = modelWithMatrix.W1.detach().t()
+
+data = {
+    # Fila 0 contiene los pesos que van al primer nodo (equivalente a w1)
+    "w1": [weights[0, 0].item(),
+           weights[0, 1].item(),
+           weights[0, 2].item(),
+           weights[0, 3].item()],
+    # Fila 1 contiene los pesos que van al segundo nodo (equivalente a w2)
+    "w2": [weights[1, 0].item(),
+           weights[1, 1].item(),
+           weights[1, 2].item(),
+           weights[1, 3].item()],
+    "token": ["Javier", "es", "bueno", "Carlos"],
+    "input": ["input1", "input2", "input3", "input4"]
+}
+
+df = pd.DataFrame(data)
+df
+```
+
+Representamos gráficamente:
+
+```{python}
+from plotnine import *
+
+(
+    ggplot(df, aes(x="w1", y="w2", color="token"))
+    + geom_point(size=5)
+    + geom_text(
+        aes(label="token"),
+        ha="left",  # Alineación horizontal izquierda
+        size=10,  
+        color="black",
+        fontweight="semibold",
+        nudge_y=0.02,
+        nudge_x=-0.04
+    )
+    + theme_bw()
+    + theme(legend_position="none")
+)
+```
+
 
 ### Entrenamiento con nn.Embedding
 
