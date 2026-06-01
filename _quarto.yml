@@ -3,47 +3,50 @@ project:
 
 execute:
   freeze: auto
-  
+
 website:
   title: "IA para desarrolladores"
   navbar:
     left:
-    - text: Inicio
-      file: qmd/index.qmd
+      - text: Inicio
+        file: qmd/index.qmd
   sidebar:
-      style: "docked"
-      search: true
-      contents:
-        - section: "Fundamentos"
-          contents:
-            - qmd/10_fundamentos/10_intro.qmd
-            - qmd/10_fundamentos/20_linear_regression.qmd
-            - qmd/10_fundamentos/30_linear_regression2.qmd
-            - qmd/10_fundamentos/40_logistic_regression.qmd
-            - qmd/10_fundamentos/50_neural_networks.qmd
-        - section: "LLM"
-          contents:
-            - qmd/20_LLM/00_introduction.qmd
-            - qmd/20_LLM/05_tokenization.qmd
-            - qmd/20_LLM/10_word_embeddings.qmd
-            - qmd/20_LLM/20_word2vec.qmd
-            - qmd/20_LLM/30_similarity.qmd
-            - qmd/20_LLM/40_attention.qmd
-            - qmd/20_LLM/50_decoder.qmd
-        - section: "Hugging Face"
-          contents:
-            #- qmd/30_hugging_face/10_intro.qmd
-            - qmd/30_hugging_face/20_fine_tunning.qmd
-        - section: "Apéndices"
-          contents:
-              - qmd/90_apendices/10_derivadas.qmd
-              - qmd/90_apendices/20_matrices.qmd
-              - text: "Demo: Transformaciones lineales"
-                href: linear_transformations.html
-                target: _blank
-              - text: "Presentación 2025"
-                href: presentacion_2025.html
-                target: _blank
+    style: "docked"
+    search: true
+    contents:
+      - section: "Fundamentos"
+        contents:
+          - qmd/10_fundamentos/10_intro.qmd
+          - qmd/10_fundamentos/20_linear_regression.qmd
+          - qmd/10_fundamentos/30_linear_regression2.qmd
+          - qmd/10_fundamentos/40_logistic_regression.qmd
+          - qmd/10_fundamentos/50_neural_networks.qmd
+      - section: "LLM"
+        contents:
+          - qmd/20_LLM/00_introduction.qmd
+          - qmd/20_LLM/05_tokenization.qmd
+          - qmd/20_LLM/10_word_embeddings.qmd
+          - qmd/20_LLM/20_word2vec.qmd
+          - qmd/20_LLM/30_similarity.qmd
+          - qmd/20_LLM/40_attention.qmd
+          - qmd/20_LLM/50_decoder.qmd
+      - section: "Hugging Face"
+        contents:
+          - qmd/30_hugging_face/10_intro.qmd
+          - qmd/30_hugging_face/20_fine_tunning.qmd
+      - section: "Guía para desarrolladores"
+        contents:
+          - qmd/40_guia_desarrolladores/10_ollama.qmd
+      - section: "Apéndices"
+        contents:
+          - qmd/90_apendices/10_derivadas.qmd
+          - qmd/90_apendices/20_matrices.qmd
+          - text: "Demo: Transformaciones lineales"
+            href: linear_transformations.html
+            target: _blank
+          - text: "Presentación 2025"
+            href: presentacion_2025.html
+            target: _blank
 format:
   html:
     charset: "utf-8"
@@ -53,8 +56,6 @@ format:
       - brand
     toc: true
 resources:
-    - presentacion_2025.html
-    - linear_transformations.html
-    - README.md
-
-
+  - presentacion_2025.html
+  - linear_transformations.html
+  - README.md

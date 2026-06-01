@@ -6,6 +6,7 @@ execute:
   message: true
   output: true
   freeze: true
+  eval: false
 format:
   html:
     code-fold: true
@@ -196,7 +197,7 @@ checkpoint = "distilbert-base-uncased-finetuned-sst-2-english"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 ``` 
 
-Podemos pasar directamente el texto al tokenizador para obtener los IDs de los tokens. El tokenizador devuelve los IDs en formato tensor. Por ejemplo, para obtener un tensor de PyTorch^[]De momento no es importante conocer el uso de los argumentos `padding` y `truncation`.:
+Podemos pasar directamente el texto al tokenizador para obtener los IDs de los tokens. El tokenizador devuelve los IDs en formato tensor. Por ejemplo, para obtener un tensor de PyTorch^[De momento no es importante conocer el uso de los argumentos `padding` y `truncation`.].:
 
 ```{python}
 raw_inputs = [

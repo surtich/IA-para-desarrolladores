@@ -14,3 +14,4 @@ site_libs
 .jupyter_cache
 *_files
 .env
+node_modules

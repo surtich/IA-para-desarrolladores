@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <body>
+    <h2>Chat con Ollama</h2>
+    <input type="text" id="msg" placeholder="Escribe algo..." />
+    <button onclick="enviar()">Enviar</button>
+    <div id="res"></div>
+
+    <script>
+      async function enviar() {
+        const mensaje = document.getElementById("msg").value;
+        const resDiv = document.getElementById("res");
+
+        resDiv.innerText = "";
+
+        const response = await fetch("http://localhost:3000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mensaje }),
+        });
+
+        // Usamos pipeThrough para transformar los bytes directamente en texto
+        const reader = response.body
+          .pipeThrough(new TextDecoderStream())
+          .getReader();
+
+        // Ahora simplemente leemos texto ya decodificado
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          resDiv.innerText += value;
+        }
+      }
+    </script>
+  </body>
+</html>

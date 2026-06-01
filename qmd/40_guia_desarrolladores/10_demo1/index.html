@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Chat con Ollama</h2>
+    <input type="text" id="msg" placeholder="Escribe algo...">
+    <button onclick="enviar()">Enviar</button>
+    <div id="res"></div>
+
+    <script>
+    async function enviar() {
+        const mensaje = document.getElementById('msg').value;
+        const res = await fetch('http://localhost:3000/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ mensaje })
+        });
+        const data = await res.json();
+        document.getElementById('res').innerText = data.respuesta;
+    }
+    </script>
+</body>
+</html>

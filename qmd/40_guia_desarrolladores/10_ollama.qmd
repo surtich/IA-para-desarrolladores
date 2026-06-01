@@ -1,0 +1,140 @@
+---
+title: Ollama
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+Ollama es una plataforma que permite ejecutar modelos de lenguaje (LLM) localmente en su máquina. Es una excelente opción para desarrolladores que desean experimentar con LLM sin depender de servicios en la nube.
+
+En esta sección, aprenderemos a instalar Ollama, descargar un modelo de lenguaje y ejecutar una aplicación simple utilizando Ollama. Existen alternativas a Ollama, como [LLaMA.cpp](https://llama-cpp.com/), que es altamente configurable y centrada en el rendimiento, y [LMStudio](https://lmstudio.ai/), que ofrece una interfaz gráfica para gestionar modelos de lenguaje. Sin embargo, en esta sección nos centraremos en Ollama debido a su facilidad de uso.
+
+### Instalación de Ollama
+
+Para instalar Ollama, siga estos pasos:
+
+1. Visite el sitio web oficial de Ollama: [https://ollama.com/](https://ollama.com/)
+2. Descargue la versión adecuada para su sistema operativo (Windows, macOS o Linux).
+3. Siga las instrucciones de instalación proporcionadas en el sitio web.
+
+### Descarga de un modelo de lenguaje
+
+Una vez que haya instalado Ollama, puede descargar un modelo de lenguaje y ejecutarlo. Aquí hay un ejemplo de cómo hacerlo:
+
+```bash
+# Descarga un modelo de lenguaje (por ejemplo, GPT-3)
+ollama pull llama3.2:1b
+```
+
+### Uso del chatbot de Ollama
+
+Después de descargar el modelo, puede iniciar un chatbot utilizando Ollama. Aquí hay un ejemplo de cómo hacerlo:
+
+```bash
+# Inicia el chatbot de Ollama
+ollama run llama3.2:1b
+```
+
+### Aplicación simple con Express.js
+
+Ahora que tiene Ollama instalado y un modelo de lenguaje descargado, puede crear una aplicación simple utilizando Express.js para interactuar con el modelo. Aquí hay un ejemplo de cómo hacerlo:
+
+
+```javascript
+#| file: 10_demo1/server_express.js
+{{< include 10_demo1/server_express.js >}}
+``` 
+
+Para probar la aplicación desde línea de comandos:
+
+```bash
+curl -X POST http://localhost:3000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"mensaje": "Hola, ¿puedes decirme algo breve sobre la inteligencia artificial?"}'
+```
+
+Para probar la aplicación desde una página HTML:
+
+```html
+#| file: 10_demo1/index.html
+{{< include 10_demo1/index.html >}}
+``` 
+
+### Aplicación con streaming
+
+Puede usar el modelo de Ollama para realizar streaming de las respuestas del modelo. Aquí hay un ejemplo de cómo hacerlo:
+
+```javascript
+#| file: 10_demo1/server_streaming.js
+{{< include 10_demo1/server_streaming.js >}}
+``` 
+
+
+### Aplicación con Python
+
+También puedes crear una aplicación simple utilizando Python para interactuar con el modelo de Ollama. Aquí hay un ejemplo de cómo hacerlo:
+
+```{python}
+import ollama
+
+# Solicitar una respuesta a un modelo (ejemplo: llama3)
+response = ollama.chat(model='llama3.2:1b', messages=[
+  {
+    'role': 'user',
+    'content': 'Explícame qué es la computación cuántica en una frase.',
+  },
+])
+
+# Imprimir la respuesta
+print(response['message']['content'])
+```
+
+Si queremos hacer streaming de las respuestas:
+
+```{python}
+stream = ollama.chat(
+    model='llama3.2:1b',
+    messages=[{'role': 'user', 'content': 'Escribe un poema sobre el café.'}],
+    stream=True,
+)
+
+for chunk in stream:
+    print(chunk['message']['content'], end='', flush=True)
+```
+
+Usando Flask:
+
+```python
+#| file: 10_demo1/server_flask.py
+{{< include 10_demo1/server_flask.py >}}
+``` 
+
+Usando FastAPI:
+
+```python
+#| file: 10_demo1/server_fastapi.py
+{{< include 10_demo1/server_fastapi.py >}}
+``` 
+
+Cliente Gradio:
+
+```python
+#| file: 10_demo1/gradio_app.py
+{{< include 10_demo1/gradio_app.py >}}
+``` 
+
+
+Cliente Streamlit:
+
+```python
+#| file: 10_demo1/streamlit_app.py
+{{< include 10_demo1/streamlit_app.py >}}
+``` 
