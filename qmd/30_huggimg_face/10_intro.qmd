@@ -5,6 +5,7 @@ execute:
   warning: false
   message: true
   output: true
+  freeze: true
 format:
   html:
     code-fold: true

@@ -1,0 +1,183 @@
+---
+title: Fine-Tunning (teoría)
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## ¿Qué es el ajuste fino?
+
+El **ajuste fino** es el proceso de tomar un modelo de lenguaje extenso preentrenado y continuar su entrenamiento en un conjunto de datos más pequeño y específico de un dominio. Esta fase de entrenamiento secundaria adapta el modelo para que tenga un buen desempeño en una tarea particular, comprenda una materia específica o adopte cierto estilo, sin tener que entrenar un modelo desde cero.
+
+Piense en un modelo base (`foundation model`) como un individuo que ha leído una biblioteca y posee una comprensión amplia del lenguaje, la historia y la ciencia. El ajuste fino es como inscribir a este individuo en un programa especializado, como la escuela de medicina o un curso de preparación para el examen de abogacía. No olvidan sus conocimientos generales; en cambio, aprenden a aplicarlos con la terminología, el contexto y los patrones de razonamiento específicos del nuevo dominio.
+
+Esta adaptación ocurre al actualizar los parámetros internos, o pesos, del modelo. Los parámetros de un modelo preentrenado se han estabilizado después de procesar billones de tokens de la internet abierta. El proceso de ajuste fino realiza ajustes adicionales más pequeños a estos pesos utilizando un nuevo conjunto de datos seleccionado. Esto se logra a través de un ciclo de entrenamiento estándar donde las predicciones del modelo sobre sus datos se comparan con los ejemplos reales, y una función de pérdida calcula el error. El algoritmo de retropropagación utiliza entonces este error para ajustar los pesos del modelo en una dirección que minimice el error en su tarea específica.
+
+
+## Preentrenamiento (pretraining) vs. Ajuste fino (fine-tuning)
+
+Para personalizar eficazmente un modelo de lenguaje, es importante distinguir entre sus dos etapas de aprendizaje principales: preentrenamiento y ajuste fino. Aunque ambas implican el entrenamiento de una red neuronal, sus objetivos, requisitos de datos y escalas computacionales son fundamentalmente diferentes. Piense en ellas como dos fases distintas en el ciclo de vida de un modelo: la primera construye una base general de conocimiento y la segunda perfecciona ese conocimiento para un propósito específico.
+
+### La fase de **preentrenamiento
+
+El **preentrenamiento** es el proceso a escala industrial que crea un modelo base como GPT-3, Llama o Mistral. El objetivo es proporcionar al modelo una comprensión integral del lenguaje, incluyendo gramática, sintaxis, habilidades de razonamiento y un repositorio de hechos.
+
+* Objetivo: El modelo aprende a predecir el siguiente token (una palabra o parte de una palabra) en una secuencia. Al hacer esto repetidamente en un conjunto de datos enorme, aprende implícitamente los patrones estadísticos del lenguaje humano. El objetivo de aprendizaje es general y no está vinculado a ninguna aplicación en particular.
+
+* Conjunto de datos: El preentrenamiento utiliza corpus de texto masivos y en gran medida no estructurados extraídos de la internet pública, libros y otras fuentes. Estamos hablando de terabytes o incluso petabytes de datos, que contienen miles de millones de oraciones. Estos datos no están etiquetados manualmente para una tarea específica; la tarea es autosupervisada, ya que la siguiente palabra en una oración sirve como su propia etiqueta.
+
+* Costo computacional: Esta etapa requiere recursos excepcionalmente intensivos. Requiere miles de GPU de alta gama funcionando en paralelo durante semanas o meses, costando millones de dólares en tiempo de computación. Es por esto que el preentrenamiento suele ser realizado solo por grandes organizaciones y laboratorios de investigación bien financiados.
+
+* Resultado: El resultado es un modelo base (`foundation model`). Este modelo es un generalista poderoso. Puede responder preguntas, escribir texto y realizar una amplia gama de tareas con cierta competencia, pero carece de especialización.
+
+### La fase de ajuste fino
+
+El ajuste fino comienza donde termina el preentrenamiento. Toma un modelo base poderoso de propósito general y lo adapta para sobresalir en una tarea particular o en un dominio específico. En lugar de aprender desde cero, refina el conocimiento ya codificado en los parámetros del modelo.
+
+* Objetivo: El objetivo del ajuste fino es la especialización. Esto podría significar enseñar al modelo a adoptar un estilo de conversación específico (por ejemplo, un agente de atención al cliente profesional), a seguir instrucciones para un formato determinado (por ejemplo, generar código a partir de lenguaje natural) o a obtener experiencia en un tema especializado (por ejemplo, terminología legal o médica).
+
+* Conjunto de datos: El ajuste fino se basa en conjuntos de datos mucho más pequeños, de alta calidad y seleccionados. Estos conjuntos de datos a menudo tienen solo unos pocos megabytes o gigabytes de tamaño y están específicamente estructurados para la tarea objetivo. Por ejemplo, un conjunto de datos de seguimiento de instrucciones contendría cientos o miles de pares de solicitud/finalización.
+
+* Costo computacional: Los recursos necesarios para el ajuste fino son órdenes de magnitud menores que para el preentrenamiento. A menudo se puede lograr con una o pocas GPU durante varias horas o días, lo que lo hace accesible para desarrolladores individuales y organizaciones más pequeñas.
+
+* Resultado: El resultado es un modelo especializado. Este modelo demuestra un rendimiento superior en su tarea objetivo en comparación con el modelo base original.
+
+### Resumen
+
+La siguiente tabla resume las distinciones principales entre ambos procesos.
+
+| Característica | Preentrenamiento | Ajuste fino |
+| :--- | :--- | :--- |
+| **Objetivo** | Comprensión general del lenguaje | Rendimiento específico para una tarea o adaptación de dominio |
+| **Escala de datos** | Terabytes a Petabytes (ej. toda la web) | Megabytes a Gigabytes (ejemplos seleccionados) |
+| **Tipo de datos** | Texto no estructurado y sin etiquetar | Ejemplos estructurados y etiquetados (ej. solicitud/respuesta) |
+| **Escala de cómputo** | Miles de GPU, semanas a meses | 1 a 8+ GPU, horas a días |
+| **Salida del modelo** | Modelo base (Generalista) | Modelo especializado (Experto) |
+| **Punto de partida** | Pesos inicializados aleatoriamente | Pesos de un modelo preentrenado |
+
+## Cuándo realizar un ajuste fino
+
+Decidir ajustar un LLM es un compromiso técnico y de recursos significativo. Aunque puede producir modelos potentes y especializados, no siempre es la solución más eficiente o efectiva. Su decisión debe basarse en un análisis lúcido de su problema específico, comparando el ajuste fino con otras dos técnicas principales de personalización: la ingeniería de prompts y la generación aumentada por recuperación (RAG, por sus siglas en inglés). Cada enfoque tiene fortalezas, costos y requisitos operativos distintos.
+
+### El espectro de personalización de modelos
+
+Piense en la personalización de modelos como un espectro de esfuerzo y especificidad. En un extremo, tiene la ingeniería de prompts, que es rápida y no requiere entrenamiento del modelo. En el medio se sitúa RAG, que añade una fuente de conocimiento externa sin alterar el modelo en sí. En el extremo lejano está el ajuste fino, que modifica los pesos internos del modelo para cambiar su comportamiento central.
+Su objetivo es elegir el método más sencillo que resuelva su problema de forma fiable. Diseñar en exceso una solución saltando directamente al ajuste fino puede desperdiciar tiempo y recursos computacionales significativos, mientras que quedarse con prompts simples para una tarea que requiere conocimiento especializado conducirá a un bajo rendimiento.
+
+### Cuándo utilizar la ingeniería de prompts
+
+La ingeniería de prompts implica elaborar instrucciones detalladas para guiar la salida de un modelo preentrenado. Al proporcionar contexto claro, ejemplos (prompting de pocos disparos o few-shot) y restricciones dentro del prompt, a menudo puede dirigir al modelo para realizar una tarea específica sin ningún entrenamiento.
+
+Elija la ingeniería de prompts cuando:
+
+* La tarea esté dentro del conocimiento existente del modelo. Por ejemplo, resumir un texto general, traducir entre idiomas comunes o reformatear información.
+
+* Necesite una solución rápida y de bajo costo. El prompting no requiere tiempo de entrenamiento en GPU y se puede iterar en segundos.
+
+* Sus requisitos de rendimiento no sean extremadamente estrictos. El prompting a veces puede producir resultados inconsistentes o ligeramente "fuera de objetivo", lo cual puede ser aceptable para algunas aplicaciones.
+
+La limitación principal de la ingeniería de prompts es su dependencia de las capacidades preexistentes del modelo. Puede guiar al modelo, pero no puede enseñarle nueva información o patrones de razonamiento fundamentalmente nuevos. Además, a medida que aumenta la complejidad de la tarea, los prompts pueden volverse largos y frágiles, lo que los hace difíciles de mantener.
+
+### Cuándo utilizar la generación aumentada por recuperación (RAG)
+
+RAG mejora la salida de un modelo proporcionándole información externa relevante en el momento de la inferencia. El proceso generalmente implica dos pasos: primero, un recuperador busca en una base de conocimientos privada (como una colección de documentos de la empresa o una wiki técnica) información relevante para la consulta del usuario. Segundo, esta información recuperada se pasa al LLM como parte del prompt, instruyendo al modelo a usar este contexto para formular su respuesta.
+
+Elija RAG cuando:
+
+* La tarea requiera acceso a información externa, propietaria o muy reciente. Este es el caso de uso clásico de RAG. Fundamenta al modelo en hechos de una fuente confiable, reduciendo las alucinaciones.
+
+* La precisión factual sea una alta prioridad. Al proporcionar el texto fuente, el modelo puede generar respuestas que están directamente respaldadas por evidencia.
+
+* Su base de conocimientos cambie con frecuencia. Actualizar una base de datos vectorial para un sistema RAG es mucho más barato y rápido que volver a entrenar un modelo cada vez que se actualizan sus documentos.
+
+RAG no cambia el estilo o las capacidades de razonamiento del modelo. Solo le proporciona mejor información. Si el modelo tiene dificultades para sintetizar el contexto proporcionado o no sigue las instrucciones sobre cómo usarlo, RAG por sí solo puede ser insuficiente. Su efectividad también depende en gran medida de la calidad del paso de recuperación. Si el recuperador no logra encontrar los documentos correctos, el LLM no tendrá la información que necesita.
+
+### Cuándo realizar un ajuste fino
+
+El ajuste fino es el proceso de actualizar los pesos de un modelo utilizando un conjunto de datos seleccionado de ejemplos de entrenamiento. Este es el método más potente para la especialización y es apropiado cuando necesita alterar el comportamiento fundamental del modelo.
+
+Elija el ajuste fino cuando:
+
+* Necesite enseñarle al modelo un nuevo estilo, formato o tono. Si necesita que el modelo genere consistentemente resultados en un formato altamente específico (ej. generar código en un marco de trabajo propietario, escribir informes médicos con una estructura precisa o adoptar una voz de marca única), el ajuste fino es la forma más efectiva de lograrlo.
+
+* La tarea implique aprender un nuevo patrón de razonamiento o capacidad. Para tareas como clasificar texto en categorías personalizadas, seguir instrucciones complejas de varios pasos o realizar una función no bien representada en los datos de entrenamiento originales, el ajuste fino puede enseñarle al modelo esta nueva habilidad.
+
+* Necesite mejorar la fiabilidad en una tarea estrecha y bien definida. Para una función repetible, el ajuste fino en miles de ejemplos de alta calidad puede hacer que el rendimiento del modelo sea significativamente más consistente que el prompting.
+
+* El prompting y RAG sean insuficientes. Si ha probado el prompting avanzado y lo ha encontrado demasiado frágil, o si ha implementado RAG y ha descubierto que el modelo tiene dificultades para utilizar correctamente el contexto recuperado, es una señal fuerte de que el comportamiento central del modelo necesita ser modificado mediante ajuste fino.
+
+* Desee optimizar la latencia y el costo de inferencia. Un modelo más pequeño ajustado para una tarea específica a menudo puede igualar o superar el rendimiento de un modelo de propósito general mucho más grande, resultando en una inferencia más rápida y barata.
+
+Los requisitos principales para el ajuste fino son un conjunto de datos de alta calidad de al menos varios cientos a unos pocos miles de ejemplos y acceso a suficientes recursos computacionales (típicamente GPU) para el entrenamiento.
+
+
+### Comparación resumida
+La tabla a continuación proporciona una comparación lado a lado de los tres métodos a través de atributos importantes.
+
+| Característica | Ingeniería de Prompts | RAG | Ajuste fino |
+| :--- | :--- | :--- | :--- |
+| **Objetivo principal** | Guiar el comportamiento existente | Inyectar conocimiento externo | Modificar el comportamiento central |
+| **Requisito de datos** | Algunos ejemplos para los prompts | Un corpus de documentos | Un conjunto de datos de entrenamiento etiquetado |
+| **Costo de configuración** | Muy bajo | Medio (requiere un recuperador) | Alto (requiere infraestructura de entrenamiento) |
+| **Cambios en el modelo** | Ninguno | Ninguno | Los pesos del modelo son actualizados |
+| **Mejor para** | Tareas simples, formato, prototipos rápidos | Fundamentación factual, datos propietarios | Adaptación de estilo, nuevas habilidades |
+| **Mantenimiento** | Actualizar prompts | Actualizar corpus de documentos | Reentrenar modelo con nuevos datos |
+
+En última instancia, estas técnicas no son mutuamente excluyentes. Una aplicación sofisticada podría usar un modelo ajustado que también esté conectado a un sistema RAG para beneficiarse tanto del comportamiento especializado como del acceso a información oportuna. Su marco analítico debe servir como punto de partida para un proceso iterativo de construcción, prueba y refinamiento de su enfoque para lograr el mejor rendimiento posible para su aplicación específica.
+
+## Estrategias de ajuste fino
+
+Adaptar un modelo preentrenado requiere seleccionar una estrategia de ajuste fino. Esta elección influye directamente en los recursos computacionales necesarios, el tiempo para entrenar el modelo y las características del artefacto final producido. Los enfoques de ajuste fino abarcan un espectro definido por la intensidad de los recursos y la cantidad de parámetros modificados, con dos métodos principales que representan los extremos.
+
+### Ajuste fino de parámetros completos (Full Parameter Fine-Tuning)
+
+El ajuste fino de parámetros completos, a menudo llamado simplemente "ajuste fino", es el método más directo. En este enfoque, usted carga un modelo preentrenado y continúa el proceso de entrenamiento en su conjunto de datos personalizado, actualizando cada peso y sesgo en el modelo. Piense en ello como tomar toda la red neuronal y ajustar todas sus conexiones para que se alineen mejor con su tarea específica.
+
+Esta estrategia es potente porque le da al modelo la máxima flexibilidad para adaptarse a los nuevos datos. Si la distribución de datos de su tarea es significativamente diferente de los datos de preentrenamiento, permitir que todos los parámetros cambien puede conducir a un mayor rendimiento. Sin embargo, esto conlleva costos sustanciales:
+
+* Alta demanda computacional: Actualizar miles de millones de parámetros requiere una cantidad significativa de memoria de GPU. Los pesos del modelo, sus gradientes y los estados del optimizador deben caber en la memoria, lo que a menudo requiere múltiples GPU de alta gama.
+
+* Requisitos de almacenamiento: Debido a que se modifica cada parámetro, el modelo resultante ajustado es igual de grande que el original. Si ajusta un modelo de 7 mil millones de parámetros, debe guardar un nuevo modelo de 7 mil millones de parámetros (aproximadamente 14 GB para pesos bfloat16).
+
+* Riesgo de olvido catastrófico: Cuando entrena todo el modelo en un conjunto de datos pequeño y estrecho, puede perder parte de su conocimiento general adquirido durante el preentrenamiento. Este fenómeno se conoce como olvido catastrófico, donde el modelo se vuelve altamente especializado pero funciona mal en tareas fuera de esa especialización.
+
+El ajuste fino completo es más adecuado cuando tiene acceso a considerables recursos computacionales y su objetivo es lograr el mayor rendimiento posible en una única tarea bien definida.
+
+
+
+### Ajuste fino eficiente en parámetros (PEFT)
+
+Los métodos de ajuste fino eficiente en parámetros (PEFT, por sus siglas en inglés) ofrecen una alternativa práctica a las exigencias de alta carga de recursos del ajuste fino completo. La idea central detrás de PEFT es congelar la mayoría de los parámetros del modelo preentrenado y solo entrenar una cantidad muy pequeña de parámetros nuevos o existentes. Esto reduce drásticamente la huella de memoria y computacional del proceso de entrenamiento.
+
+En lugar de modificar todo el modelo, usted inyecta pequeños módulos entrenables o "adaptadores" en la arquitectura original. Solo estos adaptadores, que podrían constituir menos del 0,1% del recuento total de parámetros, se actualizan durante el entrenamiento. Los pesos originales del modelo base permanecen intactos.
+
+Este enfoque proporciona varias ventajas:
+
+* Baja demanda computacional: Dado que solo está actualizando una pequeña fracción de los parámetros, los requisitos de memoria para gradientes y estados del optimizador se reducen drásticamente. Esto hace posible ajustar modelos muy grandes en una sola GPU de grado consumidor.
+
+* Almacenamiento eficiente: El resultado de un proceso PEFT es solo el pequeño conjunto de pesos de adaptadores entrenados, a menudo de solo unos pocos megabytes de tamaño. Puede mantener una copia del modelo base grande y aplicar diferentes adaptadores ligeros para varias tareas.
+
+* Mitigación del olvido catastrófico: Al mantener el modelo base congelado, PEFT ayuda a preservar las capacidades generales originales del modelo, reduciendo el riesgo de olvido catastrófico.
+
+### Comparación de las estrategias
+
+La elección entre el ajuste fino completo y PEFT implica una serie de compensaciones. La siguiente tabla resume las principales diferencias para ayudar a guiar su decisión.
+
+| Característica | Ajuste fino completo | Ajuste fino eficiente en parámetros (PEFT) |
+| :--- | :--- | :--- |
+| **Parámetros actualizados** | Todos (100%) | Un pequeño subconjunto (< 1%) |
+| **Requisito de memoria GPU** | Muy alto | Bajo |
+| **Costo de almacenamiento** | Alto (una copia completa del modelo) | Bajo (solo los pesos de los adaptadores) |
+| **Velocidad de entrenamiento** | Más lento | Más rápido |
+| **Olvido catastrófico** | Mayor riesgo | Menor riesgo |
+| **Portabilidad de tareas** | Un modelo por tarea | Un modelo base, muchos adaptadores ligeros |
+
+PEFT no es una sola técnica, sino una familia de métodos. El más popular entre ellos es la Adaptación de Bajo Rango (LoRA, por sus siglas en inglés), que implica inyectar matrices entrenables de bajo rango en las capas del Transformer. Otros métodos incluyen el ajuste de adaptadores (Adapter Tuning), que añade nuevas capas de cuello de botella, y el ajuste de prefijos (Prefix-Tuning), que añade prefijos entrenables a la secuencia de entrada.
+
+En última instancia, su selección de una estrategia de ajuste fino dependerá de las restricciones y objetivos de su proyecto. Si tiene hardware limitado y necesita admitir múltiples tareas, PEFT es una excelente opción. Si requiere el máximo rendimiento para una sola aplicación y tiene acceso a suficiente potencia computacional, el ajuste fino completo puede ser el mejor camino.

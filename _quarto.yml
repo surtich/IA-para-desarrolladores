@@ -32,7 +32,8 @@ website:
             - qmd/20_LLM/50_decoder.qmd
         - section: "Hugging Face"
           contents:
-            - qmd/30_hugging_face/10_intro.qmd
+            #- qmd/30_hugging_face/10_intro.qmd
+            - qmd/30_hugging_face/20_fine_tunning.qmd
         - section: "Apéndices"
           contents:
               - qmd/90_apendices/10_derivadas.qmd
