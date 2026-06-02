@@ -38,6 +38,10 @@ website:
         contents:
           - qmd/40_guia_desarrolladores/10_ollama.qmd
           - qmd/40_guia_desarrolladores/20_api.qmd
+          - qmd/40_guia_desarrolladores/30_params.qmd
+          - qmd/40_guia_desarrolladores/40_templates.qmd
+          - qmd/40_guia_desarrolladores/50_memory.qmd
+          - qmd/40_guia_desarrolladores/60_ingenieria_prompts.qmd
       - section: "Apéndices"
         contents:
           - qmd/90_apendices/10_derivadas.qmd
@@ -56,6 +60,7 @@ format:
       - cosmo
       - brand
     toc: true
+    code-overflow: wrap
 resources:
   - presentacion_2025.html
   - linear_transformations.html

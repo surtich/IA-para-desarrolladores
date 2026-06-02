@@ -1,0 +1,151 @@
+---
+title: Ingeniería de Prompts
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+    code-overflow: wrap
+---
+
+## Introducción
+
+La ingeniería de prompts es el proceso de diseñar y optimizar los mensajes que se envían a un modelo de lenguaje (LLM) para obtener respuestas más precisas, relevantes o creativas. Dado que los LLMs generan respuestas basándose en el texto que reciben, la forma en que se formula el prompt puede tener un impacto significativo en la calidad de la respuesta. En esta sección, exploraremos algunas técnicas y mejores prácticas para mejorar tus prompts y obtener mejores resultados de tus interacciones con los LLMs.
+
+## Técnicas de Prompting
+
+* **Zero-shot Prompting:**
+
+    * **Descripción**: El modelo realiza una tarea sin ejemplos previos. Se le da la instrucción directamente.
+    * **Cuándo usarlo**: Para tareas sencillas o cuando el modelo ya tiene mucho conocimiento.
+    * **Ejemplo**: "Traduce al español: 'Hello, how are you?'"
+
+* **Few-shot Prompting:**
+
+    * **Descripción**: Se proporcionan uno o varios ejemplos de pares entrada-salida dentro del prompt para guiar al modelo.
+    * **Cuándo usarlo**: Para tareas más complejas, para definir el formato o cuando el modelo necesita ver patrones.
+    * **Ejemplo**:
+        ```
+        Texto: El cielo es azul. Sentimiento: Positivo.
+        Texto: La espera fue eterna. Sentimiento: Negativo.
+        Texto: Me gusta el café. Sentimiento:
+        ```
+* **Chain-of-Thought (CoT) Prompting:**
+
+    * **Descripción**: Se instruye al modelo para que muestre los pasos intermedios de su razonamiento antes de la respuesta final.
+    * **Cuándo usarlo**: Para problemas de lógica, matemáticas o tareas que requieren varios pasos.
+    * **Ejemplo**: "Explica paso a paso cómo calcular el área de un círculo con un radio de 5 cm y luego da la respuesta final."
+
+* **Role-Playing Prompting:**
+
+    * **Descripción**: Se le asigna al modelo un rol específico (ej. "Actúa como un experto en finanzas").
+    * **Cuándo usarlo**: Para generar contenido con un tono o perspectiva particular.
+    * **Ejemplo**: "Actúa como un crítico de cine de los años 50. Escribe una breve reseña de la película 'Barbie'."
+
+* **Constraint-based Prompting:**
+
+    * **Descripción**: Se incluyen reglas estrictas o limitaciones sobre el formato, la longitud o las palabras clave en la salida.
+    * **Cuándo usarlo**: Cuando necesitas una respuesta muy específica y estructurada.
+    * **Ejemplo**: "Resume el siguiente texto en 50 palabras exactas, usando solo vocabulario de nivel de secundaria."
+
+* **Context-setting Prompting:**
+
+    * **Descripción**: Se proporciona información de fondo o contexto adicional relevante antes de la instrucción principal.
+    * **Cuándo usarlo**: Para tareas que requieren conocimiento específico o para evitar ambigüedades.
+    * **Ejemplo**: "Dado el siguiente artículo científico sobre la fusión nuclear: [Artículo completo aquí]. ¿Cuál es la principal conclusión sobre la viabilidad energética?"
+
+## Proyecto de Ingeniería de Prompts
+
+En esta sección se implementa un proyecto de ingeniería de prompts utilizando la biblioteca Jinja2 para crear plantillas de prompting dinámicas, junto con técnicas de gestión de memoria para optimizar el uso de la ventana de contexto en las interacciones con los LLMs. La implementación se encuentra en el directorio 50_demo2. Este directorio contiene dos subdirectorios:
+
+* `conversation_history`: Es el servidor. En este subdirectorio se implementa un sistema de gestión de la memoria para manejar conversaciones largas con un modelo de lenguaje, utilizando técnicas como el resumen del historial de conversación para optimizar el uso de la ventana de contexto.
+
+* `client`: Es el cliente de React.
+
+### Plantillas de Jinja2 para Prompts
+
+En el directorio `50_demo2/conversation_history/conversation_history` hay dos plantillas de Jinja2 que se utilizan para generar el prompt de resumen. Observe que la segunda plantilla contiene un bucle.
+
+```python
+#| file: 50_demo2/conversation_history/templates/summarize_history_system_message.txt
+{{< include 50_demo2/conversation_history/templates/summarize_history_system_message.txt >}}
+```
+```python
+#| file: 50_demo2/conversation_history/templates/summarize_history_user_message.txt
+{{< include 50_demo2/conversation_history/templates/summarize_history_user_message.txt >}}
+```
+
+El fichero [conversation_history_example_data.py](50_demo2/conversation_history/conversation_history_example_data.py){target="_blank"} contiene un ejemplo de conversación pasada con un chatbot.
+
+En vez de leer los ficheros de plantilla directamente, Jinja2 permite cargar las plantillas desde un directorio específico utilizando un `FileSystemLoader`. Esto facilita la gestión de múltiples plantillas y su reutilización en diferentes partes del proyecto:
+
+```python
+from jinja2 import Environment, FileSystemLoader
+
+env = Environment(
+  loader=FileSystemLoader("templates")
+)
+
+system_template = env.get_template('summarize_history_system_message.txt')
+user_template = env.get_template('summarize_history_user_message.txt')
+```
+
+Para renderizar una plantilla:
+
+```python
+system_message = system_template.render(max_summary_tokens=300)
+```
+
+### Pydantic
+
+Python no tiene un sistema de tipos tan estricto como otros lenguajes, lo que puede llevar a errores difíciles de detectar. Para mitigar esto, se puede utilizar la biblioteca **Pydantic**, que permite definir modelos de datos con validación automática. Esto es especialmente útil para asegurarse de que los datos que se pasan a las plantillas de Jinja2 o a las llamadas a la API de los LLMs tengan el formato correcto.
+
+Los tipos de Pydantic se definen como clases que heredan de `BaseModel`. En nuestro caso hemos definido tipos para un mensaje, para una lista de mensajes y para el resumen del historial de conversación usados por el chatbot:
+
+```python
+#| file: 50_demo2/conversation_history/chat_request.py
+{{< include 50_demo2/conversation_history/chat_request.py >}}
+```
+
+Se pueden probar estos estos tipos ejecutando el fichero `create_chat_request.py`, que crea una instancia de `ChatRequest` con una pregunta y un historial de conversación de ejemplo:
+
+```python
+#| file: 50_demo2/conversation_history/create_chat_request.py
+{{< include 50_demo2/conversation_history/create_chat_request.py >}}
+```
+
+Para el historial de conversación se definen tipos adicionales:
+
+```python
+#| file: 50_demo2/conversation_history/messages.py
+{{< include 50_demo2/conversation_history/messages.py >}}
+```
+
+### Pruebas de resumen
+
+El fichero `conversation_history.py` es una clase que permite gestionar el historial de conversación. Tiene un método `trim_history()` que permite reducir el tamaño del historial. Para probarlo, ejecutar el fichero `trim_history.py`.
+
+```python
+#| file: 50_demo2/conversation_history/conversation_history.py
+{{< include 50_demo2/conversation_history/conversation_history.py >}}
+```
+
+El fichero `summarize_history.py` reduce el historial de conversación utilizando el modelo de lenguaje para generar un resumen. Para probarlo, ejecutar el fichero `summarize_history_example.py`.
+
+```python
+#| file: 50_demo2/conversation_history/summarize_history.py
+{{< include 50_demo2/conversation_history/summarize_history.py >}}
+```
+
+### Servidor web
+
+El fichero `main.py` permite ejecutar el servidor FastAPI con los `endpoints` necesarios para gestionar el historial de conversación y generar resúmenes. Para probarlo, ejecutar el fichero `main.py`. Para ejecutarlo:
+
+```bash
+uv run fastapi dev main.py
+```
+

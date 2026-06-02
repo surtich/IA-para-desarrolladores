@@ -1,0 +1,112 @@
+---
+title: Memoria en LLM
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+    code-overflow: wrap
+---
+
+## Introducción
+
+Los modelos de lenguaje (LLMs) no tienen una "memoria" en el sentido tradicional, pero pueden mantener un contexto a lo largo de una conversación o interacción. Sin embargo, esta memoria es limitada por la ventana de contexto del modelo, que define cuántos tokens (palabras o partes de palabras) puede procesar y generar en una sola solicitud a la API. Para gestionar esta limitación, es importante entender cómo funcionan los LLMs y cómo se puede optimizar el uso de la memoria en las interacciones con ellos.
+
+## Ventana de Contexto
+
+La ventana de contexto es la cantidad máxima de tokens que un modelo puede procesar y generar en una sola solicitud a la API. Esto incluye tanto el prompt de entrada (mensajes en `system`, `user` y `assistant`) como la respuesta de salida. Cada proveedor de LLM define una ventana de contexto particular, que puede variar desde unos pocos miles de tokens hasta decenas de miles. Es fundamental tener en cuenta esta limitación al diseñar tus interacciones con el modelo, ya que si el historial de conversación excede esta ventana, los mensajes más antiguos se "olvidarán" o necesitarás gestionarlos (ej., resumirlos) para que quepan dentro de la ventana.
+
+## Estrategias para Gestionar la Memoria en LLMs
+
+1. **Resumir el Historial de Conversación**: Si la conversación se vuelve demasiado larga, puedes resumir los mensajes anteriores para reducir la cantidad de tokens utilizados. Esto puede hacerse manualmente o utilizando otro modelo de lenguaje para generar un resumen.
+
+2. **Eliminar Mensajes Antiguos**: Si el historial de conversación no es crucial para la interacción actual, puedes eliminar los mensajes más antiguos para liberar espacio en la ventana de contexto.
+
+3. **Utilizar Memoria Externa**: Puedes almacenar información relevante en una base de datos o archivo externo y recuperarla cuando sea necesario para proporcionar contexto adicional al modelo sin ocupar tokens en la ventana de contexto.
+
+4. **Dividir la Conversación en Partes**: Si la conversación es muy larga, puedes dividirla en partes y enviar solo la parte relevante al modelo en cada solicitud.
+
+## Ejemplo
+
+En el siguiente ejemplo, se muestra cómo un modelo no puede recordar información de mensajes anteriores.
+```{python}
+from IPython.display import Markdown, display
+import ollama
+
+response = ollama.chat(model='llama3.2:1b', messages=[
+  {
+    'role': 'user',
+    'content': 'Me llamo Javier.',
+  },
+])
+
+display(Markdown(response['message']['content']))
+
+response = ollama.chat(model='llama3.2:1b', messages=[
+  {
+    'role': 'user',
+    'content': '¿Cómo me llamo?',
+  },
+])
+
+display(Markdown(response['message']['content']))
+```
+
+Para que el modelo pueda recordar el nombre de Javier, es necesario incluir el mensaje anterior en la conversación:
+
+```{python}
+history = []
+
+message1 = {'role': 'user', 'content': 'Me llamo Javier.'}
+response = ollama.chat(model='llama3.2:1b', messages=history + [message1])
+
+history.append(message1)
+history.append({'role': 'assistant', 'content': response['message']['content']})
+
+
+message2 = {'role': 'user', 'content': '¿Cómo me llamo?'}
+response = ollama.chat(model='llama3.2:1b', messages=history + [message2])
+
+history.append(message2)
+history.append({'role': 'assistant', 'content': response['message']['content']})
+
+for message in history:
+  display(Markdown(f"**{message['role']}**: {message['content']}"))
+```
+
+Este código es repetitivo y no es escalable. El siguiente ejemplo gestiona la memoria de forma más eficiente utilizando una función que maneja el historial de conversación:
+
+```{python}
+def chat_with_memory(model, history, user_message):
+  response = ollama.chat(model=model, messages=history + [user_message])
+  history.append(user_message)
+  history.append({'role': 'assistant', 'content': response['message']['content']})
+  return history, response['message']['content']
+
+history = []
+
+history, _ = chat_with_memory(model='llama3.2:1b', history=history, user_message={'role': 'user', 'content': 'Me llamo Javier.'})
+
+history, _ = chat_with_memory(model='llama3.2:1b', history=history, user_message={'role': 'user', 'content': '¿Cómo me llamo?'})
+
+for message in history:
+  display(Markdown(f"**{message['role']}**: {message['content']}"))
+```
+
+Gradio ya viene con una función de memoria integrada que gestiona el historial de conversación de forma automática:
+
+```python
+#| file: 50_demo1/gradio_app.py
+{{< include 50_demo1/gradio_app.py >}}
+```
+
+En Streamlit también se puede gestionar el historial de conversación utilizando `st.session_state`:
+
+```python
+#| file: 50_demo1/streamlit_app.py
+{{< include 50_demo1/streamlit_app.py >}}
+```

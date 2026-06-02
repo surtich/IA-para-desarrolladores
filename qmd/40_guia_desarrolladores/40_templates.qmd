@@ -1,0 +1,52 @@
+---
+title: Plantillas de promting
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+    code-overflow: wrap
+---
+
+## Introducción
+
+Es habitual que, al trabajar con LLMs, se necesiten enviar prompts con formatos específicos. Para evitar tener que escribir el mismo código repetidamente y facilitar el mantenimiento, es recomendable crear **plantillas de prompting** (prompt templates) que permitan generar prompts de forma dinámica a partir de una estructura predefinida. Estas plantillas pueden incluir variables o marcadores de posición que se reemplazan con valores específicos en cada llamada a la API.
+
+## Jinja2
+
+Una de las bibliotecas más populares para crear plantillas en Python es **Jinja2**. Esta biblioteca permite definir plantillas con una sintaxis sencilla y potente, que incluye variables, estructuras de control (condicionales, bucles) y filtros para manipular los datos.
+
+```{python}
+from pathlib import Path
+from IPython.display import display, Markdown
+from jinja2 import Template
+
+def load_file_contents(filename: str):
+  with open(filename, "r", encoding="utf-8") as f:
+    return f.read()
+
+article = load_file_contents(
+  Path(".").resolve() / '40_demo1/articles/how_to_reset_your_acme_password.md')
+
+# Traducción de la plantilla del prompt
+prompt_template: Template = Template("""
+Eres un servicial Soporte de IA. Utiliza el siguiente artículo de soporte para responder preguntas. Solo utiliza el <article> proporcionado 
+y, si no encuentras una respuesta, responde con: Lo siento, no puedo ayudarte con eso. Por favor, llama al servicio de atención al cliente al 555-555-1234.
+
+<article>
+{{article}}
+</article>
+
+Pregunta: {{question}}""")
+
+# Traducción de la pregunta
+question = "Tengo problemas con mi contraseña. ¿Puedes ayudarme a iniciar sesión?"
+
+prompt = prompt_template.render(article=article, question=question)
+
+display(Markdown(f"```markdown\n{prompt}\n```"))  
+```

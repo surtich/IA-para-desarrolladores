@@ -1,0 +1,77 @@
+---
+title: Parametros en LLM
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+    code-overflow: wrap
+---
+
+## Parámetros a tener en cuenta en una llamada a la API de un LLM
+
+* **Ventana de Contexto (Context Window):**
+    * **¿Qué es?**: Es la **cantidad máxima de tokens** (unidades de texto como palabras o partes de palabras) que un modelo puede procesar y generar en una sola solicitud a la API. Incluye tanto el **prompt de entrada** (mensajes en `system`, `user` y `assistant`) como la **respuesta de salida**. Cada proveedor define una ventana de contexto particular.
+    * **Importancia**: Es fundamental porque define cuánto "historial" de conversación se puede enviar al modelo. Si el historial excede esta ventana, los mensajes más antiguos se "olvidarán" o necesitará gestionarlos (ej., resumirlos) para que quepan. Directamente **impacta en el coste**, ya que más tokens procesados equivalen a mayor coste.
+    
+* **Temperatura (Temperature):**
+    * **¿Qué es?**: Un parámetro que controla la **aleatoriedad o "creatividad"** de las respuestas del modelo.
+    * **Rango**: Generalmente va de **0.0 a 1.0**.
+    * * **Comportamiento**:
+        * **Valores bajos (ej., 0.1 - 0.3)**: Hacen que el modelo sea más **determinista y conservador**. Elige las palabras más probables, lo que da respuestas más enfocadas y repetitivas. Ideal para extracción de información, resúmenes o tareas con una única respuesta correcta.
+        * **Valores altos (ej., 0.7 - 1.0)**: Hacen que el modelo sea más **creativo y diverso**. Acepta palabras menos probables, lo que puede generar resultados más inesperados, variados y originales. Ideal para `brainstorming`, escritura creativa o generación de ideas.
+    
+* **Top P (Nucleus Sampling):**
+    * **¿Qué es?**: Otro parámetro que controla la **diversidad de la salida**, pero de una forma diferente a la temperatura. Define un **umbral de probabilidad acumulada** para seleccionar las siguientes palabras.
+    * **Comportamiento**: El modelo considera solo el conjunto más pequeño de palabras cuya probabilidad acumulada suma `top_p`. Por ejemplo, si `top_p = 0.9`, el modelo elegirá solo entre las palabras más probables que sumen hasta el 90% de la probabilidad total. Un valor de **1.0** es el más inclusivo (permite todas las palabras), mientras que un valor de **0.0** (o muy bajo) es más restrictivo.
+    * **Uso**: A menudo se usa **en combinación con la temperatura** (o en su lugar, dependiendo de la preferencia).
+    * 
+* **Max Tokens (Máximo de Tokens de Salida):**
+    * **¿Qué es?**: Este parámetro establece el **límite máximo de tokens que el modelo generará** en su respuesta.
+    * **Importancia**: Es fundamental para **controlar la longitud de la respuesta** y, por ende, el coste (ya que los tokens de salida también se facturan). Si el modelo alcanza este límite antes de terminar su respuesta, simplemente se cortará.
+  
+* **Stop Sequences (Secuencias de Parada):**
+    * **¿Qué son?**: Son **cadenas de texto específicas** que, si el modelo las genera, detienen inmediatamente la generación de la respuesta.
+    * **Importancia**: Muy útil para controlar el formato de la salida. Por ejemplo, si quiere que el modelo solo responda a una pregunta y no empiece una nueva, puedes añadir `\n` (salto de línea) o un `\nUsuario:` como secuencia de parada para evitar que simule el siguiente turno de conversación.
+  
+* **Frequency Penalty (Penalización de Frecuencia):**
+    * **¿Qué es?**: Un parámetro que penaliza al modelo por **repetir tokens** que ya ha generado en la respuesta.
+    * **Comportamiento**: Valores más altos reducen la probabilidad de que el modelo repita las mismas palabras o frases, fomentando una mayor variedad en el texto. El rango típico es de **-2.0 a 2.0**.
+  
+* **Presence Penalty (Penalización de Presencia):**
+    * **¿Qué es?**: Similar a la penalización de frecuencia, pero penaliza al modelo por **usar tokens que ya existen en el prompt** (o en la parte ya generada de la respuesta, incluso si no se repiten consecutivamente).
+    * **Comportamiento**: Valores más altos hacen que el modelo sea más propenso a introducir conceptos o palabras completamente nuevas en su respuesta. El rango típico es de **-2.0 a 2.0**.
+    * **En la API de OpenAI**: Se especifica con el parámetro `presence_penalty`.
+
+
+## Ejemplo
+
+Se puede probar el siguiente código con distintos parámetros para ver cómo afectan a la respuesta del modelo. POr ejemplo, puede ajustar la temperatura para ver cómo cambia la creatividad de las respuestas, o modificar el `max_tokens` para controlar la longitud de la respuesta. Una temperatura de 0.0 dará respuestas muy predecibles, mientras que una temperatura de 2.0 generará respuestas demasiado creativas y a menudo incoherentes.
+
+```{python}
+from IPython.display import Markdown
+from ollama import Client
+
+client = Client()
+
+def get_ollama_response(prompt, temperature=1.0, top_p=1.0, max_tokens=100):
+  result = client.generate(
+    model="llama3.2:1b",
+    prompt=prompt,
+    options={
+      "temperature": temperature,
+      "top_p": top_p,
+      "max_tokens": max_tokens
+    }
+  )
+  return result.response
+
+
+prompt = """Cuéntame una historia corta sobre un gato y un ratón."""
+
+Markdown(get_ollama_response(prompt=prompt, temperature=0.0))
+```

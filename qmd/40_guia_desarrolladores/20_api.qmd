@@ -1,5 +1,5 @@
 ---
-title: Uso de LLM API
+title: Llamadas a APIs de LLM
 execute:
   echo: true
   warning: false
@@ -134,9 +134,9 @@ print(response.choices[0].text)
 
 ## Gemini
 
-Gemini es un modelo de lenguaje desarrollado por Google que se destaca por su capacidad de razonamiento avanzado y su amplia ventana de contexto. Gemini se puede acceder a través de la API se necesita una cuenta de Google Cloud y configurar el acceso a la API de Gemini.
-
+[Gemini](https://ai.google.dev/gemini-api/docs/models?hl=es-419) es un modelo de lenguaje desarrollado por Google que se destaca por su capacidad de razonamiento avanzado y su amplia ventana de contexto. Gemini se puede acceder a través de la API se necesita una cuenta de Google Cloud y configurar el acceso a la API de Gemini. Últimamente, Google ha modificado los límites de uso de sus API y ahora Gemini es prácticamente inservible. Sin embargo, aquí hay un ejemplo de cómo se podría usar la API de Gemini:
 ```{python}
+import os
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -184,7 +184,7 @@ print(response.choices[0].message.content)
 
 ## Cohere 
 
-Cohere es una plataforma de inteligencia artificial que ofrece modelos de lenguaje avanzados para tareas de generación de texto, análisis de sentimientos, clasificación y más. Para acceder a los modelos de Cohere, es necesario crear una cuenta en su plataforma y obtener una clave API.
+[Cohere](https://docs.cohere.com/docs/models) es una plataforma de inteligencia artificial que ofrece modelos de lenguaje avanzados para tareas de generación de texto, análisis de sentimientos, clasificación y más. Para acceder a los modelos de Cohere, es necesario crear una cuenta en su plataforma y obtener una clave API.
 
 Puede funcionar con su propia API:
 
@@ -228,7 +228,7 @@ print(response.choices[0].message.content)
 
 ## Groq
 
-Groq (no confundir con Grok) es una empresa de tecnología que desarrolla hardware y software para acelerar el procesamiento de modelos de inteligencia artificial. Groq ofrece una API que permite a los desarrolladores acceder a sus modelos de lenguaje avanzados para tareas de generación de texto, análisis y más.
+[Groq](https://console.groq.com/docs/models) (no confundir con Grok) es una empresa de tecnología que desarrolla hardware y software para acelerar el procesamiento de modelos de inteligencia artificial. Groq ofrece una API que permite a los desarrolladores acceder a sus modelos de lenguaje avanzados para tareas de generación de texto, análisis y más.
 
 ```{python}
 import os
@@ -312,7 +312,76 @@ response = openai.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
+## Puter.js
 
+[Puter.js](https://docs.puter.com/) permite ejecutar modelos de lenguaje directamente en el navegador sin necesidad de API KEYS. Cada usuario ejecuta el modelo en un espacio privado en la nube de Puter, lo que garantiza la privacidad y seguridad de los datos. Puter.js es compatible con una amplia gama de modelos, incluyendo GPT-4.5 nano, y ofrece una experiencia de usuario fluida y rápida. Para usar Puter.js, simplemente incluye su script en tu página HTML y llama a la función `puter.ai.chat` con el mensaje que desea enviar al modelo:
+
+
+```html
+#| file: 20_demo1/index.html
+{{< include 20_demo1/index.html >}}
+```
+
+## LiteLLM
+
+[LiteLLM](https://docs.litellm.ai/docs/proxy/docker_quick_start) es una biblioteca de Python diseñada para simplificar la integración de múltiples modelos de lenguaje (LLMs) en aplicaciones. Su objetivo principal es permitirte llamar a cualquier LLM (como los de OpenAI, Anthropic, Cohere, Google Vertex AI, Hugging Face, etc.) utilizando el mismo formato de entrada y salida.
+
+En lugar de aprender y escribir código específico para cada SDK o API, LiteLLM estandariza el proceso bajo una interfaz común.
+
+Prueba de LiteLLM con Ollama:
+
+```{python}
+from litellm import completion
+
+# Asegúrate de que Ollama esté ejecutándose en tu máquina
+response = completion(
+    model="ollama/llama3.2:1b",
+    messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}]
+)
+
+# Imprime el contenido de la respuesta
+print(response.choices[0].message.content)
+```
+LiteLLM también puede ejecutarse como servidor proxy. Para instalar LiteLLM como proxy, ejecute desde la carpeta del proyecto:
+
+```bash
+uv add litellm[proxy]
+uv tool install litellm
+```
+
+Para configurar por primera vez, ejecute:
+
+```bash
+uv run litellm --setup
+```
+
+Esto creará un archivo de configuración `litellm_config.yaml` en la raíz del proyecto, donde puede agregar sus claves API para los diferentes proveedores de LLM.
+
+Para sucesivas ejecuciones, simplemente ejecute:
+
+```bash
+uv run litellm --config litellm_config.yaml --port 4000
+```
+
+Prueba de LiteLLM con Ollama:
+
+```python
+from openai import OpenAI
+
+# Configura el cliente para apuntar a tu proxy local
+client = OpenAI(
+    api_key="sk-zd0MSMnFPCQs1vE2_0Zfa6gUZosrVzjiIo8xqD0exCw"
+    base_url="http://localhost:4000"
+)
+
+# Realiza la petición
+response = client.chat.completions.create(
+    model="llama3.2"
+    messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}]
+)
+
+print(response.choices[0].message.content)
+```
 
 
 
