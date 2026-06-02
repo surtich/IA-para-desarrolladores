@@ -37,6 +37,7 @@ website:
       - section: "Guía para desarrolladores"
         contents:
           - qmd/40_guia_desarrolladores/10_ollama.qmd
+          - qmd/40_guia_desarrolladores/20_api.qmd
       - section: "Apéndices"
         contents:
           - qmd/90_apendices/10_derivadas.qmd

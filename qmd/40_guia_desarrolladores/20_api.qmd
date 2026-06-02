@@ -1,0 +1,319 @@
+---
+title: Uso de LLM API
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+Hasta ahora, hemos explorado Ollama para ejecutar modelos de forma privada en nuestra propia máquina. Sin embargo, en el mundo real, los desarrolladores rara vez despliegan modelos masivos en el servidor del usuario final. Para construir aplicaciones robustas, escalables y con capacidades de razonamiento avanzado (como las que ofrecen los modelos propietarios de última generación), necesitamos interactuar con LLMs a través de APIs.
+
+Factores que se deben tener en cuenta al elegir una API de LLM:
+
+* **Infraestructura**:
+    * Ventajas: Escalabilidad ilimitada. Se delega el cómputo pesado y el auto-escalado al proveedor.
+    * Desafíos: Dependencia del proveedor (Vendor Lock-in). Existe una sujeción a la disponibilidad y políticas del servicio contratado.
+
+* **Evolución del modelo**:
+    * Ventajas: Acceso instantáneo a modelos con mejoras continuas en razonamiento y ventanas de contexto.
+    * Desafíos: Latencia de red. La comunicación externa introduce un factor temporal ausente en el procesamiento local.
+
+* **Gestión y Operaciones**:
+    * Ventajas: Mantenimiento nulo. Se eliminan las tareas de parches, drivers y gestión de GPUs; el sistema se mantiene actualizado de forma automática.
+    * Desafíos: Estructura de costes. El esquema de pago por uso puede escalar exponencialmente si no se optimiza el consumo de tokens.
+
+* **Integración y Ecosistema**:
+    * Ventajas: Facilidad de integración. Las APIs facilitan la conexión con herramientas, bases de datos vectoriales y frameworks de agentes.
+    * Desafíos: Limitaciones de uso. Se opera bajo *Rate Limits* (límites de tasa) y políticas de filtrado que pueden restringir el flujo de trabajo.
+
+* **Privacidad y Seguridad**:
+    * Ventajas: Seguridad gestionada. Los proveedores suelen implementar medidas de seguridad robustas para proteger los datos.
+    * Desafíos: Exposición de datos. Enviar datos sensibles a través de la red puede plantear riesgos de privacidad, especialmente si no se cifran adecuadamente.
+
+* **Personalización**:
+    * Ventajas: Modelos preentrenados. Acceso a modelos de última generación sin necesidad de entrenamiento o ajuste fino.
+    * Desafíos: Falta de control. No se puede personalizar el modelo ni ajustar su comportamiento más allá de los parámetros de la API.
+
+* **Coste**:
+    * Ventajas: Sin costes iniciales. No se requiere inversión en hardware o infraestructura. Se paga por uso. Algunos proveedores ofrecen planes gratuitos o de bajo costo para comenzar.
+    * Desafíos: Costes operativos. El uso continuo puede resultar costoso, especialmente con modelos de gran tamaño o alto volumen de solicitudes.
+
+* **Estandarización**:
+    * Ventajas: Interfaz unificada. Las APIs proporcionan una interfaz consistente para interactuar con diferentes modelos y proveedores. El estándar de facto es el formato de solicitud de OpenAI, lo que facilita la integración con múltiples servicios.
+    * Desafíos: Fragmentación del mercado. La falta de estándares comunes puede dificultar la migración entre proveedores o la integración de múltiples servicios.
+
+
+## Ollama a través de API de OpenAI
+
+Ollama ofrece una API compatible con el formato de solicitud de OpenAI, lo que facilita la integración con aplicaciones que ya utilizan este estándar. Para interactuar con Ollama a través de su API. OpenAI tiene dos APIs principales:
+
+* **API de Chat**: Permite enviar mensajes en formato de conversación, ideal para aplicaciones de chatbots o asistentes virtuales.
+* **API de Completions**: Permite enviar un prompt y recibir una respuesta generada, ideal para tareas de generación de texto o completado de código.
+
+Las APIs de OpenAI se puede ejecutar a través de HTTP utilizando herramientas como `curl` o bibliotecas de cliente en diversos lenguajes de programación como Python, JavaScript, etc.
+
+### Roles en la API de Chat
+
+En la API de Chat, los mensajes se estructuran con roles específicos que definen el contexto de la conversación:
+
+* **system**: Define el comportamiento general del modelo. Por ejemplo, "Eres un asistente útil."
+* **user**: Representa las entradas del usuario. Por ejemplo, "¿Cuál es la capital de Francia?"
+* **assistant**: Representa las respuestas generadas por el modelo.
+
+### Ejemplo de uso con `curl`
+
+```bash
+curl -X POST "http://localhost:11434/v1/chat/completions" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "model": "llama3.2:1b",
+           "messages": [
+             {"role": "system", "content": "Eres un guía turístico."},
+             {"role": "user", "content": "¿Cuál es la capital de Francia?"}
+           ]
+         }'
+``` 
+
+### Ejemplo de uso con request (Python)
+
+```{python}
+import requests
+url = "http://localhost:11434/v1/chat/completions"
+headers = {"Content-Type": "application/json"}
+data = {
+    "model": "llama3.2:1b",
+    "messages": [
+        {"role": "system", "content": "Eres un guía turístico."},
+        {"role": "user", "content": "¿Cuál es la capital de Francia?"}
+    ]
+}
+response = requests.post(url, headers=headers, json=data)
+print(response.json())
+```
+
+### Ejemplo de uso con openai (Python) - API de Chat
+
+```{python}
+from openai import OpenAI
+MODEL = "llama3.2:1b"
+openai = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+
+response = openai.chat.completions.create(
+ model=MODEL,
+ messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+### Ejemplo de uso con openai (Python) - API de Completions
+
+```{python}
+from openai import OpenAI
+
+client = OpenAI(
+    base_url='http://localhost:11434/v1/',
+    api_key='ollama'
+)
+
+response = client.completions.create(
+    model="llama3.2:1b",
+    prompt="Escribe un refrán corto sobre la perseverancia:",
+    max_tokens=50
+)
+
+print(response.choices[0].text)
+```
+
+## Gemini
+
+Gemini es un modelo de lenguaje desarrollado por Google que se destaca por su capacidad de razonamiento avanzado y su amplia ventana de contexto. Gemini se puede acceder a través de la API se necesita una cuenta de Google Cloud y configurar el acceso a la API de Gemini.
+
+```{python}
+from google import genai
+from google.genai import types
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+api_key = os.getenv('GOOGLE_API_KEY')
+
+client = genai.Client(api_key=api_key)
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=[
+        types.Content(
+            role="user",
+            parts=[
+                types.Part.from_text(text="2+2")
+            ]
+        )
+    ]
+)
+
+print(response.text)
+```
+
+Usando la el API de Chat de OpenAI:
+
+```{python}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+api_key = os.getenv('GOOGLE_API_KEY')
+
+MODEL = "gemini-2.5-flash"
+openai = OpenAI(base_url="https://generativelanguage.googleapis.com/v1beta", api_key=api_key)
+
+response = openai.chat.completions.create(
+ model=MODEL,
+ messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Cohere 
+
+Cohere es una plataforma de inteligencia artificial que ofrece modelos de lenguaje avanzados para tareas de generación de texto, análisis de sentimientos, clasificación y más. Para acceder a los modelos de Cohere, es necesario crear una cuenta en su plataforma y obtener una clave API.
+
+Puede funcionar con su propia API:
+
+```{python}
+import os
+import cohere
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv('COHERE_API_KEY')
+
+MODEL = "command-a-plus-05-2026"
+co = cohere.ClientV2(api_key=api_key)
+response = co.chat(
+    model="command-a-plus-05-2026", 
+    messages=[{"role": "user", "content": "2+2"}]
+)
+print(response)
+```
+
+O con la de OpenAI:
+
+```{python}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv('COHERE_API_KEY')
+
+MODEL = "command-a-plus-05-2026"
+openai = OpenAI(base_url="https://api.cohere.ai/compatibility/v1", api_key=api_key)
+
+response = openai.chat.completions.create(
+ model=MODEL,
+ messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Groq
+
+Groq (no confundir con Grok) es una empresa de tecnología que desarrolla hardware y software para acelerar el procesamiento de modelos de inteligencia artificial. Groq ofrece una API que permite a los desarrolladores acceder a sus modelos de lenguaje avanzados para tareas de generación de texto, análisis y más.
+
+```{python}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv('GROQ_API_KEY')
+
+MODEL = "llama-3.1-8b-instant" 
+openai = OpenAI(
+    base_url="https://api.groq.com/openai/v1",
+    api_key=api_key
+)
+
+response = openai.chat.completions.create(
+    model=MODEL,
+    messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}]
+)
+
+print(response.choices[0].message.content)
+``` 
+
+## GitHub Marketplace
+
+[GitHub Marketplace](https://github.com/marketplace/models) ofrece una variedad de aplicaciones y servicios que se integran con GitHub para mejorar el flujo de trabajo de desarrollo. Entre estas aplicaciones, hay varias que proporcionan acceso a modelos de lenguaje de distintos proveedores a través de APIs, lo que permite a los desarrolladores incorporar capacidades de inteligencia artificial en sus proyectos directamente desde GitHub.
+
+Tiene su propia API:
+
+```{python}
+import os
+from azure.ai.inference import ChatCompletionsClient
+from azure.ai.inference.models import SystemMessage, UserMessage
+from azure.core.credentials import AzureKeyCredential
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
+endpoint = "https://models.github.ai/inference"
+model = "deepseek/DeepSeek-V3-0324"
+token = os.getenv('GITHUB_TOKEN')
+
+client = ChatCompletionsClient(
+    endpoint=endpoint,
+    credential=AzureKeyCredential(token),
+)
+
+response = client.complete(
+    messages=[
+        SystemMessage("You are a helpful assistant."),
+        UserMessage("2+2"),
+    ],
+    model=model
+)
+
+print(response.choices[0].message.content)
+```
+
+Aunque también se puede acceder a través de la API de OpenAI:
+
+```{python}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+api_key = os.getenv('GITHUB_TOKEN')
+
+MODEL = "microsoft/Phi-4-reasoning"
+
+openai = OpenAI(
+    base_url="https://models.github.ai/inference",
+    api_key=api_key
+)
+
+response = openai.chat.completions.create(
+    model=MODEL,
+    messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+
+
+
+
+
