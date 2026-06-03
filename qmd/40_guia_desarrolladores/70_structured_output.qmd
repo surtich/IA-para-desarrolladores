@@ -1,0 +1,171 @@
+---
+title: Salida estructurada
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+    code-overflow: wrap
+---
+
+## Introducción
+
+Los Chatbbots generalmente generan sus respuestas en lenguaje natural, lo que puede ser difícil de procesar para las aplicaciones que necesitan extraer información específica o estructurada de la respuesta. Para abordar este problema, es posible diseñar prompts que instruyan al modelo para que genere su salida en un formato específico, como JSON, XML o CSV. Esto facilita la extracción de datos y la integración de las respuestas del modelo en aplicaciones y sistemas automatizados.Sin embargo, es importante tener en cuenta que, aunque los modelos de lenguaje pueden generar texto en un formato específico, no garantizan que la salida siempre sea válida o bien formateada. Por lo tanto, es recomendable implementar mecanismos de validación y manejo de errores para asegurarse de que la salida generada por el modelo se ajuste al formato esperado. En lugar de indicar el formato de salida en el prompt, muchas API tienen formas de indicar el formato de salida esperado.
+
+# Salida estructurada con la API de Ollama
+
+El SDK de Ollama permite especificar el formato de salida esperado utilizando el parámetro `response_format` en la función `chat`. Por ejemplo:
+
+```{python}
+import logging
+
+from ollama import chat, ChatResponse
+
+from typing import Literal
+from pydantic import BaseModel
+from pydantic import BaseModel, Field
+import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+model = os.getenv('OLLAMA_MODEL')
+
+# Configurar el registro en DEBUG para ver la salida de ollama
+# logging.basicConfig(level=logging.DEBUG)
+
+
+class SocialMessage(BaseModel):
+    comment: str = Field(description="El comentario que se está analizando")
+    sentiment: Literal['positive', 'negative', 'neutral'] = Field( description="Proporcione el sentimiento de la declaración")
+    department: Literal['customer_support', 'online_ordering', 'product_quality', 'shipping_and_delivery',
+                        'other_off_topic'] = Field(description="Departamento al que se debe dirigir la declaración")
+    reply: str = Field(description="Recomendar una respuesta al comentario")
+
+
+def analyze_sentiment(statement: str) -> ChatResponse:
+    return chat(
+        model=model,
+        messages=[
+            {"role": "system", "content": """
+Eres un experto en comentarios de clientes en línea. Analiza cuidadosamente el comentario proporcionado 
+y responde con el sentimiento, el departamento y una respuesta.
+        
+Utiliza la siguiente información para determinar el departamento al que dirigir el comentario:
+  - customer_support: problemas con la atención al cliente por no ser servicial
+  - online_ordering: problemas con los pedidos, la velocidad del sitio web o el proceso de pago
+  - product_quality: problemas con la calidad del producto o su descripción
+  - shipping_and_delivery: problemas con envíos lentos o no haber recibido un pedido
+  - other_off_topic: no se pudo identificar un departamento
+
+La respuesta que escribas:
+  - debe estar escrita en un tono amable y profesional
+  - debe estar escrita en el mismo idioma que el comentario
+  - no debe superar las 100 palabras
+  - debe incluir el número de atención al cliente: 555-555-1245
+"""},
+            {"role": "user", "content": f"Declaración: {statement}, JSON:"}
+        ],
+        format=SocialMessage.model_json_schema(),
+        options={
+            "temperature": 0
+        }
+    )
+
+
+print(json.dumps(SocialMessage.model_json_schema(), indent=2))
+
+response = analyze_sentiment(
+    "No confíen en @AcmeCorp. ¡Han pasado semanas y ni siquiera han enviado mi pedido!")
+
+social_message = SocialMessage.model_validate_json(
+    response.message.content)
+
+print(f"Sentimiento: {social_message.sentiment}")
+print(f"Departamento: {social_message.department}")
+print(f"Respuesta: {social_message.reply}")
+```
+
+El método `model_validate_json()` de Pydantic se utiliza para validar y analizar la respuesta JSON generada por el modelo, asegurando que se ajuste al formato definido por el modelo `SocialMessage`. Si la respuesta no es válida o no se ajusta al formato esperado, se generará una excepción.
+
+Aunque el sentimiento es correcto, los otros campos no parecen contener la información adecuada. Quizás con un prompt con más detalles y con ejemplos de salida se podría mejorar la precisión de la respuesta.
+
+## Salida estructurada con Instructor
+
+El paquete **Instructor** de OpenAI facilita la generación de salidas estructuradas al encargarse de reintentar la respuesta si no se adecúa al formato esperado. Aunque Instructor es compatible con muchos proveedores de LLM, no lo es con la API nativa de Ollama por lo que, para este ejemplo, se usa con la API de OpenAI.
+
+
+```{python}
+import instructor
+import logging
+
+from typing import Literal
+
+from pydantic import BaseModel, Field
+import os
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+model = os.getenv('OLLAMA_MODEL')
+
+
+# Configura el registro en DEBUG si quieres ver los registros de Instructor
+# logging.basicConfig(level=logging.DEBUG)
+
+
+class SocialMessage(BaseModel):
+    """
+    Utiliza la siguiente información para determinar el departamento al que dirigir el comentario:
+      - customer_support: problemas con la atención al cliente por no ser servicial
+      - online_ordering: problemas con los pedidos, la velocidad del sitio web o el proceso de pago
+      - product_quality: problemas con la calidad del producto o su descripción
+      - shipping_and_delivery: problemas con envíos lentos o no haber recibido un pedido
+      - other_off_topic: no se pudo identificar un departamento
+
+    La respuesta que escribas:
+      - debe estar escrita en un tono amable y profesional
+      - debe estar escrita en el mismo idioma que el comentario
+      - no debe superar las 100 palabras
+      - debe incluir el número de atención al cliente: 555-555-1245
+    """
+    statement: str = Field(description="La declaración que se está analizando")
+    sentiment: Literal['positive', 'negative', 'neutral'] = Field(
+        description="Proporcione el sentimiento de la declaración")
+    department: Literal['customer_support', 'online_ordering', 'product_quality', 'shipping_and_delivery',
+                        'other_off_topic'] = Field(description="Departamento al que se debe dirigir la declaración")
+    reply: str = Field(description="Recomendar una respuesta a la declaración")
+
+
+client = instructor.from_provider(
+    model=f"ollama/{model}",
+    base_url="http://localhost:11434/v1",
+    mode=instructor.Mode.JSON,
+)
+
+
+def analyze_sentiment(statement: str) -> SocialMessage:
+    return client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": """
+Eres un experto en comentarios de clientes en línea. Analiza cuidadosamente la declaración proporcionada 
+y responde con el sentimiento, el departamento y una respuesta.
+"""},
+            {"role": "user", "content": "Declaración: {{statement}}, JSON:"}
+        ],
+        response_model=SocialMessage,
+        context={"statement": statement},
+        temperature=0
+    )
+
+
+social_message = analyze_sentiment(
+    "No confíen en @AcmeCorp. ¡Han pasado semanas y ni siquiera han enviado mi pedido!")
+
+print(f"Sentimiento: {social_message.sentiment}")
+print(f"Departamento: {social_message.department}")
+print(f"Respuesta: {social_message.reply}")
+```
