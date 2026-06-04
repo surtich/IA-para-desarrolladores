@@ -43,6 +43,7 @@ website:
           - qmd/40_guia_desarrolladores/50_memory.qmd
           - qmd/40_guia_desarrolladores/60_ingenieria_prompts.qmd
           - qmd/40_guia_desarrolladores/70_structured_output.qmd
+          - qmd/40_guia_desarrolladores/75_vector_db.qmd
       - section: "Apéndices"
         contents:
           - qmd/90_apendices/10_derivadas.qmd

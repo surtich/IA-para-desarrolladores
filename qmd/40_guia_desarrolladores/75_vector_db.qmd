@@ -1,0 +1,153 @@
+---
+title: Bases de datos vectoriales
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+    code-overflow: wrap
+---
+
+## Introducción
+
+Los LLM son capaces de generar texto de una forma que parece natural, pero su conocimiento está limitado al momento en que terminó su entrenamiento. Dado que la información global evoluciona constantemente y el reentrenamiento de estos modelos es un proceso técnica y económicamente prohibitivo, surge una brecha crítica: ¿cómo dotar a un LLM de conocimiento actualizado y específico sin reentrenarlo?
+
+Si bien podemos inyectar datos directamente en el prompt (técnica conocida como in-context learning), nos topamos rápidamente con el muro de la ventana de contexto: una limitación técnica que impide procesar volúmenes masivos de datos.
+
+La solución reside en la implementación de una fuente de datos externa mediante la técnica conocida como RAG (Retrieval-Augmented Generation). Sin embargo, todavía existe un dificultad: ¿cómo puede el LLM identificar, entre millones de documentos, la información precisa necesaria para responder a una consulta en lenguaje natural?
+
+Aquí es donde las bases de datos vectoriales se vuelven fundamentales. A diferencia de las bases de datos relacionales tradicionales, estas permiten transformar la información en representaciones numéricas de alta dimensión (embeddings). Esto permite la búsqueda semántica: el sistema no busca coincidencias exactas de palabras, sino que encuentra información basándose en el significado y la intención a través de métricas de similitud vectorial.
+
+Hay una diferencia crucial entre una base de datos vectorial y un LLM: Mientras que los LLMs procesan vectores para realizar inferencia y generar nuevo contenido de forma probabilística, las bases de datos vectoriales actúan como un sistema de recuperación determinista. Su función no es razonar, sino gestionar el almacenamiento y la búsqueda eficiente de vectores. En este contexto, cuando un usuario realiza una consulta, la base de datos vectorial ejecuta una búsqueda de similitud sobre su índice para devolver los fragmentos de datos más relevantes; a diferencia del carácter creativo y variable de un LLM, este proceso de recuperación es preciso y repetible, garantizando que ante una misma consulta y un índice inalterado, se obtenga siempre el mismo conjunto de resultados.
+
+## Ejemplos de bases de datos vectoriales
+
+El mercado de las bases de datos vectoriales ha madurado rápidamente, ofreciendo opciones que van desde soluciones especializadas en alto rendimiento hasta la extensión de sistemas de gestión de datos ya existentes.
+
+### 1. Bases de Datos Vectoriales Especializadas
+Están diseñadas desde su arquitectura base para gestionar, indexar y consultar vectores de alta dimensión de forma eficiente. Son la opción preferente cuando el volumen de datos es masivo o se requiere latencia ultra baja.
+
+* **Pinecone:** La opción líder en el mercado para quienes buscan una solución *serverless* sin preocuparse por la infraestructura. Es muy apreciada por su facilidad de integración y escalabilidad automática.
+* **Milvus:** Diseñada para escalar a miles de millones de vectores, es la opción estándar para aplicaciones de gran escala que requieren un control total sobre la arquitectura distribuida.
+* **Qdrant:** Destaca por su rendimiento excepcional. Escrita en Rust, es muy popular por ofrecer una excelente relación entre velocidad, eficiencia y capacidades de filtrado avanzado.
+* **Weaviate:** Una opción versátil que brilla por su capacidad de realizar búsquedas híbridas (combinando búsqueda vectorial con búsqueda por palabras clave tradicional) de forma nativa.
+* **Chroma:** El estándar para el desarrollo ágil y prototipado. Es ligera, fácil de implementar y muy utilizada en entornos locales o aplicaciones de menor escala.
+
+
+### 2. Bases de Datos Tradicionales
+No siempre es necesario adoptar una base de datos puramente vectorial. La mayoría de las bases de datos relacionales y NoSQL han integrado capacidades vectoriales, permitiendo realizar búsquedas de similitud sobre datos que ya residen en tu infraestructura actual.
+
+* **PostgreSQL y `pgvector`:** Gracias a la extensión *pgvector*, PostgreSQL se ha convertido en una opción robusta para muchas empresas. Permite almacenar vectores y realizar búsquedas de vecinos cercanos directamente en tablas existentes, facilitando enormemente la implementación de sistemas RAG sin añadir la complejidad operativa de mantener un sistema independiente.
+* **MongoDB:** A través de *Atlas Vector Search*, MongoDB integra la búsqueda vectorial directamente dentro de su plataforma documental. Esto es ideal si sus datos ya tienen una estructura flexible y necesita combinar la potencia de una base de datos NoSQL con consultas semánticas avanzadas.
+
+## sentence_transformers
+
+Una de las herramientas más populares para generar embeddings es la biblioteca `sentence_transformers` de Hugging Face. Esta biblioteca ofrece una amplia variedad de modelos preentrenados que pueden convertir texto en vectores de alta dimensión, capturando el significado semántico de las palabras y frases.
+
+Ejemplo de uso:
+
+```{python}
+from sentence_transformers import SentenceTransformer
+
+# 1. Cargar un modelo de Sentence Transformer preentrenado
+model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+# Las oraciones a codificar (traducidas)
+sentences = [
+    "Auriculares inalámbricos Sony con cancelación de ruido",
+    "Kit de cámara DSLR profesional Canon",
+    "Auriculares inalámbricos Jenson Pro",
+    "Auriculares inalámbricos Panasonic con reducción de ruido",
+]
+
+# 2. Calcular los embeddings llamando a model.encode()
+embeddings = model.encode(sentences)
+
+print(embeddings[0])
+print(f"Dimensiones: {len(embeddings[0])}")
+
+idx_to_compare = 0
+
+similarities = model.similarity(embeddings[idx_to_compare], embeddings)
+
+print(f"Comparando con: {sentences[idx_to_compare]}")
+
+for idx, embedding in enumerate(embeddings):
+  print(
+    f"- {sentences[idx]}, Puntuación: {similarities[idx_to_compare][idx]:.4f}")
+```
+
+## Chroma
+
+Chroma es una base de datos vectorial de código abierto diseñada para ser fácil de usar y altamente eficiente. Es ideal para desarrolladores que buscan una solución ligera y rápida para almacenar y consultar vectores de alta dimensión.
+
+```{python}
+from pathlib import Path
+import chromadb
+from chromadb.utils import embedding_functions
+import pandas as pd
+
+# Initialize ChromaDB client
+client = chromadb.Client()
+
+# Use the all-MiniLM-L6-v2 embedding function
+embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
+  model_name="all-MiniLM-L6-v2"
+)
+
+# Load product data
+products_df = pd.read_csv(Path(".").resolve() / '75_demo1/products.csv')
+
+# Create collection
+collection = client.create_collection(
+  name="product_search",
+  embedding_function=embedding_function
+)
+
+print(type(products_df['title']))
+
+all_titles = products_df['title']
+all_descriptions = products_df['description']
+
+all_titles_and_descriptions = zip(all_titles, all_descriptions)
+
+"""Add all products to the ChromaDB collection"""
+# Combine title and description for better matching
+texts = [
+  f"{title} {desc}" for title, desc in all_titles_and_descriptions
+]
+
+collection.add(
+  documents=texts,
+  metadatas=[{
+    'product_id': pid,
+    'title': title,
+    'category': category,
+    'description': description,
+    'price': price,
+  } for pid, title, category, description, price in zip(
+    products_df['product_id'],
+    products_df['title'],
+    products_df['category'],
+    products_df['description'],
+    products_df['price']
+  )],
+  ids=[pid for pid in products_df['product_id']]
+)
+
+query = "camera for taking professional quality photography"
+
+results = collection.query(
+  query_texts=[query],
+  n_results=3
+)
+
+for metadata in results['metadatas'][0]:
+  print(f"{metadata['product_id']}:  {metadata['title']}")
+```
+
+
