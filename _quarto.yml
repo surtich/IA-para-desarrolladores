@@ -44,6 +44,9 @@ website:
           - qmd/40_guia_desarrolladores/60_ingenieria_prompts.qmd
           - qmd/40_guia_desarrolladores/70_structured_output.qmd
           - qmd/40_guia_desarrolladores/75_vector_db.qmd
+          - qmd/40_guia_desarrolladores/80_rag.qmd
+          - qmd/40_guia_desarrolladores/85_hugging_face.qmd
+          - qmd/40_guia_desarrolladores/87_fine_tuning.qmd
       - section: "Apéndices"
         contents:
           - qmd/90_apendices/10_derivadas.qmd
