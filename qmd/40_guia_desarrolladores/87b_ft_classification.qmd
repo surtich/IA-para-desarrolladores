@@ -1,0 +1,415 @@
+---
+title: Ajuste fino en un modelo de clasificación
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+En esta sección, aprenderá a realizar el ajuste fino (*fine-tuning*) de un modelo de lenguaje preentrenado y ya ajustado para una tarea de clasificación concreta. Se reentrenarán los pesos para adaptarlo a la tarea de clasificación de su `dataset`. El objetivo es tomar un modelo que ya posee una base sólida de comprensión del idioma y adaptarlo específicamente a su propio conjunto de datos para resolver una tarea de clasificación concreta.
+
+## Ejemplo de entrenamiento
+
+### Línea base
+
+Antes de modificar los pesos de cualquier red neuronal, es una práctica fundamental comprobar cómo se comporta el modelo preentrenado "de fábrica" con sus datos. Esto marcará nuestra **línea base (baseline)**, permitiéndonos evaluar con métricas reales si el entrenamiento posterior realmente aporta valor o mejora el rendimiento del modelo.
+
+Para establecer esta línea base utilizaremos una técnica llamada **clasificación zero-shot**. Como su nombre indica, *zero-shot* (cero disparos/ejemplos) significa que el modelo intentará clasificar el texto basándose únicamente en su conocimiento previo del mundo, sin haber visto jamás un solo ejemplo de entrenamiento de nuestro dataset.
+
+Definimos primero el identificador del modelo que utilizaremos desde el Hub de Hugging Face. En este caso, un modelo basado en RoBERTa optimizado para tareas de inferencia en español:
+
+```{python}
+model_id="bertin-project/bertin-base-xnli-es"
+``` 
+
+A continuación, preparamos el entorno cargando nuestro conjunto de datos estructurado desde el disco. Aprovecharemos para construir dos diccionarios de mapeo bidireccional (`label2id` e `id2label`). Estos índices nos permitirán traducir de forma transparente los nombres de nuestras etiquetas de texto a números enteros (IDs) y viceversa, lo cual es obligatorio para alimentar a la red neuronal.
+
+```{python}
+from pathlib import Path
+from datasets import load_from_disk
+
+base_path = Path(".").resolve() / '87_demo'
+ds = load_from_disk(base_path / "data/dataset_encoded")
+
+# Extraemos los nombres de las categorías presentes en el dataset
+label_names = ds["train"].features["label"].names
+
+# Creamos los mapas de conversión entre texto e ID numérico
+label2id = {name: idx for idx, name in enumerate(label_names)}
+id2label = {idx: name for idx, name in enumerate(label_names)}
+
+ds
+```
+
+Instanciamos el pipeline de clasificación *zero-shot*. Hugging Face se encargará de descargar la arquitectura del modelo y configurar los componentes necesarios para realizar predicciones directas utilizando lenguaje natural.
+
+```{python}
+from transformers import pipeline
+
+model = pipeline("zero-shot-classification", model=model_id)
+```
+
+Inspeccionamos la estructura interna del modelo accediendo a su propiedad `.model`:
+
+```{python}
+model.model
+```
+
+Al analizar la salida de la celda anterior, podemos observar que la arquitectura del modelo se divide estructuralmente en tres bloques esenciales:
+
+* **1. Capa de Entrada: `roberta.embeddings`**
+Es la encargada de transformar el texto en vectores matemáticos que el modelo pueda procesar.
+  * **`word_embeddings` (50265, 768):** El vocabulario del modelo tiene un tamaño de **50.265 tokens** únicos. Cada uno de estos tokens se representa inicialmente como un vector continuo de **768 dimensiones** (la dimensión oculta estándar de los modelos *base*).
+  * **`position_embeddings` (514, 768):** Como los Transformers procesan todas las palabras a la vez, necesitan saber el orden de los elementos. Este componente mapea la posición física de cada palabra en el texto. Soporta textos de hasta **512 tokens** de longitud máxima (más 2 tokens especiales de control).
+  * **`LayerNorm` y `Dropout`:** Capas de normalización y regularización para dar estabilidad matemática al inicio del flujo y evitar el sobreajuste (*overfitting*).
+
+* **2. El Cuerpo del Modelo: `roberta.encoder`**
+Este es el motor principal del modelo, encargado de extraer el significado y el contexto profundo del texto. 
+
+  * **12 Bloques Idénticos `(0-11)`:**
+    Contiene una lista modular (`ModuleList`) de **12 capas consecutivas** de tipo `RobertaLayer`. El texto pasa secuencialmente a través de cada una de ellas.
+    Cada una de estas 12 capas se compone internamente de:
+    * **Mecanismo de Atención (`RobertaAttention`):** Calcula la relación de cada palabra con todas las demás del texto usando proyecciones lineales llamadas *Query*, *Key* y *Value* (todas manteniendo las 768 dimensiones). Esto le permite entender, por ejemplo, a qué se refiere un pronombre.
+    * **Capa Intermedia (`RobertaIntermediate`):** Una red neuronal densa (*Feed-Forward*) que expande temporalmente las 768 dimensiones hasta **3072 dimensiones** para realizar cálculos complejos y extraer patrones abstractos, aplicando una función de activación no lineal `GELU`.
+    * **Capa de Salida (`RobertaOutput`):** Vuelve a comprimir las dimensiones de 3072 a **768** y las normaliza para inyectarlas en la siguiente capa del Transformer.
+
+* **3. La Cabeza de Clasificación: `classifier`**
+Esta es la extensión añadida al final del modelo base para resolver tareas de clasificación.
+
+  * **`dense` (768 -> 768):** Una capa lineal intermedia.
+  * **`out_proj` (768 -> 3):** Esta es la capa final de salida (la matriz de proyección). Recibe las 768 características complejas del texto y las reduce a **3 salidas (Logits)**.
+
+Antes de lanzar el proceso, evaluamos el presupuesto de hardware computacional analizando cuántos parámetros posee este modelo en total y cuántos de ellos se encuentran activos para recibir actualizaciones de gradiente:
+
+```{python}
+def contar_parametros(modelo):
+    # Sumamos los elementos (numel) de cada matriz de pesos en el modelo
+    total_params = sum(p.numel() for p in modelo.parameters())
+    
+    # Sumamos solo aquellos que tienen activado el gradiente (se van a entrenar)
+    trainable_params = sum(p.numel() for p in modelo.parameters() if p.requires_grad)
+    
+    print(f"========================================")
+    print(f" Parámetros Totales:    {total_params:,}")
+    print(f" Parámetros Entrenables: {trainable_params:,}")
+    print(f" Parámetros Congelados:  {total_params - trainable_params:,}")
+    print(f"========================================")
+
+# Llamamos a la función pasando tu modelo RoBERTa o BERT
+contar_parametros(model.model)
+```
+
+Asimismo, medimos el tamaño físico que ocuparán los pesos del modelo dentro de la memoria RAM o la memoria de vídeo (VRAM) de nuestro acelerador de hardware para asegurar la viabilidad de la ejecución:
+
+```{python}
+def calcular_tamano_memoria(modelo):
+    # 1. Calcular los bytes que ocupan los parámetros del modelo
+    param_bytes = sum(p.numel() * p.element_size() for p in modelo.parameters())
+    
+    # 2. Calcular los bytes que ocupan los buffers (parámetros fijos no entrenables)
+    buffer_bytes = sum(b.numel() * b.element_size() for b in modelo.buffers())
+    
+    # 3. Sumar todo y convertir a Megabytes
+    total_bytes = param_bytes + buffer_bytes
+    total_mb = total_bytes / (1024 ** 2)
+    
+    print(f"========================================")
+    print(f" Memoria en disco/RAM: {total_mb:.2f} MB")
+    print(f"========================================")
+
+# Llamamos a la función pasando tu modelo
+calcular_tamano_memoria(model.model)
+```
+
+Probamos el comportamiento del pipeline enviándole un único string del conjunto de pruebas. Extraemos de forma explícita el contenido de la columna de texto (`["text"]`) para evitar errores de tipo de dato dentro del pipeline:
+
+```{python}
+results = model(ds["test"][0]["text"], candidate_labels=label_names)
+
+results
+```
+
+Ahora que comprobamos que funciona para un registro individual, realizamos una inferencia por lote (*batch*) pasando la totalidad de los textos del subconjunto de prueba para recopilar sus predicciones correspondientes:
+
+```{python}
+results = model(
+    ds["test"][:]["text"], 
+    candidate_labels=label_names
+)
+results
+```
+
+Dado que el pipeline de clasificación zero-shot entrega las etiquetas ordenadas de mayor a menor probabilidad de forma automática, el índice `0` equivale directamente al *argmax*. Extraemos dicha predicción para cada registro, la mapeamos a su ID numérico a través de nuestro diccionario `label2id` y calculamos manualmente la métrica de exactitud (*accuracy*) comparando contra las respuestas reales:
+
+```{python}
+import numpy as np
+
+# Extraemos la etiqueta con mayor puntaje (siempre en la primera posición)
+pred_labels = [res["labels"][0] for res in results]
+
+# Convertimos los textos predichos a sus IDs numéricos correspondientes
+y_pred = [label2id[label] for label in pred_labels]
+
+# Recuperamos las etiquetas reales del dataset de pruebas
+y_true = ds["test"]["label"]
+
+# Conversión a arreglos de NumPy para una comparación vectorizada
+y_pred_np = np.array(y_pred)
+y_true_np = np.array(y_true)
+
+accuracy_manual = np.mean(y_pred_np == y_true_np)
+
+print(f"Predicciones (IDs): {y_pred[:10]}")
+print(f"Reales (IDs):       {y_true[:10]}")
+print(f"Accuracy del modelo Zero-Shot: {accuracy_manual:.4f}")
+``` 
+
+Para validar formalmente nuestros resultados bajo el estándar del ecosistema de Hugging Face, cargamos el módulo de métricas mediante la librería `evaluate` y recalculamos la exactitud:
+
+```{python}
+import evaluate
+
+accuracy_metric = evaluate.load("accuracy")
+
+# Calculamos el accuracy pasando las listas directamente
+final_score = accuracy_metric.compute(predictions=y_pred, references=y_true)
+
+print(final_score)
+``` 
+
+### Justificación de la línea base
+
+Asumiendo un escenario donde la exactitud obtenida por nuestro clasificador zero-shot es de 59%, este porcentaje se convertirá oficialmente en nuestra línea base a batir.
+
+Recordemos que para establecer si una línea base es sólida, podemos compararla contra estrategias básicas de control:
+
+* 1. Predicción Aleatoria: Produciría una exactitud cercana al 50% en tareas binarias perfectamente balanceadas.
+
+* 2. Clase Mayoritaria: Predecir siempre la categoría más común del dataset, obteniendo una exactitud proporcional a la distribución de dicha clase.
+
+Dado que nuestro modelo zero-shot supera el comportamiento puramente aleatorio, su 59% representa un punto de partida competitivo que intentaremos superar mediante el ajuste fino supervisado.
+
+
+### Preparación de datos y Fine-Tuning Supervisado
+
+Importamos las librerías necesarias para construir nuestro flujo de entrenamiento supervisado:
+
+```{python}
+from transformers import AutoModelForSequenceClassification
+from transformers import AutoTokenizer
+from transformers import TrainingArguments, Trainer
+from transformers import DataCollatorWithPadding
+from datasets import load_from_disk
+import numpy as np
+import evaluate
+```
+
+Instanciamos el tokenizador correspondiente a nuestra arquitectura de modelo base para garantizar que los textos se dividan en subpalabras utilizando exactamente las mismas reglas y diccionarios con los que el modelo fue originalmente concebido:
+
+```{python}
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+``` 
+
+Definimos una función de preprocesamiento encargada de mapear el tokenizador sobre los textos, aplicando un truncamiento estricto (`truncation=True`) para recortar cualquier texto que exceda el límite máximo de tokens del modelo:
+
+```{python}
+def preprocess_function(examples):
+    # Aplicar el tokenizador a la columna 'text', 
+    # truncando las secuencias que sean demasiado largas
+    return tokenizer(examples["text"], truncation=True)
+
+# Cargar el conjunto de datos guardado desde el paso de preparación de datos
+ds = load_from_disk(base_path / "data/dataset_encoded")
+
+# Aplicar la función de preprocesamiento a todo el 
+# conjunto de datos usando map para mayor eficiencia
+tokenized_dataset = ds.map(preprocess_function, batched=True)
+```
+
+Creamos un colador de datos (*Data Collator*). Su función será empaquetar los ejemplos en batches durante el entrenamiento y aplicar un relleno dinámico (*dynamic padding*), asegurando que todos los textos dentro de un mismo lote tengan exactamente la misma longitud que el texto más largo de ese lote particular, optimizando el uso de memoria.
+
+```{python}
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+```
+
+Cargamos el modelo especializado en clasificación de secuencias. Dado que el modelo original operaba con 3 clases y nuestro problema actual requiere únicamente 2 clases, especificamos `num_labels=2` y suministramos nuestros diccionarios de mapeo personalizados. El parámetro `ignore_mismatched_sizes=True` es crítico aquí, ya que le advierte al framework que descarte la cabeza de clasificación antigua de 3 salidas e inicialice una nueva capa lineal de $768 \times 2$ con valores aleatorios lista para ser entrenada:
+
+```{python}
+model = AutoModelForSequenceClassification.from_pretrained(
+    model_id, 
+    num_labels=2, 
+    id2label=id2label, 
+    label2id=label2id, 
+    ignore_mismatched_sizes=True
+)
+```
+
+Definimos la función auxiliar que invocará el evaluador del `Trainer` al final de cada ciclo para transformar las salidas continuas (logits) de la red en predicciones discretas mediante un `argmax`:
+
+```{python}
+accuracy = evaluate.load("accuracy")
+
+def compute_metrics(eval_pred):
+    # El Trainer proporciona las predicciones y las etiquetas reales durante la evaluación
+    predictions, labels = eval_pred
+    # Obtener el ID de la clase predicha (la que tiene la probabilidad más alta)
+    predictions = np.argmax(predictions, axis=1)
+    # Utilizar la métrica de exactitud cargada para comparar las predicciones con las etiquetas reales
+    return accuracy.compute(predictions=predictions, references=labels)
+```
+Establecemos los hiperparámetros de entrenamiento mediante `TrainingArguments`. Configuramos variables de control como la tasa de aprendizaje (`learning_rate`), el tamaño del lote por dispositivo, el total de épocas y definimos que evalúe y guarde los mejores pesos al concluir cada época:
+
+```{python}
+training_args = TrainingArguments(
+    output_dir=base_path / "data/trainer_output/my_classifier",
+    learning_rate=2e-5,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
+    num_train_epochs=3,
+    weight_decay=0.01,
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    push_to_hub=False,
+    report_to="none",
+)
+```
+
+Construimos el objeto central `Trainer`, asociando el modelo, los argumentos, los conjuntos tokenizados y declarando explícitamente nuestro tokenizador en el parámetro unificado processing_class:
+
+
+```{python}
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=tokenized_dataset["train"],
+    eval_dataset=tokenized_dataset["validation"],
+    processing_class=tokenizer,
+    data_collator=data_collator,
+    compute_metrics=compute_metrics,
+)
+```
+
+Ejecutamos el ciclo de entrenamiento completo. En esta configuración por defecto, **todos los pesos del modelo se actualizarán (`Full Fine-Tuning`)**:
+
+```{python}
+trainer.train()
+```
+
+Almacenamos los pesos del modelo final optimizado en una ruta local de nuestro disco duro para su posterior despliegue en entornos de producción:
+
+```{python}
+model_path = base_path / "data/models/my_mail_classifier"
+trainer.save_model(model_path)
+```
+
+Cargamos un pipeline convencional apuntando directamente a nuestro modelo local entrenado. El parámetro `device_map="auto"` garantizará de forma interna la selección del hardware más veloz disponible en el sistema (CPU, CUDA o MPS):
+
+```{python}
+trained_model = pipeline("text-classification", model=model_path, device_map="auto")
+```
+
+Enviamos los textos de prueba al nuevo modelo para cuantificar la efectividad de nuestro entrenamiento supervisado:Enviamos los textos de prueba al nuevo modelo para cuantificar la efectividad de nuestro entrenamiento supervisado:
+
+```{python}
+trained_results = trained_model(ds["test"][:]["text"])
+```
+
+Calculamos la métrica final de exactitud de nuestro clasificador supervisado y la desplegamos en consola para verificar si conseguimos superar de forma exitosa el 59% de nuestra línea base inicial:
+
+```{python}
+trained_pred_labels = [res["label"] for res in trained_results]
+trained_y_pred = [label2id[label] for label in trained_pred_labels]
+
+trained_y_pred_np = np.array(trained_y_pred)
+final_score = np.mean(trained_y_pred_np == y_true_np)
+print(f"Accuracy final tras Full Fine-Tuning: {final_score:.4f}")
+```
+
+Vemos que el modelo ha sido capaz de clasificar correctamente todos los ejemplos del conjunto de prueba, alcanzando una exactitud del 100%. Esto representa una mejora significativa respecto a la línea base del 59% obtenida con el modelo zero-shot, demostrando que el proceso de ajuste fino supervisado ha sido exitoso al adaptar el modelo a las características específicas de nuestro dataset.
+
+## Ejemplo entrenando sólo la cabeza (head)
+
+A dife,rencia del *Full Fine-Tuning* donde alteramos la totalidad de las capas del Transformer, existe una estrategia alternativa y computacionalmente eficiente llamada extracción de características o congelamiento de pesos (weights freezing).
+
+En esta modalidad, asumimos que el cuerpo del modelo base ya comprende perfectamente la estructura gramatical y semántica del lenguaje español. Por ende, congelamos todos sus bloques internos de atención y procesamiento para que permanezcan inalterados, y concentramos el 100% del entrenamiento de manera exclusiva en adaptar la nueva cabeza de clasificación lineal final hacia nuestras etiquetas particulares.
+
+Para implementar este enfoque, volvemos a instanciar el modelo de origen desde el Hub:
+
+```{python}
+model_head_only = AutoModelForSequenceClassification.from_pretrained(
+    model_id, 
+    num_labels=2, 
+    id2label=id2label, 
+    label2id=label2id, 
+    ignore_mismatched_sizes=True
+)
+```
+
+Iteramos sobre todos los parámetros de la estructura base del modelo (`base_model`) y desactivamos el cálculo de gradientes fijando la propiedad `requires_grad` en `False`. Esto congelará las 12 capas del codificador y sus capas de embeddings:
+
+```{python}
+for param in model_head_only.base_model.parameters():
+    param.requires_grad = False
+```
+
+Invocamos nuestra función auxiliar previamente definida para auditar el estado del modelo y confirmar que el cuerpo se encuentra bloqueado pero la cabeza se mantiene editable:
+
+```{python}
+contar_parametros(model_head_only)
+```
+
+Configuramos unos nuevos argumentos de entrenamiento. Al entrenar únicamente una sola capa final, es una práctica habitual incrementar ligeramente la tasa de aprendizaje (`learning_rate`) para permitir que la cabeza converja con mayor velocidad:
+
+```{python}
+training_args_head = TrainingArguments(
+    output_dir=base_path / "data/trainer_output/head_classifier",
+    learning_rate=1e-4, # Tasa ligeramente superior para optimizar solo la cabeza
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
+    num_train_epochs=3,
+    weight_decay=0.01,
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    push_to_hub=False,
+    report_to="none",
+)
+```
+
+Inicializamos un nuevo objeto `Trainer` vinculando nuestro modelo parcialmente congelado:
+
+```{python}
+trainer_head = Trainer(
+    model=model_head_only,
+    args=training_args_head,
+    train_dataset=tokenized_dataset["train"],
+    eval_dataset=tokenized_dataset["validation"],
+    processing_class=tokenizer,
+    data_collator=data_collator,
+    compute_metrics=compute_metrics,
+)
+```
+
+Ejecutamos el entrenamiento. Notará inmediatamente que el tiempo requerido por época disminuye significativamente en comparación con el experimento previo, debido a que el sistema evita computar matrices de gradientes para millones de parámetros:
+
+```{python}
+trainer_head.train()
+```
+
+```{python}
+eval_results_head = trainer_head.evaluate(tokenized_dataset["test"])
+print(f"Resultados de evaluación (Solo Cabeza): {eval_results_head}")
+``` 
+
+La predicción del modelo es pero que con `Full Fine-Tuning`, aunque superior a la línea base que habíamos establecido. Esto se debe a que el modelo no ha podido ajustar sus representaciones internas para capturar matices específicos de nuestro dataset, limitándose a adaptar únicamente la capa final de clasificación.
+
+
+

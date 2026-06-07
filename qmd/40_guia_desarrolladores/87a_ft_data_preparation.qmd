@@ -1,0 +1,189 @@
+---
+title: Preparación de datos para el ajuste fino
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+En esta sección, aprenderá cómo preparar tus datos para el ajuste fino de modelos de lenguaje. La calidad y el formato de tus datos son cruciales para obtener buenos resultados en el ajuste fino, por lo que es importante seguir las mejores prácticas en esta etapa.
+
+## Ejemplo de preparación de datos
+En esta práctica, se realizará un pipeline de preparación y preprocesamiento de datos utilizando la librería `datasets` de Hugging Face. Trabajaremos con dos conjuntos de datos independientes que contienen comunicaciones y mensajes de texto procedentes de centros educativos de dos regiones geográficas distintas: **India** (`india_school.csv`) y **España** (`spain_school.csv`).
+
+
+### 1. Definición de rutas del sistema
+
+Comenzamos localizando los archivos de datos dentro de nuestro espacio de trabajo utilizando la librería nativa `pathlib`. Esto nos asegura la compatibilidad de rutas de archivos independientemente del sistema operativo en el que se ejecute el código.
+
+```{python}
+from pathlib import Path
+
+base_path = Path(".").resolve() / '87_demo'
+
+path_to_raw_data_in_school = base_path / "raw_data/india_school.csv"
+path_to_raw_data_sp_school = base_path / "raw_data/spain_school.csv"
+``` 
+
+### 2. Carga de los conjuntos de datos en memoria
+
+Utilizamos la función `load_dataset` de la librería `datasets` para importar los archivos CSV estructurados. Esta función mapea automáticamente el contenido de los archivos y los almacena eficientemente en memoria utilizando Apache Arrow.
+
+```{python}
+from datasets import load_dataset
+
+# Cargar los datasets desde los archivos CSV
+ds_in_school = load_dataset("csv", data_files=str(path_to_raw_data_in_school))
+ds_sp_school = load_dataset("csv", data_files=str(path_to_raw_data_sp_school))
+```
+
+
+Podemos inspeccionar la estructura básica del objeto recién creado para el conjunto de datos de España:
+
+
+```{python}
+ds_sp_school
+```
+
+Echemos un vistazo al primer registro de este conjunto de datos para comprobar tanto el texto recopilado como su etiqueta de clasificación inicial:
+
+```{python}
+ds_sp_school["train"][0]
+```
+
+### 3. División de datos en Entrenamiento, Validación y Prueba
+
+Para evaluar el rendimiento de nuestro futuro modelo de forma rigurosa, dividiremos los datos de cada país de manera independiente. El proceso se realiza en dos fases utilizando el método `.train_test_split()`:
+
+Primero, aislamos un 20% de los datos totales para propósitos de prueba externos.
+
+Segundo, dividimos ese 20% resultante a la mitad (50%), obteniendo así una distribución final exacta de 80% Entrenamiento, 10% Validación y 10% Prueba.
+
+Fijamos una semilla aleatoria (`seed=42`) para garantizar la reproducibilidad exacta del split.
+
+```{python}
+from datasets import DatasetDict
+
+ds_sp_school_train_test_split = ds_sp_school['train'].train_test_split(test_size=0.2, shuffle=True, seed=42)
+ds_sp_school_test_valid_split = ds_sp_school_train_test_split['test'].train_test_split(test_size=0.5, shuffle=True, seed=42)
+
+ds_sp_school_split = DatasetDict({
+    'train': ds_sp_school_train_test_split['train'],
+    'validation': ds_sp_school_test_valid_split['train'],
+    'test': ds_sp_school_test_valid_split['test']
+})
+
+ds_in_school_train_test_split = ds_in_school['train'].train_test_split(test_size=0.2, shuffle=True, seed=42)
+ds_in_school_test_valid_split = ds_in_school_train_test_split['test'].train_test_split(test_size=0.5, shuffle=True, seed=42)
+
+ds_in_school_split = DatasetDict({
+    'train': ds_in_school_train_test_split['train'],
+    'validation': ds_in_school_test_valid_split['train'],
+    'test': ds_in_school_test_valid_split['test']
+})
+```
+
+
+Validamos la nueva estructura de particiones generada para el conjunto de datos de España:
+
+```{python}
+ds_sp_school_split
+```
+
+### 4. Consolidación y Mezcla de los Datasets
+
+Una vez que ambos orígenes disponen de la misma estructura de particiones, procedemos a concatenar los datos correspondientes de India y España para cada bloque (`train`, `validation` y `test`). Inmediatamente después de unirlos, aplicamos una mezcla aleatoria (.`shuffle()`) para asegurar que el modelo no reciba primero todos los ejemplos de un país y luego los del otro, evitando sesgos durante el entrenamiento.
+
+
+```{python}
+from datasets import concatenate_datasets
+
+ds_combined_train = concatenate_datasets([ds_in_school_split['train'], ds_sp_school_split['train']]).shuffle(seed=42)
+
+ds_combined_validation = concatenate_datasets([ds_in_school_split['validation'], ds_sp_school_split['validation']]).shuffle(seed=42)
+
+ds_combined_test = concatenate_datasets([ds_in_school_split['test'], ds_sp_school_split['test']]).shuffle(seed=42)
+```
+
+Estructuramos los tres conjuntos mezclados dentro de un único objeto contenedor `DatasetDict`:
+
+```{python}
+ds_combined = DatasetDict({
+    'train': ds_combined_train,
+    'validation': ds_combined_validation,
+    'test': ds_combined_test
+})
+```
+
+Revisamos las dimensiones totales de nuestro nuevo conjunto de datos combinado:
+
+```{python}
+ds_combined
+```
+
+### 5. Almacenamiento intermedio en disco
+Es una buena práctica guardar el progreso del conjunto de datos combinado en el disco local. Esto libera memoria intermedia y nos proporciona un punto de restauración seguro antes de aplicar transformaciones en las columnas.
+
+```{python}
+ds_combined.save_to_disk(base_path / "data/dataset")
+```
+
+Para verificar que los datos se han guardado correctamente y sin corrupciones, volvemos a cargar el dataset desde el directorio local:
+
+```{python}
+from datasets import load_from_disk
+ds = load_from_disk(base_path / "data/dataset")
+ds
+```
+
+Si examinamos las propiedades internas (features), podemos observar que la columna "label" todavía se almacena como texto plano (`Value(dtype='large_string'`)).
+
+```{python}
+ds["train"].features
+```
+
+### 6. Codificación Categórica de Etiquetas (`ClassLabel`)
+
+Los modelos de Machine Learning requieren valores numéricos para calcular las funciones de pérdida. En lugar de procesar cadenas de texto manuales, la función `class_encode_column()` analiza dinámicamente las etiquetas de texto de nuestra columna, identifica los elementos únicos y los transforma de manera segura a un tipo de dato estructurado llamado `ClassLabel`.
+
+```{python}
+# Codifica automáticamente la columna de texto a ClassLabel
+ds = ds.class_encode_column("label")
+``` 
+
+Al transformarse en `ClassLabel`, podemos recuperar tanto la lista ordenada de las clases creadas (`names`) como construir un diccionario inverso (`label2IdMap`) que asocie explícitamente el nombre de la etiqueta con el índice entero asignado por el framework. Esto resultará fundamental para configurar la capa de salida de nuestro modelo de clasificación de texto.
+
+```{python}
+label_names = ds["train"].features["label"].names
+
+# Creamos el mapa usando la información interna que calculó class_encode_column
+label2IdMap = {
+    name: idx 
+    for idx, name in enumerate(ds["train"].features["label"].names)
+}
+
+
+print(label_names)
+print(label2IdMap)
+```
+
+### 7. Almacenamiento final del Dataset Codificado
+Por último, guardamos la versión definitiva del conjunto de datos con sus etiquetas completamente codificadas en una nueva ruta de almacenamiento. Este artefacto procesado quedará completamente listo para ser consumido por cualquier tokenizador y script de entrenamiento de redes neuronales.
+
+```{python}
+ds.save_to_disk(base_path / "data/dataset_encoded")
+```
+
+Realizamos una comprobación final cargando nuestro recurso definitivo:
+
+```{python}
+ds_encoded = load_from_disk(base_path / "data/dataset_encoded")
+ds_encoded
+```
