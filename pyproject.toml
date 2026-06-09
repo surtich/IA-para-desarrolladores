@@ -28,6 +28,7 @@ dependencies = [
     "ollama>=0.6.2",
     "openai>=2.40.0",
     "pandas>=3.0.3",
+    "peft>=0.19.1",
     "playwright>=1.60.0",
     "plotly>=6.7.0",
     "plotnine>=0.15.4",
@@ -43,4 +44,5 @@ dependencies = [
     "torchvision>=0.27.0",
     "tqdm>=4.67.3",
     "transformers>=5.9.0",
+    "trl>=1.5.1",
 ]

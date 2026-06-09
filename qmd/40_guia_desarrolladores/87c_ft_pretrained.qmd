@@ -1,0 +1,590 @@
+---
+title: Ajuste fino en un modelo preentrenado
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+Un modelo preentrenado (*pretrained model*) es un modelo de lenguaje que ha sido entrenado previamente en una gran cantidad de datos para aprender patrones y representaciones del lenguaje. Estos modelos únicamente son capaces de generar el siguiente token dada una secuencia de texto, pero no pueden realizar tareas específicas sin un proceso adicional de entrenamiento. El ajuste fino (*fine-tuning*) es el proceso de tomar un modelo preentrenado y entrenarlo adicionalmente en un conjunto de datos específico para que pueda realizar una tarea particular, como clasificación, generación de texto, traducción, entre otras.
+
+## PEFT y LoRA
+
+Utilizaremos el ajuste fino eficiente en parámetros (*Parameter-Efficient Fine-Tuning* o **PEFT**) y la adaptación de bajo rango (*Low-Rank Adaptation* o **LoRA**) para ajustar nuestro LLM (Modelo de Lenguaje Grande). Pero antes de intentar definir estos términos, es necesario entender por qué existen estas modalidades de entrenamiento.
+
+
+## Ajuste Fino Tradicional frente a PEFT
+
+Con el ajuste fino tradicional (o regular), como se mostró en el tema anterior, actualizamos **todos los parámetros** del modelo de lenguaje al entrenarlo con datos nuevos. Esto permite que el modelo aprenda nueva información y se adapte a las características específicas de los nuevos datos, mejorando su rendimiento general en la tarea objetivo. Esta técnica genera mejoras de rendimiento significativas, especialmente cuando se dispone de datos suficientes, y es relativamente sencilla de implementar.
+
+Por otra parte, este enfoque es **computacionalmente muy costoso y requiere mucho tiempo**. También exige una cantidad de datos mucho mayor para evitar el **sobreajuste** (*overfitting*). En este problema común del aprendizaje automático, el modelo aprende los datos de entrenamiento con demasiada precisión, incluyendo el ruido y los detalles específicos que son únicos de ese conjunto de datos en particular. En lugar de capturar los patrones generales subyacentes, el modelo esencialmente memoriza los ejemplos de entrenamiento. Esto se traduce en un rendimiento excelente en los propios datos de entrenamiento, pero en un rendimiento significativamente inferior cuando se le pide al modelo que realice predicciones sobre datos nuevos y no vistos.
+
+Sin embargo, lo más preocupante es que este tipo de entrenamiento provoca el **olvido catastrófico** (*catastrophic forgetting*). Si se vuelve a entrenar un modelo con un nuevo conjunto de datos sin aplicar ninguna técnica especial, el modelo podría sobrescribir por completo el conocimiento que había adquirido del primer conjunto de datos.
+
+Aquí es donde entra en juego [PEFT](https://huggingface.co/blog/peft). Los métodos PEFT introducen una pequeña cantidad de parámetros adicionales al modelo en lugar de modificar toda la matriz de pesos original. Esto reduce drásticamente el número de parámetros entrenables, haciendo que el proceso de ajuste fino sea más eficiente y menos costoso a nivel computacional.
+
+Al tener menos parámetros entrenables, el proceso de entrenamiento requiere menos memoria y recursos computacionales. Esto se traduce en tiempos de entrenamiento más rápidos, especialmente para modelos grandes. 
+
+### PEFT frente a Ajuste Fino Tradicional
+
+| Criterio | PEFT | Ajuste Fino Tradicional (Regular) |
+| :--- | :--- | :--- |
+| **Cuándo usarlo** | • Tiene datos o recursos computacionales limitados.<br>• Necesita un entrenamiento y despliegue más rápidos.<br>• Quiere minimizar los requisitos de almacenamiento.<br>• La nueva tarea es relativamente similar a la tarea original de preentrenamiento. | • Tiene suficientes datos y recursos computacionales.<br>• Necesita el máximo rendimiento.<br>• La nueva tarea es significativamente diferente de la tarea original de preentrenamiento. |
+| **Pros** | • Más eficiente y rápido que el ajuste fino tradicional.<br>• Menos propenso al sobreajuste, especialmente con datos limitados.<br>• Reduce los requisitos de almacenamiento para el modelo ajustado.<br>• Mitiga el olvido catastrófico. | • Puede lograr mejoras significativas en el rendimiento, especialmente con datos suficientes.<br>• Relativamente sencillo de implementar. |
+| **Contras** | • Podría no alcanzar el mismo nivel de rendimiento que el ajuste fino tradicional en algunos casos.<br>• Requiere una selección cuidadosa de los módulos objetivo. | • Computacionalmente costoso y requiere mucho tiempo.<br>• Requiere más datos para evitar el sobreajuste.<br>• Puede provocar olvido catastrófico (pérdida del conocimiento aprendido previamente). |
+
+
+## LoRA (Low-Rank Adaptation)
+
+LoRA es uno de los métodos de PEFT más populares. Se basa en una hipótesis clave del aprendizaje profundo: **las actualizaciones de los pesos de una red neuronal durante el ajuste fino tienen una "dimensión intrínseca baja"**. 
+
+Esto significa que, aunque una matriz de pesos original sea gigantesca, los cambios necesarios para que aprenda una nueva tarea se pueden proyectar en un espacio matemático mucho más pequeño sin perder apenas información.
+
+A continuación, desglosamos la ecuación y el álgebra lineal que hacen posible este truco de magia computacional.
+
+### 1. El punto de partida: La capa lineal tradicional
+
+En una red neuronal estándar (como un Transformer), una capa lineal toma un vector de entrada $x$ y lo multiplica por una matriz de pesos preentrenados $W_0$ para producir una salida $h$ (oculta o *hidden*).
+
+La operación matemática es:
+$$h = W_0 \cdot x$$
+
+Donde:
+* $x \in \mathbb{R}^k$ (un vector de entrada de dimensión $k$).
+* $W_0 \in \mathbb{R}^{d \times k}$ (la matriz de pesos preentrenada de dimensiones $d \times k$).
+* $h \in \mathbb{R}^d$ (el vector de salida de dimensión $d$).
+
+Cuando hacemos un *Full Fine-Tuning*, el optimizador intenta calcular una matriz de cambio llamada $\Delta W$ (Delta $W$), de modo que los nuevos pesos sean $W = W_0 + \Delta W$. La nueva salida sería:
+$$h = (W_0 + \Delta W) \cdot x = W_0 \cdot x + \Delta W \cdot x$$
+
+El problema es que $\Delta W$ tiene exactamente las mismas dimensiones gigantescas que $W_0$ ($d \times k$), lo que exige gigabytes de memoria para calcular sus gradientes durante el entrenamiento.
+
+## 2. La solución de LoRA: Factorización de bajo rango
+
+En lugar de crear y optimizar esa matriz densa $\Delta W$ de tamaño $d \times k$, LoRA la **factoriza** (la divide) en el producto de dos matrices mucho más delgadas, llamadas $B$ y $A$:
+
+$$\Delta W = B \cdot A$$
+
+
+Aquí es donde ocurre la magia de las dimensiones (Álgebra Lineal):
+* **$A$** es una matriz de tamaño $r \times k$.
+* **$B$** es una matriz de tamaño $d \times r$.
+* **$r$** es el **rango** (*rank*), un hiperparámetro que usted elige (suele ser un número muy pequeño como 4, 8, 16 o 32).
+
+Al multiplicar una matriz de $d \times r$ por una de $r \times k$, el resultado es, por pura definición de producto de matrices, una matriz de $d \times k$. Matemáticamente la salida final del pipeline se reescribe así:
+
+$$h = W_0 \cdot x + B \cdot A \cdot x$$
+
+Durante todo el entrenamiento, **$W_0$ se congela por completo** (no recibe gradientes). Solo se entrenan los números contenidos en las matrices delgadas $B$ y $A$.
+
+
+### 3. Demostración numérica del ahorro de parámetros
+
+Para entender el impacto real, hagamos una multiplicación con dimensiones típicas de un modelo de lenguaje moderno (por ejemplo, Llama o Mistral), donde la dimensión interna de una capa de atención podría ser $d = 4096$ y $k = 4096$.
+
+### Ajuste fino tradicional ($\Delta W$ completa):
+$$\text{Parámetros a entrenar} = d \times k = 4096 \times 4096 = \mathbf{16,777,216}$$
+
+### Ajuste fino con LoRA (usando un rango $r = 8$):
+* Parámetros de la matriz $A$ ($r \times k$): $8 \times 4096 = 32,768$
+* Parámetros de la matriz $B$ ($d \times r$): $4096 \times 8 = 32,768$
+
+$$\text{Parámetros a entrenar} = (r \times k) + (d \times r) = 32,768 + 32,768 = \mathbf{65,536}$$
+
+> **Conclusión del cálculo:** Al pasar de 16.7 millones de parámetros a solo 65 mil, hemos reducido el coste de almacenamiento y cálculo de esa capa en un **99.6%**, manteniendo una capacidad de aprendizaje prácticamente idéntica.
+
+### 4. El truco de la Inicialización Matemática
+
+Para que LoRA funcione desde el primer *step* de entrenamiento sin romper el conocimiento previo del modelo, la inicialización de las matrices $B$ y $A$ no puede ser aleatoria. Debe cumplir una condición estricta: al inicio, $\Delta W$ debe ser exactamente $0$.
+
+Hugging Face y PyTorch lo resuelven así:
+1. La matriz **$A$** se inicializa usando una distribución gaussiana (valores aleatorios normales).
+2. La matriz **$B$** se inicializa completamente con **ceros**.
+
+Al comenzar el entrenamiento, cualquier multiplicación por la matriz de ceros da cero:
+$$\Delta W = B \cdot A = 0 \cdot A = 0$$
+
+Esto garantiza que en la primera iteración, $h = W_0 \cdot x + 0 \cdot x$, por lo que el modelo se comporta exactamente igual que el modelo base original antes de empezar a ajustarse con sus datos.
+
+### 5. Escalado mediante $\alpha$ (Alpha)
+
+Finalmente, LoRA aplica un factor de escala constante a la actualización para estabilizar el entrenamiento cuando cambia el rango $r$. La ecuación final implementada en el código es:
+
+$$h = W_0 \cdot x + \frac{\alpha}{r} (B \cdot A \cdot x)$$
+
+Donde **$\alpha$** (alpha) es una constante. Al dividir $\alpha$ entre $r$, se asegura que cuando decida experimentar cambiando el rango (por ejemplo, subir de $r=8$ a $r=16$), no necesite reajustar desde cero la tasa de aprendizaje (*learning rate*), ya que la escala de los gradientes se compensa dinámicamente.
+
+## Plantillas de instrucciones
+
+Antes de comenzar el proceso de ajuste fino (fine-tuning), exploremos cómo los LLM entienden las instrucciones o prompts.
+
+Usted ya está familiarizado con la forma en que los LLM responden a las instrucciones proporcionadas en texto plano, a menudo a través de prompting o indicaciones conversacionales. Aunque estos modelos están diseñados para comprender el lenguaje humano, no siempre están entrenados para interpretar las instrucciones y el historial de la conversación presentados exactamente en el mismo formato. La estructura específica de su prompt —la forma en que delimita la entrada del usuario, los mensajes del sistema o los turnos anteriores— puede variar de un modelo a otro.
+
+Aquí es donde las plantillas de instrucciones (también llamadas plantillas de chat o chat templates) cobran importancia. Una plantilla de instrucciones es el formato de texto específico, incluyendo tókens especiales y reglas estructurales, con la que un LLM en particular fue entrenado para recibir instrucciones, contexto o un historial de chat. Utilizar la plantilla correcta para el modelo con el que está trabajando es crucial para garantizar que el modelo entienda adecuadamente su entrada y responda de la manera prevista.
+
+Comenzamos importando las clases necesarias de la librería `transformers` para cargar tanto el tokenizador como el modelo causal de lenguaje.
+
+```{python}
+from transformers import AutoTokenizer, AutoModelForCausalLM
+```
+
+Definimos el identificador del modelo que utilizaremos de prueba. En este caso, usaremos la versión instruct de Qwen2.5.
+
+```{python}
+model_id = "Qwen/Qwen2.5-0.5B-Instruct"
+```
+
+Cargamos el tokenizador correspondiente y visualizamos su propiedad chat_template. Esta plantilla en formato Jinja determina cómo se estructuran los roles de sistema, usuario y asistente en una sola cadena de texto.
+
+```{python}
+from pprint import pprint
+
+# Descarga y carga del tokenizador preentrenado
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+# Inspección de la plantilla Jinja asignada por defecto al modelo
+pprint(tokenizer.chat_template)
+```
+
+Creamos una lista de diccionarios que simula una interacción estándar de chat, estructurada con los roles de `system` y `user`.
+
+```{python}
+# Definición de una conversación estructurada estructurada por roles
+prompt = [
+ {
+    "role": "system",
+    "content": "Eres un asistente de geografía. Eres capaz de responder preguntas sobre el mundo."
+ },
+ {
+    "role": "user",
+    "content": "¿Cuál es la capital de España?"
+ }]
+```
+
+Aplicamos la plantilla de chat configurando `tokenize=False` para observar la representación en texto plano del prompt junto con sus tókens especiales de control (e.g., `<|im_start|>` e `<|im_end|>`).
+
+```{python}
+# Conversión de la estructura de lista a texto plano formateado según el modelo
+pprint(tokenizer.apply_chat_template(prompt, tokenize=False))
+``` 
+
+Para pasar el prompt al modelo, necesitamos transformarlo en tókens numéricos (tensores). Añadimos `add_generation_prompt=True` para agregar los delimitadores finales que le indican al modelo que es el turno del asistente para responder.
+
+```{python}
+# Tokenización del prompt con formateo de chat integrado
+tokenized_input = tokenizer.apply_chat_template(
+    prompt,
+    tokenize=True,
+    add_generation_prompt=True,  # Fundamental para indicar que el asistente debe comenzar a hablar ahora
+    return_dict=True,            # Devuelve un diccionario compatible con las entradas de PyTorch
+    return_tensors="pt"          # Retorna tensores de PyTorch ("pt")
+)
+tokenized_input
+```
+
+Cargamos el modelo en memoria para realizar una inferencia de prueba rápida con nuestro input tokenizado.
+
+```{python}
+# Carga de la arquitectura del modelo causal para inferencia
+model = AutoModelForCausalLM.from_pretrained(model_id)
+model
+```
+
+Pasamos los tensores desempaquetados al método `.generate()` para obtener la predicción de los tókens subsiguientes.
+
+```{python}
+# Generación automática de tókens basada en el contexto suministrado
+output_text = model.generate(**tokenized_input, max_new_tokens=50)
+output_text
+```
+
+Finalmente, decodificamos los tókens numéricos resultantes para transformarlos nuevamente en texto legible, omitiendo los tókens especiales de control.
+
+
+``` {python}
+# Decodificación de la salida numérica a texto legible
+tokenizer.decode(output_text[0], skip_special_tokens=True)
+```
+
+### Personalización del formato de la respuesta generada
+Para guiar la generación del modelo de manera más precisa e influir en el inicio de su respuesta, una técnica común al utilizar plantillas de instrucciones consiste en añadir el marcador para el rol de asistente justo al final del prompt formateado. Esto le indica explícitamente al modelo que ahora es el turno del asistente para generar texto, y que su respuesta debe comenzar inmediatamente después de este marcador.
+
+También podemos utilizar esta técnica para incentivar que la salida del modelo comience con un prefijo o frase específica, personalizando eficazmente el inicio de su respuesta. Por ejemplo, al añadir el marcador del rol de asistente seguido inmediatamente por GA: (geography assistant / asistente de geografía), establec# Decodificación de la salida numérica a texto legible
+tokenizer.decode(output_text[0], skip_special_tokens=True)emos la expectativa de que la respuesta generada por el modelo debe comenzar con esta cadena de texto específica. Actualicemos nuestro prompt en consecuencia y verifiquemos la salida del modelo para ver si sigue este formato:
+
+```{python}
+prompt = [
+ {
+    "role": "system",
+    "content": "Eres un asistente de geografía. Eres capaz de responder preguntas sobre el mundo."
+ },
+ {
+    "role": "user",
+    "content": "¿Cuál es la capital de España?"
+ },
+ {
+    "role": "assistant",
+    "content": "GA: "
+ }]
+```
+
+Tokenizamos el prompt extendido utilizando el argumento `continue_final_message=True`. Esto evita que el tokenizador agregue caracteres de cierre adicionales al último mensaje, permitiendo que el modelo continúe escribiendo de forma fluida desde el prefijo "GA: ".
+
+
+```{python}
+# Preparación del input forzando la continuación del prefijo definido
+tokenized_input = tokenizer.apply_chat_template(
+    prompt,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt",
+    continue_final_message=True  # Indica que el modelo debe continuar generando dentro del último mensaje del prompt
+)
+
+# Inferencia del modelo con la restricción de prefijo instalada
+output_text = model.generate(**tokenized_input, max_new_tokens=50)
+pprint(tokenizer.decode(output_text[0], skip_special_tokens=True))
+```
+
+## Adaptando el dataset
+
+En esta sección adaptaremos el dataset del capítulo anterior a la plantilla de instrucciones del modelo que vamos a ajustar.
+
+Cargamos el conjunto de datos previamente codificado desde el almacenamiento local y extraemos las etiquetas de clasificación disponibles.
+
+```{python}
+from transformers import AutoTokenizer
+from datasets import load_from_disk, Dataset, DatasetDict
+from pathlib import Path
+
+# Resolución de rutas locales para la carga de datos
+base_path = Path(".").resolve() / '87_demo'
+dataset = load_from_disk(base_path / "data/dataset_encoded")
+
+# Extracción de los nombres de las categorías objetivo
+label_names = dataset["train"].features["label"].names
+
+dataset
+```
+
+
+```{python}
+model_id = "Qwen/Qwen2.5-0.5B-Instruct"
+```
+
+Definimos el mensaje de sistema (message_system). Este actuará como el conjunto de reglas e instrucciones fijas que le dictan al LLM cómo comportarse y qué formato estricto debe retornar.
+
+```{python}
+message_system = """
+Eres un asistente para la clasificación de mensajes.
+Clasificarás el mensaje en una de las siguientes categorías: "Escuela de India", "Escuela de España".
+No se necesita ninguna explicación.
+La salida debe ser únicamente una de las siguientes: "Escuela de India", "Escuela de España"
+"""
+``` 
+
+Creamos la función de mapeo para los subconjuntos de entrenamiento y validación. Aquí incluimos los tres roles completos (system, user, assistant), ya que durante el entrenamiento el modelo necesita aprender tanto a interpretar el contexto como a predecir la respuesta esperada.
+
+
+```{python}
+def convert_to_training_messages(dataset):
+    messages = [[    
+        {
+            "role": "system", 
+            "content": message_system
+        },
+        {
+            "role": "user",
+            "content": f"Categorise: {ds['text']}"
+        },
+        {
+            "role": "assistant",
+            "content": f"Category: {label_names[ds['label']]}"
+        }
+    ] for ds in dataset]
+    
+    texts = [
+        tokenizer.apply_chat_template(message, tokenize=False) 
+        for message in messages
+    ]
+    return {"text": texts}
+```
+
+Aplicamos la función de transformación a los bloques de entrenamiento y validación, reconstruyendo los objetos nativos de Python en objetos de tipo `Dataset`.
+
+
+```{python}
+ds_train = convert_to_training_messages(dataset["train"])
+ds_val = convert_to_training_messages(dataset["validation"])
+
+ds_train = Dataset.from_dict(ds_train)
+ds_val = Dataset.from_dict(ds_val)
+```
+Para el conjunto de evaluación (test), implementamos una lógica ligeramente distinta: el rol del assistant se omite y se activa add_generation_prompt=True. Esto deja el prompt preparado en el punto exacto donde el modelo debe realizar la predicción autónoma sin conocer la respuesta de antemano. Además, devolvemos un dataset plano con columnas text y label independientes para facilitar el bucle de evaluación final.
+
+
+```{python}
+def convert_to_prompting_messages(dataset):
+    texts = []
+    labels = []
+    for ds in dataset:
+        message = [
+          {
+            "role": "system", 
+            "content": message_system
+          },
+          {
+              "role": "user",
+              "content": f"Categorise: {ds['text']}"
+          }
+        ]
+        # Formateo del prompt omitiendo la respuesta pero forzando el trigger de generación
+        chat_message = tokenizer.apply_chat_template(
+          message,
+          tokenize=False,
+          add_generation_prompt=True,
+        )
+        texts.append(chat_message)
+        labels.append(ds["label"])
+        
+    return {"text": texts, "label": labels}
+```
+
+```{python}
+ds_test = convert_to_prompting_messages(dataset["test"])
+ds_test = Dataset.from_dict(ds_test)
+```
+
+Agrupamos los tres conjuntos procesados bajo un único objeto centralizado `DatasetDict` para mantener la organización de los datos.
+
+
+```{python}
+ds_combined = DatasetDict({
+	"train": ds_train,
+	"validation": ds_val,
+	"test": ds_test
+})
+```
+
+Almacenamos de forma persistente en disco el dataset resultante para optimizar los accesos en la fase de entrenamiento.
+
+```{python}
+# Guardado del DatasetDict procesado en el almacenamiento local
+ds_combined.save_to_disk(base_path / "data/llm_dataset")
+``` 
+
+## Entrenamiento con LoRA
+
+```{python}
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from datasets import load_from_disk, Dataset
+import torch
+```
+
+```{python}
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print("Using CUDA device.")
+else:
+    device = torch.device("cpu")
+    print("CUDA not available, using CPU.")
+```
+
+```{python}
+model_id = "Qwen/Qwen2.5-0.5B-Instruct"
+
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
+```
+
+```{python}
+from pathlib import Path
+
+base_path = Path(".").resolve() / '87_demo'
+
+dataset = load_from_disk(base_path / "data/llm_dataset")
+dataset
+```
+
+
+Configuramos los hiperparámetros de LoRA para el entrenamiento.
+
+* **`r` (El rango de LoRA):** Como ya se ha mencionado, es el parámetro más crítico para controlar el tamaño de las pequeñas matrices de adaptación que se añaden a las capas del modelo y, por lo tanto, determina el número de parámetros entrenables. Un valor de `r` más bajo significa menos parámetros, pero potencialmente una menor capacidad para adaptaciones complejas. En este ejemplo, `r=4`, lo que indica matrices de adaptación bastante pequeñas.
+* **`lora_alpha`:** Un factor de escala que ajusta la magnitud de las actualizaciones aprendidas por las capas LoRA. A menudo se configura de forma proporcional a `r` (por ejemplo, igual a `r`o `2 × r`) para controlar el nivel de influencia que las adaptaciones de LoRA tienen sobre el comportamiento del modelo original. El escalado real que se aplica es típicamente `lora_alpha / r`. Aquí, `lora_alpha=32`.
+* **`lora_dropout`:** Especifica la tasa de *dropout* que se aplicará a las capas del adaptador LoRA durante el entrenamiento. Con la técnica de *dropout*, una fracción de las conexiones se ignora aleatoriamente durante cada paso de entrenamiento. Esto ayuda a evitar que los pequeños adaptadores LoRA sufran de sobreajuste (*overfitting*) con los datos de entrenamiento. Aquí se establece una tasa de *dropout* de 0.05 (5 por ciento).
+* **`bias`:** Controla la forma en que se manejan los términos de sesgo (*bias*) en las capas objetivo durante el entrenamiento de LoRA. Configurar `bias="none"` significa que los parámetros de sesgo en las capas específicas por `target_modules` no se entrenarán; permanecerán congelados en sus valores preentrenados. Otras opciones podrían entrenar todos los términos de sesgo o solo algunos específicos.
+* **`task_type`:** Le indica a la librería `peft` el tipo de tarea derivada (*downstream task*) para la que estás realizando el ajuste fino. Esto ayuda a la librería a identificar correctamente las capas o aplicar consideraciones específicas de la tarea. `CAUSAL_LM` indica modelado de lenguaje causal (*causal language modeling*), que es la tarea estándar para la mayoría de los LLM de generación de texto (predecir el próximo tóken basándose en los tókens anteriores).
+* **`target_modules`:** Una lista de cadenas de texto (*strings*) que especifica los nombres exactos de las subcapas o módulos dentro del modelo base preentrenado donde se deben inyectar las matrices del adaptador LoRA. Los objetivos habituales en los modelos Transformer son las matrices de pesos en el mecanismo de atención (como la consulta `q_proj`, clave `k_proj`, valor `v_proj` y salida `o_proj`) y las capas *feed-forward* (`gate_proj`, `up_proj`, `down_proj`). Al dirigirse solo a módulos específicos e importantes, LoRA mantiene el número de parámetros entrenables notablemente más bajo que en un ajuste fino completo (*full fine-tuning*).
+* **`modules_to_save`:** Especifica componentes adicionales del modelo, como `lm_head`, cuyos pesos originales también se volverán entrenables y se guardarán junto con los adaptadores LoRA. Ajustar de forma fina la capa `lm_head` es crucial, ya que afecta directamente a las probabilidades de salida del modelo y se beneficia de una adaptación directa a tu tarea específica. 
+
+```{python}
+from peft import LoraConfig
+
+# Configuración del adaptador alineada con las especificaciones del diseño teórico
+lora_config = LoraConfig(
+  r=4,
+  lora_alpha=32,
+  lora_dropout=0.05,
+  bias="none",
+  task_type="CAUSAL_LM",
+  target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+  modules_to_save=["lm_head"]
+)
+```
+
+Inyectamos la configuración PEFT definida sobre la arquitectura de nuestro modelo base, congelando los pesos originales y exponiendo únicamente los parámetros entrenables del adaptador.
+
+```{python}
+from peft import get_peft_model
+
+peft_model = get_peft_model(
+	model,
+	lora_config,
+)
+
+peft_model
+```
+
+```{python}
+peft_model.print_trainable_parameters()
+```
+
+## Entrenamiento
+
+Para gestionar el entrenamiento, utilizaremos `SFTTrainer` de la librería `trl` (*Transformer Reinforcement Learning*) de Hugging Face. Este conjunto de herramientas especializado simplifica el proceso de post-entrenamiento al proporcionar herramientas de alto nivel para el ajuste fino supervisado (*supervised fine-tuning*) y otras técnicas de alineación diseñadas para enseñar al modelo las preferencias humanas. 
+
+`SFTTrainer` es especialmente útil cuando se trabaja con técnicas PEFT como LoRA, ya que optimiza la transición desde la configuración de los parámetros de entrenamiento hasta la inicialización del entrenador con su modelo y *datasets* específicos.
+
+```{python}
+from trl import SFTTrainer, SFTConfig
+``` 
+
+* **`output_dir`**: Especifica dónde se guardarán los puntos de control (*checkpoints*) del modelo entrenado, los registros (*logs*) y otras salidas.
+* **`report_to`**: Se establece en `"none"` para evitar que se informen o reporten las métricas de entrenamiento a plataformas externas.
+* **`overwrite_output_dir`**: Al configurarlo en `True`, se permite al `Trainer` eliminar y volver a crear el directorio de salida (`output_dir`) si este ya existe.
+* **`do_train`**: Confirma que se debe ejecutar el proceso de entrenamiento.
+* **`learning_rate`**: Establece la tasa de aprendizaje (*learning rate*) inicial para el optimizador del modelo.
+* **`num_train_epochs`**: Define el número de veces (épocas) que el `Trainer` iterará sobre el conjunto de datos de entrenamiento (*dataset*) completo.
+* **`bf16=False` y `fp16=False`**: Desactiva el entrenamiento de precisión mixta (BFloat16 y Float16, respectivamente), lo que significa que el modelo probablemente se entrenará en precisión completa `float32`.
+
+```{python}
+training_args = SFTConfig(
+   output_dir=base_path / "data/trainer_output/my_classifier_llm",
+   report_to="none",
+   do_train=True,
+   learning_rate=2e-4,
+   num_train_epochs=3,
+   bf16=False,
+   fp16=False
+)
+``` 
+
+Instanciamos la clase entrenadora `SFTTrainer`, enlazando el modelo adaptado con las particiones de entrenamiento y validación correctas tomadas desde nuestro dataset cargado.
+
+
+```{python}
+trainer = SFTTrainer(
+   model=peft_model,
+   args=training_args,
+   train_dataset=dataset["train"],
+   eval_dataset=dataset["validation"],
+)
+``` 
+
+```{python}
+trainer.train()
+```
+
+```{python}
+model_path = base_path / "data/models/my_llm_classifier"
+trainer.save_model(model_path)
+```
+
+## Evaluación del ajuste fino
+
+```{python}
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from datasets import load_from_disk, Dataset
+import torch
+from pathlib import Path
+
+base_path = Path(".").resolve() / '87_demo'
+```
+
+```{python}
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print("Using CUDA device.")
+else:
+    device = torch.device("cpu")
+    print("CUDA not available, using CPU.")
+```
+
+```{python}
+model_path = base_path / "data/models/my_llm_classifier"
+```
+
+```{python}
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForCausalLM.from_pretrained(model_path).to(device)
+```
+
+```{python}
+dataset = load_from_disk(base_path / "data/llm_dataset")
+
+label_names = dataset["train"].features["label"].names
+```
+
+```{python}
+def evaluate(model, tokenizer, data):
+    # Tokenización y mapeo explícito de todo el diccionario al dispositivo acelerador
+    tokenized_input = tokenizer(data, return_tensors="pt").to(device)
+    
+    # Generación segura pasando los tensores estructurados completos
+    response = model.generate(
+        **tokenized_input,
+        max_new_tokens=10,
+    )
+    
+    # Decodificación y segmentación guiada por el prefijo de respuesta
+    decoded_message = tokenizer.batch_decode(response, skip_special_tokens=True)[0]
+    decoded_category = decoded_message.split("Category: ")[1].strip()
+    return decoded_category
+```
+
+```{python}
+error_counter = 0
+total_messages = len(dataset['test'])
+
+# Bucle optimizado sobre el dataset plano corregido
+for index, data in enumerate(dataset['test']):
+    # Inferencia del modelo sobre la columna de texto plano
+    result = evaluate(model, tokenizer, data['text'])
+    actual = label_names[data['label']]
+    
+    # Impresión de reportes y diagnóstico selectivo ante fallos de predicción
+    if actual != result:
+        print(f"Actual: {actual}, Result: {result}, Index: {index}")
+        error_counter += 1
+
+# Presentación estructurada del reporte de rendimiento final del clasificador
+print("\n" + "="*50)
+print(f"Total messages: {total_messages}")
+print(f"Total Error: {error_counter}")
+print("-"*50)
+print(f"Accuracy: {((1 - error_counter / total_messages) * 100):.2f}%")
+print("="*50)
+```
+
+
+
+
+
+
+
