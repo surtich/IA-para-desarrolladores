@@ -1,0 +1,429 @@
+---
+title: Agentes de IA
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+Hasta ahora, nuestro recorrido por el mundo de los LLMs ha seguido una progresión lógica:
+
+* **Fundamentos:** Aprendimos cómo los modelos generan texto a partir de la arquitectura y los pesos.
+* **Contextualización (RAG):** Vimos cómo enriquecer el conocimiento del modelo con datos externos mediante la recuperación de información.
+* **Adaptación (PEFT):** Exploramos cómo especializar un modelo preentrenado para tareas específicas.
+
+Sin embargo, en todos estos casos, nos hemos limitado a un paradigma de **"Generación Pasiva"**: el modelo recibe una entrada y devuelve una salida. El LLM actúa como un procesador de texto, pero no interactúa con el mundo real.
+
+Para que la IA alcance su máximo potencial, necesitamos trascender la generación de texto. Necesitamos sistemas que puedan navegar por la web, gestionar calendarios, ejecutar código o procesar correos electrónicos de forma autónoma. Es aquí donde entran los **Agentes de IA**: sistemas capaces de razonar, planificar y, crucialmente, **actuar** sobre su entorno.
+
+## ¿Qué son los Agentes de IA?
+
+Un agente de IA es un sistema que utiliza un LLM como su "motor de razonamiento" para completar tareas complejas. A diferencia de un modelo de chat convencional, que solo responde a una consulta, un agente opera bajo un **ciclo de razonamiento y acción**.
+
+El agente no solo procesa una instrucción; él decide:
+1.  **Qué pasos seguir** para desglosar una meta de alto nivel.
+2.  **Qué herramientas utilizar** (calculadora, navegador, APIs) para obtener información o realizar acciones.
+3.  **Cómo evaluar los resultados** de cada paso para ajustar su estrategia si es necesario.
+
+En esencia, el agente actúa como un **orquestador autónomo**.
+
+## Workflows vs. Agentes de IA
+
+Es común confundir un flujo de trabajo (workflow) automatizado con un agente, pero la diferencia fundamental radica en la **autonomía y la toma de decisiones**.
+
+En un workflow, el desarrollador define exactamente qué pasos se ejecutan y en qué orden. El sistema simplemente sigue esa receta. En cambio, un agente de IA tiene la capacidad de **decidir por sí mismo** cómo alcanzar un objetivo, lo que le permite adaptarse a situaciones imprevistas o cambiar de estrategia sobre la marcha.
+
+| Característica | Flujo de Trabajo (Workflow) | Agente de IA |
+| :--- | :--- | :--- |
+| **Estructura** | Lineal, predefinida y rígida. | Dinámica, basada en objetivos. |
+| **Toma de decisiones** | Programada por el desarrollador. | Delegada al LLM durante la ejecución. |
+| **Flexibilidad** | Baja; sigue pasos fijos. | Alta; puede elegir herramientas y caminos. |
+| **Determinismo** | Altamente determinista. | No determinista (varía según el contexto). |
+| **Caso de uso ideal** | Tareas repetitivas y estables. | Tareas complejas y ambiguas. |
+
+
+## Tools
+
+Una **tool** o herramienta es cualquier recurso externo que un LLM puede utilizar para obtener información o realizar una acción. Las herramientas pueden ser tan simples como una calculadora o tan complejas como sistemas de reserva de vuelos.
+
+### Ejemplo de aplicación
+
+Supongamos que queremos conocer la temperatura actual de una ciudad.
+
+Si probamos a hacer esta pregunta a un LLM podemos comprobar que no será capaz de satisfacer nuestra petición:
+
+```{python}
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+model = os.getenv('OLLAMA_MODEL')
+
+openai = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+
+response = openai.chat.completions.create(
+ model=model,
+ messages=[
+  {"role": "system", "content": "Eres un agente de viajes especializado en proporcionar información sobre una ciudad: lugares de interés, cultura, gastronomía, consejos de viaje, información meteorológica, etc. Tu objetivo es ayudar a los usuarios a planificar sus viajes proporcionando información precisa y útil sobre la ciudad que elijan."},
+  {"role": "user", "content": "Estoy planificando un viaje a España. Concretamente, visitaré Majadahonda y necesito saber cuál es la temperatura actual."}]
+)
+
+print(response.choices[0].message.content)
+```
+
+El modelo no tiene acceso a información en tiempo real, por lo que no puede responder a esta consulta. Sin embargo, si le proporcionamos una herramienta que le permita consultar la temperatura actual, el LLM podrá utilizarla para obtener la información necesaria.
+
+
+```{python}
+import requests
+
+def obtener_coordenadas(ciudad):
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={ciudad}"
+    respuesta = requests.get(url).json()
+    if "results" in respuesta:
+        # Tomamos el primer resultado que suele ser el más relevante
+        datos = respuesta["results"][0]
+        return datos["latitude"], datos["longitude"]
+    else:
+        return None
+
+ciudad = "Majadahonda"
+coords = obtener_coordenadas(ciudad)
+coords
+```
+
+```{python}
+import requests
+
+def obtener_temperatura(lat, lon):
+    # Consultamos la API de clima directamente con latitud y longitud
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m"
+    
+    respuesta = requests.get(url)
+    
+    if respuesta.status_code == 200:
+        datos = respuesta.json()
+        temp = datos["current"]["temperature_2m"]
+        unidad = datos["current_units"]["temperature_2m"]
+        return f"La temperatura actual en las coordenadas ({lat}, {lon}) es de {temp}{unidad}."
+    else:
+        return "Error al obtener los datos del clima."
+
+# Ejemplo de uso (coordenadas de Majadahonda):
+print(obtener_temperatura(*coords))
+``` 
+
+Observe que hemos usado el modelo de Gemini ya que el que estábamos usando en Ollama no estaba llamando correctamente a las herramientas.
+
+Por otro lado, el modelo es el que decide autónomamente si hay que llamar a una herramienta o no, y en caso de que lo haga, qué herramienta usar y con qué argumentos. Para ello, es necesario definir un **prompt de sistema** que le indique al modelo cómo debe usar las herramientas disponibles. Además, el modelo no tiene acceso directamente a las herramientas, por lo que es necesario implementar un mecanismo de **ejecución de herramientas** que interprete las llamadas a herramientas generadas por el modelo y ejecute la función correspondiente. Las herramientas se llaman desde un código escrito en Python. 
+
+```{python}
+import json 
+
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+api_key = os.getenv('GOOGLE_API_KEY')
+
+model = "gemini-2.5-flash"
+openai = OpenAI(base_url="https://generativelanguage.googleapis.com/v1beta", api_key=api_key)
+
+
+system_prompt = """
+Eres un agente de viajes especializado en proporcionar información sobre una ciudad.
+
+Cuando te pregunten por la temperatura actual de una ciudad, no confíes en la información que tienes de esa ciudad y usa estas herramientas en orden:
+
+1.- Obtener coordenadas de la {ciudad}, responde exactamente:
+  TOOL CALL: obtener_coordenadas ciudad={ciudad}
+
+Esto te dará la {latitud} y {longitud} de la ciudad. Luego, con esa información, haz lo siguiente:
+
+2.- Obtener temperatura de unas coordenadas, responde exactamente:
+  TOOL CALL: obtener_temperatura lat={latitud} lon={longitud}
+
+No añadas nada más cuando uses una herramienta. Cuando tengas la respuesta, responde con texto normal
+"""
+
+# Definimos las herramientas disponibles
+tools = {
+    "obtener_coordenadas": obtener_coordenadas,
+    "obtener_temperatura": obtener_temperatura
+}
+
+import re
+import json
+
+def ejecutar_agente(user_input, max_turns=5):
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_input}
+    ]
+    
+    for i in range(max_turns):
+        response = openai.chat.completions.create(model=model, messages=messages)
+        content = response.choices[0].message.content
+        messages.append({"role": "assistant", "content": content})
+        
+        print(f"🧠 LLM: {content}")
+        
+        match = re.search(r"TOOL CALL:\s*(\w+)\s*(\{.*\})", content)
+        
+        # Regex genérico para: TOOL CALL: nombre_tool key1=val1 key2=val2...
+        match = re.search(r"TOOL CALL: (\w+) (.*)", content)
+        
+        if match:
+            tool_name = match.group(1)
+            args_string = match.group(2)
+            
+            # Buscar la función en el registro de tools
+            if tool_name in tools:
+                func = tools[tool_name]
+                
+                # Parsear argumentos (convirtiendo x=y en diccionario)
+                # Ejemplo: lat=40.47 lon=-3.87 -> {"lat": "40.47", "lon": "-3.87"}
+                try:
+                    args = dict(item.split("=") for item in args_string.split())
+                    
+                    # TIP: Conversión de tipos básica (opcional, si tus funciones esperan int/float)
+                    # Aquí podrías añadir lógica para convertir "40.47" a float(40.47)
+                    
+                    print(f"🛠️ Ejecutando {tool_name} con {args}")
+                    resultado = func(**args)
+
+                   
+                    messages.append({"role": "user", "content": f"OBSERVACIÓN: {resultado}"})
+                    continue
+                except Exception as e:
+                    messages.append({"role": "user", "content": f"ERROR: Fallo al ejecutar {tool_name}: {str(e)}"})
+            else:
+                messages.append({"role": "user", "content": f"ERROR: La herramienta '{tool_name}' no existe."})
+        else:
+            return content
+
+    return "Límite de turnos alcanzado."
+
+# Ejecución
+respuesta_final = ejecutar_agente("Quiero saber institutos públicos en Majadahonda y la temperatura actual.")
+print(f"\n✅ Respuesta final: {respuesta_final}")
+``` 
+
+## API Tools
+
+Muchas API de LLMs (incluyendo la API de OpenAI) ya tienen soporte nativo para herramientas, lo que simplifica mucho este proceso. En lugar de tener que parsear manualmente las llamadas a herramientas, podemos definir un esquema de herramientas directamente en la llamada a la API, y el modelo generará una estructura de respuesta específica para indicar qué herramienta quiere usar y con qué argumentos. Esto elimina la necesidad de regex o parsing manual, ya que el modelo seguirá un formato predefinido para las llamadas a herramientas.
+
+En el siguiente ejemplo, se muestra cómo definir herramientas usando el esquema nativo de la API de OpenAI, lo que hace que la interacción con las herramientas sea mucho más fluida y estructurada. El modelo generará automáticamente una sección `tool_calls` en su respuesta cuando quiera usar una herramienta, y el código de ejecución simplemente necesita procesar esa sección para ejecutar la herramienta correspondiente. Cuando se quiera informar al modelo del resultado de la herramienta, se debe usar el rol `tool` para que el modelo lo reciba como una respuesta de la herramienta, lo que mejora la claridad y la organización de la conversación. Este rol `tool` debe incluir el parametro `tool_call_id` que corresponde al ID de la llamada a herramienta que se está respondiendo, lo que permite al modelo asociar correctamente la respuesta con la herramienta utilizada.
+
+Observe que el modelo informa bien de la temperatura de Majadahonda, pero no de los institutos públicos, que se los inventa. Esto se debe a que el modelo no tiene acceso a una herramienta para obtener esa información, por lo que intenta responder con su conocimiento previo, que en este caso es inventado. Para evitar esto, es importante diseñar el prompt de sistema de manera que el modelo entienda claramente cuándo debe usar una herramienta y que no intente responder con información inventada si no tiene acceso a los datos necesarios. En este caso, podríamos mejorar el prompt para indicar explícitamente que si no tiene acceso a la información actualizada sobre los institutos públicos, debe responder con un mensaje indicando que no puede proporcionar esa información en lugar de inventarla.
+
+```{python}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv('GROQ_API_KEY')
+
+model = "llama-3.3-70b-versatile" 
+openai = OpenAI(
+    base_url="https://api.groq.com/openai/v1",
+    api_key=api_key
+)
+
+# 1. Definición de herramientas (Esquema nativo)
+tools_schema = [
+    {
+        "type": "function",
+        "function": {
+            "name": "obtener_coordenadas",
+            "description": "Obtiene la latitud y longitud de una ciudad.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ciudad": {"type": "string", "description": "Nombre de la ciudad"}
+                },
+                "required": ["ciudad"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "obtener_temperatura",
+            "description": "Obtiene la temperatura de unas coordenadas.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "lat": {"type": "number", "description": "Latitud"},
+                    "lon": {"type": "number", "description": "Longitud"}
+                },
+                "required": ["lat", "lon"]
+            }
+        }
+    }
+]
+
+# Definimos las funciones reales
+tools_map = {
+    "obtener_coordenadas": obtener_coordenadas,
+    "obtener_temperatura": obtener_temperatura
+}
+
+system_prompt = "Eres un agente de viajes experto. Si necesitas datos, usa las herramientas."
+
+def ejecutar_agente(user_input, max_turns=5):
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_input}
+    ]
+    
+    for i in range(max_turns):
+        # Llamada con tools
+        response = openai.chat.completions.create(
+            model=model, 
+            messages=messages, 
+            tools=tools_schema
+        )
+        
+        message = response.choices[0].message
+        messages.append(message)
+
+        print(f"🧠 LLM: {message}")
+
+        
+        # Si el modelo decide llamar a herramientas (tool_calls)
+        if message.tool_calls:
+
+            
+            # Procesamos cada llamada (el modelo puede pedir varias a la vez)
+            for tool_call in message.tool_calls:
+                tool_name = tool_call.function.name
+                args = json.loads(tool_call.function.arguments)
+                
+                print(f"🛠️ Ejecutando {tool_name} con {args}")
+                
+                if tool_name in tools_map:
+                    # Ejecutar función
+                    resultado = tools_map[tool_name](**args)
+                    
+                    # Añadir resultado (Rol: tool)
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": json.dumps(resultado)
+                    })
+                else:
+                    messages.append({"role": "user", "content": f"ERROR: Herramienta {tool_name} no existe."})
+            continue # Volvemos al inicio del bucle para que el modelo procese el resultado
+            
+        else:
+            # No hay más herramientas, el modelo responde normalmente
+            return message.content
+
+    return "Límite de turnos alcanzado."
+
+# Ejecución
+respuesta_final = ejecutar_agente("Quiero saber institutos públicos en Majadahonda y la temperatura actual.")
+print(f"\n✅ Respuesta final: {respuesta_final}")
+```
+
+## SDK de Agentes
+
+Un agente es un sistema basado en un LLM capaz de interactuar con el entorno mediante el uso de herramientas. En las secciones anteriores hemos visto que podemos definir las herramientas, que tiene a su disposición el LLM, en el prompt de forma manual. Sin embargo, vimos que es más conveniente usar el soporte nativo de herramientas que ofrecen algunas API de LLMs. Esto sigue siendo un proceso manual que requiere escribir código específico para manejar las llamadas a herramientas y su ejecución.
+
+Para facilitar este proceso, algunas plataformas y bibliotecas han desarrollado SDKs específicos para agentes, que abstraen gran parte de la lógica de manejo de herramientas y permiten a los desarrolladores centrarse en la definición de la lógica del agente y las herramientas que quiere usar, sin preocuparse por los detalles de la implementación. Estos SDKs suelen proporcionar una interfaz más sencilla para definir herramientas, gestionar el ciclo de razonamiento y acción del agente, y manejar la comunicación entre el modelo y las herramientas, lo que hace que el desarrollo de agentes de IA sea más accesible y eficiente.
+
+### ¿Por qué utilizar un SDK de agentes?
+
+El uso de un SDK profesional proporciona ventajas críticas sobre la implementación manual:
+
+* **Abstracción del ciclo de razonamiento:** Automatizan el bucle `ReAct` (Reasoning + Acting), encargándose de analizar cuándo el modelo debe detenerse, invocar una función o responder al usuario.
+* **Gestión estandarizada de herramientas:** Ofrecen interfaces unificadas para definir herramientas, simplificando la serialización de parámetros y la validación de esquemas (JSON Schema).
+* **Gestión de memoria y estado:** Permiten persistir el historial de conversaciones y el estado del agente entre ejecuciones de manera transparente.
+* **Interoperabilidad:** Facilitan la integración con diversas APIs de modelos (OpenAI, Anthropic, Google Gemini, modelos locales) sin necesidad de reescribir la lógica central.
+
+
+## Frameworks y SDKs destacados
+
+Existen diversas herramientas que se han convertido en estándares de la industria, categorizadas según su enfoque:
+
+#### 1. Frameworks de Orquestación (Agentes Individuales)
+Diseñados para construir agentes capaces de realizar tareas complejas utilizando una variedad de herramientas integradas.
+
+* **LangChain:** El estándar de facto en la industria. Ofrece una estructura modular para conectar LLMs con fuentes de datos y APIs externas.
+* **LlamaIndex:** Aunque nació enfocado en la recuperación de datos (RAG), destaca por su capacidad para crear agentes que interactúan con datos estructurados y no estructurados.
+* **OpenAI Assistants API:** Un SDK gestionado por OpenAI que abstrae gran parte de la infraestructura (archivos, recuperación, ejecución de código) directamente en la plataforma.
+
+#### 2. Sistemas Multi-Agente
+Estos frameworks permiten crear arquitecturas donde varios agentes especializados colaboran entre sí. Esta especialización (por ejemplo, un "Agente de Análisis" trabajando con un "Agente de Redacción") mejora significativamente el rendimiento en tareas complejas.
+
+* **LangGraph:** Una extensión de LangChain diseñada específicamente para crear flujos de agentes cíclicos y con estado, ideal para flujos de trabajo multi-agente robustos.
+* **CrewAI:** Enfocado en la orquestación de roles. Permite definir "equipos" de agentes con objetivos, herramientas y procesos de colaboración predefinidos.
+* **Microsoft AutoGen:** Un framework potente que permite la conversación entre múltiples agentes para resolver tareas, destacando por su capacidad para permitir la interacción entre agentes humanos y virtuales.
+
+## smolagents
+
+[smolagents](https://huggingface.co/learn/agents-course/unit2/smolagents/introduction) es una librería para agentes creada por Hugging Face.
+
+
+### Code Agents
+
+Los Code agents (agentes de código) son el tipo de agente predeterminado en smolagents. Generan llamadas a herramientas en Python para realizar acciones, logrando representaciones de acción que son eficientes, expresivas y precisas.
+
+```{python}
+from huggingface_hub import login
+
+login()
+```
+
+En el siguiente ejemplo se usa InferenceClientModel, que permite ejecutar la API de inferencia de Hugging Face. El agente tiene acceso a la herramienta DuckDuckGoSearchTool, que le permite realizar búsquedas en la web.
+
+```{python}
+from smolagents import CodeAgent, DuckDuckGoSearchTool, InferenceClientModel
+
+agent = CodeAgent(tools=[DuckDuckGoSearchTool()], model=InferenceClientModel())
+
+agent.run("Busca música adecuada para una fiesta de graduación de un instituto de formación profesional.")
+```
+
+Code agent puede invocar herramientas personalizadas.
+
+```{python}
+from smolagents import CodeAgent, tool, InferenceClientModel
+
+# Herramienta para sugerir un menú según la ocasión
+@tool
+def suggest_menu(occasion: str) -> str:
+    """
+    Sugiere un menú basado en la ocasión.
+    Args:
+        occasion (str): El tipo de ocasión para la fiesta. Los valores permitidos son:
+                        - "casual": Menú para una fiesta casual.
+                        - "formal": Menú para una fiesta formal.
+                        - "superhero": Menú para una fiesta de superhéroes.
+                        - "custom": Menú personalizado.
+    """
+    if occasion == "casual":
+        return "Pizza, snacks y bebidas."
+    elif occasion == "formal":
+        return "Cena de 3 platos con vino y postre."
+    elif occasion == "superhero":
+        return "Buffet con comida saludable y energética."
+    else:
+        return "Menú personalizado para el mayordomo."
+
+# Alfred, el mayordomo, preparando el menú para la fiesta
+agent = CodeAgent(tools=[suggest_menu], model=InferenceClientModel())
+
+# Preparando el menú para la fiesta
+agent.run("Prepara un menú formal para la fiesta.")
+```

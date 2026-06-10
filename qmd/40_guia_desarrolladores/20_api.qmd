@@ -312,6 +312,56 @@ response = openai.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
+## Hugging Face
+
+[Hugging Face](https://huggingface.co/inference-endpoints) es una plataforma que ofrece una amplia variedad de modelos de lenguaje y aprendizaje automático a través de su API de Inference Endpoints. Esta API permite a los desarrolladores acceder a modelos preentrenados para tareas como generación de texto, clasificación, análisis de sentimientos y más, sin necesidad de gestionar la infraestructura subyacente.
+
+```{python}
+import os
+from huggingface_hub import InferenceClient
+from dotenv import load_dotenv
+
+load_dotenv()
+hf_token = os.getenv('HUGGINGFACE_API_KEY')
+
+MODEL = "meta-llama/Llama-3.1-8B-Instruct"
+
+client = InferenceClient(api_key=hf_token)
+
+response = client.chat_completion(
+    model=MODEL,
+    messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}],
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+
+Usando la API de OpenAI:
+
+```{python}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
+api_key = os.getenv('HUGGINGFACE_API_KEY')
+MODEL = "meta-llama/Llama-3.1-8B-Instruct"
+
+openai = OpenAI(
+    base_url="https://router.huggingface.co/v1",
+    api_key=api_key
+)
+
+response = openai.chat.completions.create(
+    model=MODEL,
+    messages=[{"role": "user", "content": "¿Cuánto son 2 + 2?"}],
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+
 ## Puter.js
 
 [Puter.js](https://docs.puter.com/) permite ejecutar modelos de lenguaje directamente en el navegador sin necesidad de API KEYS. Cada usuario ejecuta el modelo en un espacio privado en la nube de Puter, lo que garantiza la privacidad y seguridad de los datos. Puter.js es compatible con una amplia gama de modelos, incluyendo GPT-4.5 nano, y ofrece una experiencia de usuario fluida y rápida. Para usar Puter.js, simplemente incluye su script en tu página HTML y llama a la función `puter.ai.chat` con el mensaje que desea enviar al modelo:
