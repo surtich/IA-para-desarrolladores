@@ -16,3 +16,4 @@ site_libs
 .env
 node_modules
 **/87_demo/data
+qmd/**/*.html
