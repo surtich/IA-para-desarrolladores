@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Ajuste fino en un modelo preentrenado – IA para desarrolladores</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-ab5985e7cd7d0abcbf09aae1c15bbc81.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">IA para desarrolladores</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../qmd/index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Ajuste fino en un modelo preentrenado</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Buscar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal simple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal múltiple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/40_logistic_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/50_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Redes neuronales</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">LLM</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/00_introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">¿Qué es LLM?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/05_tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tokenización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/20_word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/30_similarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Similitud entre palabras</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/40_attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mecanismo de Atención</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/50_decoder.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decoder-Only Transformers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Hugging Face</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+ <span class="menu-text">qmd/30_hugging_face/10_intro.qmd</span>
+  </li>
+          <li class="sidebar-item">
+ <span class="menu-text">qmd/30_hugging_face/20_fine_tunning.qmd</span>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guía para desarrolladores</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/10_ollama.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ollama</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/20_api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Llamadas a APIs de LLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/30_params.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametros en LLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/40_templates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Plantillas de promting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/50_memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Memoria en LLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/60_ingenieria_prompts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ingeniería de Prompts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/70_structured_output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Salida estructurada</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/75_vector_db.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bases de datos vectoriales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/80_rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/85_hugging_face.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hugging Face</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/87_fine_tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fine-Tunning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/87a_ft_data_preparation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preparación de datos para el ajuste fino</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/87b_ft_classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ajuste fino en un modelo de clasificación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/90_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agentes de IA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Apéndices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/10_derivadas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derivadas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/20_matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Álgebra Lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../linear_transformations.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Demo: Transformaciones lineales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../presentacion_2025.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Presentación 2025</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#introducción" id="toc-introducción" class="nav-link active" data-scroll-target="#introducción">Introducción</a></li>
+  <li><a href="#peft-y-lora" id="toc-peft-y-lora" class="nav-link" data-scroll-target="#peft-y-lora">PEFT y LoRA</a></li>
+  <li><a href="#ajuste-fino-tradicional-frente-a-peft" id="toc-ajuste-fino-tradicional-frente-a-peft" class="nav-link" data-scroll-target="#ajuste-fino-tradicional-frente-a-peft">Ajuste Fino Tradicional frente a PEFT</a>
+  <ul class="collapse">
+  <li><a href="#peft-frente-a-ajuste-fino-tradicional" id="toc-peft-frente-a-ajuste-fino-tradicional" class="nav-link" data-scroll-target="#peft-frente-a-ajuste-fino-tradicional">PEFT frente a Ajuste Fino Tradicional</a></li>
+  </ul></li>
+  <li><a href="#lora-low-rank-adaptation" id="toc-lora-low-rank-adaptation" class="nav-link" data-scroll-target="#lora-low-rank-adaptation">LoRA (Low-Rank Adaptation)</a>
+  <ul class="collapse">
+  <li><a href="#el-punto-de-partida-la-capa-lineal-tradicional" id="toc-el-punto-de-partida-la-capa-lineal-tradicional" class="nav-link" data-scroll-target="#el-punto-de-partida-la-capa-lineal-tradicional">1. El punto de partida: La capa lineal tradicional</a></li>
+  </ul></li>
+  <li><a href="#la-solución-de-lora-factorización-de-bajo-rango" id="toc-la-solución-de-lora-factorización-de-bajo-rango" class="nav-link" data-scroll-target="#la-solución-de-lora-factorización-de-bajo-rango">2. La solución de LoRA: Factorización de bajo rango</a>
+  <ul class="collapse">
+  <li><a href="#demostración-numérica-del-ahorro-de-parámetros" id="toc-demostración-numérica-del-ahorro-de-parámetros" class="nav-link" data-scroll-target="#demostración-numérica-del-ahorro-de-parámetros">3. Demostración numérica del ahorro de parámetros</a></li>
+  <li><a href="#ajuste-fino-tradicional-delta-w-completa" id="toc-ajuste-fino-tradicional-delta-w-completa" class="nav-link" data-scroll-target="#ajuste-fino-tradicional-delta-w-completa">Ajuste fino tradicional (<span class="math inline">\(\Delta W\)</span> completa):</a></li>
+  <li><a href="#ajuste-fino-con-lora-usando-un-rango-r-8" id="toc-ajuste-fino-con-lora-usando-un-rango-r-8" class="nav-link" data-scroll-target="#ajuste-fino-con-lora-usando-un-rango-r-8">Ajuste fino con LoRA (usando un rango <span class="math inline">\(r = 8\)</span>):</a></li>
+  <li><a href="#el-truco-de-la-inicialización-matemática" id="toc-el-truco-de-la-inicialización-matemática" class="nav-link" data-scroll-target="#el-truco-de-la-inicialización-matemática">4. El truco de la Inicialización Matemática</a></li>
+  <li><a href="#escalado-mediante-alpha-alpha" id="toc-escalado-mediante-alpha-alpha" class="nav-link" data-scroll-target="#escalado-mediante-alpha-alpha">5. Escalado mediante <span class="math inline">\(\alpha\)</span> (Alpha)</a></li>
+  </ul></li>
+  <li><a href="#plantillas-de-instrucciones" id="toc-plantillas-de-instrucciones" class="nav-link" data-scroll-target="#plantillas-de-instrucciones">Plantillas de instrucciones</a>
+  <ul class="collapse">
+  <li><a href="#personalización-del-formato-de-la-respuesta-generada" id="toc-personalización-del-formato-de-la-respuesta-generada" class="nav-link" data-scroll-target="#personalización-del-formato-de-la-respuesta-generada">Personalización del formato de la respuesta generada</a></li>
+  </ul></li>
+  <li><a href="#adaptando-el-dataset" id="toc-adaptando-el-dataset" class="nav-link" data-scroll-target="#adaptando-el-dataset">Adaptando el dataset</a></li>
+  <li><a href="#entrenamiento-con-lora" id="toc-entrenamiento-con-lora" class="nav-link" data-scroll-target="#entrenamiento-con-lora">Entrenamiento con LoRA</a></li>
+  <li><a href="#entrenamiento" id="toc-entrenamiento" class="nav-link" data-scroll-target="#entrenamiento">Entrenamiento</a></li>
+  <li><a href="#evaluación-del-ajuste-fino" id="toc-evaluación-del-ajuste-fino" class="nav-link" data-scroll-target="#evaluación-del-ajuste-fino">Evaluación del ajuste fino</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Ajuste fino en un modelo preentrenado</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introducción" class="level2">
+<h2 class="anchored" data-anchor-id="introducción">Introducción</h2>
+<p>Un modelo preentrenado (<em>pretrained model</em>) es un modelo de lenguaje que ha sido entrenado previamente en una gran cantidad de datos para aprender patrones y representaciones del lenguaje. Estos modelos únicamente son capaces de generar el siguiente token dada una secuencia de texto, pero no pueden realizar tareas específicas sin un proceso adicional de entrenamiento. El ajuste fino (<em>fine-tuning</em>) es el proceso de tomar un modelo preentrenado y entrenarlo adicionalmente en un conjunto de datos específico para que pueda realizar una tarea particular, como clasificación, generación de texto, traducción, entre otras.</p>
+</section>
+<section id="peft-y-lora" class="level2">
+<h2 class="anchored" data-anchor-id="peft-y-lora">PEFT y LoRA</h2>
+<p>Utilizaremos el ajuste fino eficiente en parámetros (<em>Parameter-Efficient Fine-Tuning</em> o <strong>PEFT</strong>) y la adaptación de bajo rango (<em>Low-Rank Adaptation</em> o <strong>LoRA</strong>) para ajustar nuestro LLM (Modelo de Lenguaje Grande). Pero antes de intentar definir estos términos, es necesario entender por qué existen estas modalidades de entrenamiento.</p>
+</section>
+<section id="ajuste-fino-tradicional-frente-a-peft" class="level2">
+<h2 class="anchored" data-anchor-id="ajuste-fino-tradicional-frente-a-peft">Ajuste Fino Tradicional frente a PEFT</h2>
+<p>Con el ajuste fino tradicional (o regular), como se mostró en el tema anterior, actualizamos <strong>todos los parámetros</strong> del modelo de lenguaje al entrenarlo con datos nuevos. Esto permite que el modelo aprenda nueva información y se adapte a las características específicas de los nuevos datos, mejorando su rendimiento general en la tarea objetivo. Esta técnica genera mejoras de rendimiento significativas, especialmente cuando se dispone de datos suficientes, y es relativamente sencilla de implementar.</p>
+<p>Por otra parte, este enfoque es <strong>computacionalmente muy costoso y requiere mucho tiempo</strong>. También exige una cantidad de datos mucho mayor para evitar el <strong>sobreajuste</strong> (<em>overfitting</em>). En este problema común del aprendizaje automático, el modelo aprende los datos de entrenamiento con demasiada precisión, incluyendo el ruido y los detalles específicos que son únicos de ese conjunto de datos en particular. En lugar de capturar los patrones generales subyacentes, el modelo esencialmente memoriza los ejemplos de entrenamiento. Esto se traduce en un rendimiento excelente en los propios datos de entrenamiento, pero en un rendimiento significativamente inferior cuando se le pide al modelo que realice predicciones sobre datos nuevos y no vistos.</p>
+<p>Sin embargo, lo más preocupante es que este tipo de entrenamiento provoca el <strong>olvido catastrófico</strong> (<em>catastrophic forgetting</em>). Si se vuelve a entrenar un modelo con un nuevo conjunto de datos sin aplicar ninguna técnica especial, el modelo podría sobrescribir por completo el conocimiento que había adquirido del primer conjunto de datos.</p>
+<p>Aquí es donde entra en juego <a href="https://huggingface.co/blog/peft">PEFT</a>. Los métodos PEFT introducen una pequeña cantidad de parámetros adicionales al modelo en lugar de modificar toda la matriz de pesos original. Esto reduce drásticamente el número de parámetros entrenables, haciendo que el proceso de ajuste fino sea más eficiente y menos costoso a nivel computacional.</p>
+<p>Al tener menos parámetros entrenables, el proceso de entrenamiento requiere menos memoria y recursos computacionales. Esto se traduce en tiempos de entrenamiento más rápidos, especialmente para modelos grandes.</p>
+<section id="peft-frente-a-ajuste-fino-tradicional" class="level3">
+<h3 class="anchored" data-anchor-id="peft-frente-a-ajuste-fino-tradicional">PEFT frente a Ajuste Fino Tradicional</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Criterio</th>
+<th style="text-align: left;">PEFT</th>
+<th style="text-align: left;">Ajuste Fino Tradicional (Regular)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Cuándo usarlo</strong></td>
+<td style="text-align: left;">• Tiene datos o recursos computacionales limitados.<br>• Necesita un entrenamiento y despliegue más rápidos.<br>• Quiere minimizar los requisitos de almacenamiento.<br>• La nueva tarea es relativamente similar a la tarea original de preentrenamiento.</td>
+<td style="text-align: left;">• Tiene suficientes datos y recursos computacionales.<br>• Necesita el máximo rendimiento.<br>• La nueva tarea es significativamente diferente de la tarea original de preentrenamiento.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Pros</strong></td>
+<td style="text-align: left;">• Más eficiente y rápido que el ajuste fino tradicional.<br>• Menos propenso al sobreajuste, especialmente con datos limitados.<br>• Reduce los requisitos de almacenamiento para el modelo ajustado.<br>• Mitiga el olvido catastrófico.</td>
+<td style="text-align: left;">• Puede lograr mejoras significativas en el rendimiento, especialmente con datos suficientes.<br>• Relativamente sencillo de implementar.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Contras</strong></td>
+<td style="text-align: left;">• Podría no alcanzar el mismo nivel de rendimiento que el ajuste fino tradicional en algunos casos.<br>• Requiere una selección cuidadosa de los módulos objetivo.</td>
+<td style="text-align: left;">• Computacionalmente costoso y requiere mucho tiempo.<br>• Requiere más datos para evitar el sobreajuste.<br>• Puede provocar olvido catastrófico (pérdida del conocimiento aprendido previamente).</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="lora-low-rank-adaptation" class="level2">
+<h2 class="anchored" data-anchor-id="lora-low-rank-adaptation">LoRA (Low-Rank Adaptation)</h2>
+<p>LoRA es uno de los métodos de PEFT más populares. Se basa en una hipótesis clave del aprendizaje profundo: <strong>las actualizaciones de los pesos de una red neuronal durante el ajuste fino tienen una “dimensión intrínseca baja”</strong>.</p>
+<p>Esto significa que, aunque una matriz de pesos original sea gigantesca, los cambios necesarios para que aprenda una nueva tarea se pueden proyectar en un espacio matemático mucho más pequeño sin perder apenas información.</p>
+<p>A continuación, desglosamos la ecuación y el álgebra lineal que hacen posible este truco de magia computacional.</p>
+<section id="el-punto-de-partida-la-capa-lineal-tradicional" class="level3">
+<h3 class="anchored" data-anchor-id="el-punto-de-partida-la-capa-lineal-tradicional">1. El punto de partida: La capa lineal tradicional</h3>
+<p>En una red neuronal estándar (como un Transformer), una capa lineal toma un vector de entrada <span class="math inline">\(x\)</span> y lo multiplica por una matriz de pesos preentrenados <span class="math inline">\(W_0\)</span> para producir una salida <span class="math inline">\(h\)</span> (oculta o <em>hidden</em>).</p>
+<p>La operación matemática es: <span class="math display">\[h = W_0 \cdot x\]</span></p>
+<p>Donde: * <span class="math inline">\(x \in \mathbb{R}^k\)</span> (un vector de entrada de dimensión <span class="math inline">\(k\)</span>). * <span class="math inline">\(W_0 \in \mathbb{R}^{d \times k}\)</span> (la matriz de pesos preentrenada de dimensiones <span class="math inline">\(d \times k\)</span>). * <span class="math inline">\(h \in \mathbb{R}^d\)</span> (el vector de salida de dimensión <span class="math inline">\(d\)</span>).</p>
+<p>Cuando hacemos un <em>Full Fine-Tuning</em>, el optimizador intenta calcular una matriz de cambio llamada <span class="math inline">\(\Delta W\)</span> (Delta <span class="math inline">\(W\)</span>), de modo que los nuevos pesos sean <span class="math inline">\(W = W_0 + \Delta W\)</span>. La nueva salida sería: <span class="math display">\[h = (W_0 + \Delta W) \cdot x = W_0 \cdot x + \Delta W \cdot x\]</span></p>
+<p>El problema es que <span class="math inline">\(\Delta W\)</span> tiene exactamente las mismas dimensiones gigantescas que <span class="math inline">\(W_0\)</span> (<span class="math inline">\(d \times k\)</span>), lo que exige gigabytes de memoria para calcular sus gradientes durante el entrenamiento.</p>
+</section>
+</section>
+<section id="la-solución-de-lora-factorización-de-bajo-rango" class="level2">
+<h2 class="anchored" data-anchor-id="la-solución-de-lora-factorización-de-bajo-rango">2. La solución de LoRA: Factorización de bajo rango</h2>
+<p>En lugar de crear y optimizar esa matriz densa <span class="math inline">\(\Delta W\)</span> de tamaño <span class="math inline">\(d \times k\)</span>, LoRA la <strong>factoriza</strong> (la divide) en el producto de dos matrices mucho más delgadas, llamadas <span class="math inline">\(B\)</span> y <span class="math inline">\(A\)</span>:</p>
+<p><span class="math display">\[\Delta W = B \cdot A\]</span></p>
+<p>Aquí es donde ocurre la magia de las dimensiones (Álgebra Lineal): * <strong><span class="math inline">\(A\)</span></strong> es una matriz de tamaño <span class="math inline">\(r \times k\)</span>. * <strong><span class="math inline">\(B\)</span></strong> es una matriz de tamaño <span class="math inline">\(d \times r\)</span>. * <strong><span class="math inline">\(r\)</span></strong> es el <strong>rango</strong> (<em>rank</em>), un hiperparámetro que usted elige (suele ser un número muy pequeño como 4, 8, 16 o 32).</p>
+<p>Al multiplicar una matriz de <span class="math inline">\(d \times r\)</span> por una de <span class="math inline">\(r \times k\)</span>, el resultado es, por pura definición de producto de matrices, una matriz de <span class="math inline">\(d \times k\)</span>. Matemáticamente la salida final del pipeline se reescribe así:</p>
+<p><span class="math display">\[h = W_0 \cdot x + B \cdot A \cdot x\]</span></p>
+<p>Durante todo el entrenamiento, <strong><span class="math inline">\(W_0\)</span> se congela por completo</strong> (no recibe gradientes). Solo se entrenan los números contenidos en las matrices delgadas <span class="math inline">\(B\)</span> y <span class="math inline">\(A\)</span>.</p>
+<section id="demostración-numérica-del-ahorro-de-parámetros" class="level3">
+<h3 class="anchored" data-anchor-id="demostración-numérica-del-ahorro-de-parámetros">3. Demostración numérica del ahorro de parámetros</h3>
+<p>Para entender el impacto real, hagamos una multiplicación con dimensiones típicas de un modelo de lenguaje moderno (por ejemplo, Llama o Mistral), donde la dimensión interna de una capa de atención podría ser <span class="math inline">\(d = 4096\)</span> y <span class="math inline">\(k = 4096\)</span>.</p>
+</section>
+<section id="ajuste-fino-tradicional-delta-w-completa" class="level3">
+<h3 class="anchored" data-anchor-id="ajuste-fino-tradicional-delta-w-completa">Ajuste fino tradicional (<span class="math inline">\(\Delta W\)</span> completa):</h3>
+<p><span class="math display">\[\text{Parámetros a entrenar} = d \times k = 4096 \times 4096 = \mathbf{16,777,216}\]</span></p>
+</section>
+<section id="ajuste-fino-con-lora-usando-un-rango-r-8" class="level3">
+<h3 class="anchored" data-anchor-id="ajuste-fino-con-lora-usando-un-rango-r-8">Ajuste fino con LoRA (usando un rango <span class="math inline">\(r = 8\)</span>):</h3>
+<ul>
+<li>Parámetros de la matriz <span class="math inline">\(A\)</span> (<span class="math inline">\(r \times k\)</span>): <span class="math inline">\(8 \times 4096 = 32,768\)</span></li>
+<li>Parámetros de la matriz <span class="math inline">\(B\)</span> (<span class="math inline">\(d \times r\)</span>): <span class="math inline">\(4096 \times 8 = 32,768\)</span></li>
+</ul>
+<p><span class="math display">\[\text{Parámetros a entrenar} = (r \times k) + (d \times r) = 32,768 + 32,768 = \mathbf{65,536}\]</span></p>
+<blockquote class="blockquote">
+<p><strong>Conclusión del cálculo:</strong> Al pasar de 16.7 millones de parámetros a solo 65 mil, hemos reducido el coste de almacenamiento y cálculo de esa capa en un <strong>99.6%</strong>, manteniendo una capacidad de aprendizaje prácticamente idéntica.</p>
+</blockquote>
+</section>
+<section id="el-truco-de-la-inicialización-matemática" class="level3">
+<h3 class="anchored" data-anchor-id="el-truco-de-la-inicialización-matemática">4. El truco de la Inicialización Matemática</h3>
+<p>Para que LoRA funcione desde el primer <em>step</em> de entrenamiento sin romper el conocimiento previo del modelo, la inicialización de las matrices <span class="math inline">\(B\)</span> y <span class="math inline">\(A\)</span> no puede ser aleatoria. Debe cumplir una condición estricta: al inicio, <span class="math inline">\(\Delta W\)</span> debe ser exactamente <span class="math inline">\(0\)</span>.</p>
+<p>Hugging Face y PyTorch lo resuelven así: 1. La matriz <strong><span class="math inline">\(A\)</span></strong> se inicializa usando una distribución gaussiana (valores aleatorios normales). 2. La matriz <strong><span class="math inline">\(B\)</span></strong> se inicializa completamente con <strong>ceros</strong>.</p>
+<p>Al comenzar el entrenamiento, cualquier multiplicación por la matriz de ceros da cero: <span class="math display">\[\Delta W = B \cdot A = 0 \cdot A = 0\]</span></p>
+<p>Esto garantiza que en la primera iteración, <span class="math inline">\(h = W_0 \cdot x + 0 \cdot x\)</span>, por lo que el modelo se comporta exactamente igual que el modelo base original antes de empezar a ajustarse con sus datos.</p>
+</section>
+<section id="escalado-mediante-alpha-alpha" class="level3">
+<h3 class="anchored" data-anchor-id="escalado-mediante-alpha-alpha">5. Escalado mediante <span class="math inline">\(\alpha\)</span> (Alpha)</h3>
+<p>Finalmente, LoRA aplica un factor de escala constante a la actualización para estabilizar el entrenamiento cuando cambia el rango <span class="math inline">\(r\)</span>. La ecuación final implementada en el código es:</p>
+<p><span class="math display">\[h = W_0 \cdot x + \frac{\alpha}{r} (B \cdot A \cdot x)\]</span></p>
+<p>Donde <strong><span class="math inline">\(\alpha\)</span></strong> (alpha) es una constante. Al dividir <span class="math inline">\(\alpha\)</span> entre <span class="math inline">\(r\)</span>, se asegura que cuando decida experimentar cambiando el rango (por ejemplo, subir de <span class="math inline">\(r=8\)</span> a <span class="math inline">\(r=16\)</span>), no necesite reajustar desde cero la tasa de aprendizaje (<em>learning rate</em>), ya que la escala de los gradientes se compensa dinámicamente.</p>
+</section>
+</section>
+<section id="plantillas-de-instrucciones" class="level2">
+<h2 class="anchored" data-anchor-id="plantillas-de-instrucciones">Plantillas de instrucciones</h2>
+<p>Antes de comenzar el proceso de ajuste fino (fine-tuning), exploremos cómo los LLM entienden las instrucciones o prompts.</p>
+<p>Usted ya está familiarizado con la forma en que los LLM responden a las instrucciones proporcionadas en texto plano, a menudo a través de prompting o indicaciones conversacionales. Aunque estos modelos están diseñados para comprender el lenguaje humano, no siempre están entrenados para interpretar las instrucciones y el historial de la conversación presentados exactamente en el mismo formato. La estructura específica de su prompt —la forma en que delimita la entrada del usuario, los mensajes del sistema o los turnos anteriores— puede variar de un modelo a otro.</p>
+<p>Aquí es donde las plantillas de instrucciones (también llamadas plantillas de chat o chat templates) cobran importancia. Una plantilla de instrucciones es el formato de texto específico, incluyendo tókens especiales y reglas estructurales, con la que un LLM en particular fue entrenado para recibir instrucciones, contexto o un historial de chat. Utilizar la plantilla correcta para el modelo con el que está trabajando es crucial para garantizar que el modelo entienda adecuadamente su entrada y responda de la manera prevista.</p>
+<p>Comenzamos importando las clases necesarias de la librería <code>transformers</code> para cargar tanto el tokenizador como el modelo causal de lenguaje.</p>
+<div id="23d89592" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForCausalLM</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Definimos el identificador del modelo que utilizaremos de prueba. En este caso, usaremos la versión instruct de Qwen2.5.</p>
+<div id="5ce86f05" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>model_id <span class="op">=</span> <span class="st">"Qwen/Qwen2.5-0.5B-Instruct"</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Cargamos el tokenizador correspondiente y visualizamos su propiedad chat_template. Esta plantilla en formato Jinja determina cómo se estructuran los roles de sistema, usuario y asistente en una sola cadena de texto.</p>
+<div id="bf7fa3d6" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Descarga y carga del tokenizador preentrenado</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_id)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspección de la plantilla Jinja asignada por defecto al modelo</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>pprint(tokenizer.chat_template)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>('{%- if tools %}\n'
+ "    {{- '&lt;|im_start|&gt;system\\n' }}\n"
+ "    {%- if messages[0]['role'] == 'system' %}\n"
+ "        {{- messages[0]['content'] }}\n"
+ '    {%- else %}\n'
+ "        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful "
+ "assistant.' }}\n"
+ '    {%- endif %}\n'
+ '    {{- "\\n\\n# Tools\\n\\nYou may call one or more functions to assist '
+ 'with the user query.\\n\\nYou are provided with function signatures within '
+ '&lt;tools&gt;&lt;/tools&gt; XML tags:\\n&lt;tools&gt;" }}\n'
+ '    {%- for tool in tools %}\n'
+ '        {{- "\\n" }}\n'
+ '        {{- tool | tojson }}\n'
+ '    {%- endfor %}\n'
+ '    {{- "\\n&lt;/tools&gt;\\n\\nFor each function call, return a json object with '
+ 'function name and arguments within &lt;tool_call&gt;&lt;/tool_call&gt; XML '
+ 'tags:\\n&lt;tool_call&gt;\\n{\\"name\\": &lt;function-name&gt;, \\"arguments\\": '
+ '&lt;args-json-object&gt;}\\n&lt;/tool_call&gt;&lt;|im_end|&gt;\\n" }}\n'
+ '{%- else %}\n'
+ "    {%- if messages[0]['role'] == 'system' %}\n"
+ "        {{- '&lt;|im_start|&gt;system\\n' + messages[0]['content'] + "
+ "'&lt;|im_end|&gt;\\n' }}\n"
+ '    {%- else %}\n'
+ "        {{- '&lt;|im_start|&gt;system\\nYou are Qwen, created by Alibaba Cloud. "
+ "You are a helpful assistant.&lt;|im_end|&gt;\\n' }}\n"
+ '    {%- endif %}\n'
+ '{%- endif %}\n'
+ '{%- for message in messages %}\n'
+ '    {%- if (message.role == "user") or (message.role == "system" and not '
+ 'loop.first) or (message.role == "assistant" and not message.tool_calls) %}\n'
+ "        {{- '&lt;|im_start|&gt;' + message.role + '\\n' + message.content + "
+ "'&lt;|im_end|&gt;' + '\\n' }}\n"
+ '    {%- elif message.role == "assistant" %}\n'
+ "        {{- '&lt;|im_start|&gt;' + message.role }}\n"
+ '        {%- if message.content %}\n'
+ "            {{- '\\n' + message.content }}\n"
+ '        {%- endif %}\n'
+ '        {%- for tool_call in message.tool_calls %}\n'
+ '            {%- if tool_call.function is defined %}\n'
+ '                {%- set tool_call = tool_call.function %}\n'
+ '            {%- endif %}\n'
+ '            {{- \'\\n&lt;tool_call&gt;\\n{"name": "\' }}\n'
+ '            {{- tool_call.name }}\n'
+ '            {{- \'", "arguments": \' }}\n'
+ '            {{- tool_call.arguments | tojson }}\n'
+ "            {{- '}\\n&lt;/tool_call&gt;' }}\n"
+ '        {%- endfor %}\n'
+ "        {{- '&lt;|im_end|&gt;\\n' }}\n"
+ '    {%- elif message.role == "tool" %}\n'
+ '        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != '
+ '"tool") %}\n'
+ "            {{- '&lt;|im_start|&gt;user' }}\n"
+ '        {%- endif %}\n'
+ "        {{- '\\n&lt;tool_response&gt;\\n' }}\n"
+ '        {{- message.content }}\n'
+ "        {{- '\\n&lt;/tool_response&gt;' }}\n"
+ '        {%- if loop.last or (messages[loop.index0 + 1].role != "tool") %}\n'
+ "            {{- '&lt;|im_end|&gt;\\n' }}\n"
+ '        {%- endif %}\n'
+ '    {%- endif %}\n'
+ '{%- endfor %}\n'
+ '{%- if add_generation_prompt %}\n'
+ "    {{- '&lt;|im_start|&gt;assistant\\n' }}\n"
+ '{%- endif %}\n')</code></pre>
+</div>
+</div>
+<p>Creamos una lista de diccionarios que simula una interacción estándar de chat, estructurada con los roles de <code>system</code> y <code>user</code>.</p>
+<div id="e8105558" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Definición de una conversación estructurada estructurada por roles</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> [</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a> {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"content"</span>: <span class="st">"Eres un asistente de geografía. Eres capaz de responder preguntas sobre el mundo."</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a> },</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a> {</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"content"</span>: <span class="st">"¿Cuál es la capital de España?"</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a> }]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Aplicamos la plantilla de chat configurando <code>tokenize=False</code> para observar la representación en texto plano del prompt junto con sus tókens especiales de control (e.g., <code>&lt;|im_start|&gt;</code> e <code>&lt;|im_end|&gt;</code>).</p>
+<div id="d14fee03" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Conversión de la estructura de lista a texto plano formateado según el modelo</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>pprint(tokenizer.apply_chat_template(prompt, tokenize<span class="op">=</span><span class="va">False</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>('&lt;|im_start|&gt;system\n'
+ 'Eres un asistente de geografía. Eres capaz de responder preguntas sobre el '
+ 'mundo.&lt;|im_end|&gt;\n'
+ '&lt;|im_start|&gt;user\n'
+ '¿Cuál es la capital de España?&lt;|im_end|&gt;\n')</code></pre>
+</div>
+</div>
+<p>Para pasar el prompt al modelo, necesitamos transformarlo en tókens numéricos (tensores). Añadimos <code>add_generation_prompt=True</code> para agregar los delimitadores finales que le indican al modelo que es el turno del asistente para responder.</p>
+<div id="815c22fd" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tokenización del prompt con formateo de chat integrado</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tokenized_input <span class="op">=</span> tokenizer.apply_chat_template(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    prompt,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    tokenize<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    add_generation_prompt<span class="op">=</span><span class="va">True</span>,  <span class="co"># Fundamental para indicar que el asistente debe comenzar a hablar ahora</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    return_dict<span class="op">=</span><span class="va">True</span>,            <span class="co"># Devuelve un diccionario compatible con las entradas de PyTorch</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    return_tensors<span class="op">=</span><span class="st">"pt"</span>          <span class="co"># Retorna tensores de PyTorch ("pt")</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>tokenized_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>{'input_ids': tensor([[151644,   8948,    198,     36,    416,    650,    438,    380,   6817,
+            409,   3893, 141742,     13,    468,    416,   2062,   1370,    409,
+          64034,  19978,  54572,  15131,    655,  28352,     13, 151645,    198,
+         151644,    872,    198,  30182,  44819,  19003,   1531,   1187,   6722,
+            409,  56508,     30, 151645,    198, 151644,  77091,    198]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])}</code></pre>
+</div>
+</div>
+<p>Cargamos el modelo en memoria para realizar una inferencia de prueba rápida con nuestro input tokenizado.</p>
+<div id="524d9af3" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carga de la arquitectura del modelo causal para inferencia</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(model_id)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>model</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"afc8818dabd442d7a81ce05a96c161e3","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(151936, 896)
+    (layers): ModuleList(
+      (0-23): 24 x Qwen2DecoderLayer(
+        (self_attn): Qwen2Attention(
+          (q_proj): Linear(in_features=896, out_features=896, bias=True)
+          (k_proj): Linear(in_features=896, out_features=128, bias=True)
+          (v_proj): Linear(in_features=896, out_features=128, bias=True)
+          (o_proj): Linear(in_features=896, out_features=896, bias=False)
+        )
+        (mlp): Qwen2MLP(
+          (gate_proj): Linear(in_features=896, out_features=4864, bias=False)
+          (up_proj): Linear(in_features=896, out_features=4864, bias=False)
+          (down_proj): Linear(in_features=4864, out_features=896, bias=False)
+          (act_fn): SiLUActivation()
+        )
+        (input_layernorm): Qwen2RMSNorm((896,), eps=1e-06)
+        (post_attention_layernorm): Qwen2RMSNorm((896,), eps=1e-06)
+      )
+    )
+    (norm): Qwen2RMSNorm((896,), eps=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=896, out_features=151936, bias=False)
+)</code></pre>
+</div>
+</div>
+<p>Pasamos los tensores desempaquetados al método <code>.generate()</code> para obtener la predicción de los tókens subsiguientes.</p>
+<div id="7a5066c2" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generación automática de tókens basada en el contexto suministrado</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>output_text <span class="op">=</span> model.generate(<span class="op">**</span>tokenized_input, max_new_tokens<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>output_text</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>tensor([[151644,   8948,    198,     36,    416,    650,    438,    380,   6817,
+            409,   3893, 141742,     13,    468,    416,   2062,   1370,    409,
+          64034,  19978,  54572,  15131,    655,  28352,     13, 151645,    198,
+         151644,    872,    198,  30182,  44819,  19003,   1531,   1187,   6722,
+            409,  56508,     30, 151645,    198, 151644,  77091,    198,   8747,
+           6722,    409,  56508,   1531,   4270,  23422,     13, 151645]])</code></pre>
+</div>
+</div>
+<p>Finalmente, decodificamos los tókens numéricos resultantes para transformarlos nuevamente en texto legible, omitiendo los tókens especiales de control.</p>
+<div id="f6133f7f" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Decodificación de la salida numérica a texto legible</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>pprint(tokenizer.decode(output_text[<span class="dv">0</span>], skip_special_tokens<span class="op">=</span><span class="va">True</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>('system\n'
+ 'Eres un asistente de geografía. Eres capaz de responder preguntas sobre el '
+ 'mundo.\n'
+ 'user\n'
+ '¿Cuál es la capital de España?\n'
+ 'assistant\n'
+ 'La capital de España es París.')</code></pre>
+</div>
+</div>
+<section id="personalización-del-formato-de-la-respuesta-generada" class="level3">
+<h3 class="anchored" data-anchor-id="personalización-del-formato-de-la-respuesta-generada">Personalización del formato de la respuesta generada</h3>
+<p>Para guiar la generación del modelo de manera más precisa e influir en el inicio de su respuesta, una técnica común al utilizar plantillas de instrucciones consiste en añadir el marcador para el rol de asistente justo al final del prompt formateado. Esto le indica explícitamente al modelo que ahora es el turno del asistente para generar texto, y que su respuesta debe comenzar inmediatamente después de este marcador.</p>
+<p>También podemos utilizar esta técnica para incentivar que la salida del modelo comience con un prefijo o frase específica, personalizando eficazmente el inicio de su respuesta. Por ejemplo, al añadir el marcador del rol de asistente seguido inmediatamente por GA: (geography assistant / asistente de geografía), establec# Decodificación de la salida numérica a texto legible tokenizer.decode(output_text[0], skip_special_tokens=True)emos la expectativa de que la respuesta generada por el modelo debe comenzar con esta cadena de texto específica. Actualicemos nuestro prompt en consecuencia y verifiquemos la salida del modelo para ver si sigue este formato:</p>
+<div id="e0fa58cd" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> [</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a> {</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"content"</span>: <span class="st">"Eres un asistente de geografía. Eres capaz de responder preguntas sobre el mundo."</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a> },</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a> {</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"content"</span>: <span class="st">"¿Cuál es la capital de España?"</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a> },</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a> {</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"role"</span>: <span class="st">"assistant"</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"content"</span>: <span class="st">"GA: "</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a> }]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Tokenizamos el prompt extendido utilizando el argumento <code>continue_final_message=True</code>. Esto evita que el tokenizador agregue caracteres de cierre adicionales al último mensaje, permitiendo que el modelo continúe escribiendo de forma fluida desde el prefijo “GA:”.</p>
+<div id="5847fde9" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Preparación del input forzando la continuación del prefijo definido</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>tokenized_input <span class="op">=</span> tokenizer.apply_chat_template(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    prompt,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    tokenize<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    return_dict<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    return_tensors<span class="op">=</span><span class="st">"pt"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    continue_final_message<span class="op">=</span><span class="va">True</span>  <span class="co"># Indica que el modelo debe continuar generando dentro del último mensaje del prompt</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Inferencia del modelo con la restricción de prefijo instalada</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>output_text <span class="op">=</span> model.generate(<span class="op">**</span>tokenized_input, max_new_tokens<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>pprint(tokenizer.decode(output_text[<span class="dv">0</span>], skip_special_tokens<span class="op">=</span><span class="va">True</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>('system\n'
+ 'Eres un asistente de geografía. Eres capaz de responder preguntas sobre el '
+ 'mundo.\n'
+ 'user\n'
+ '¿Cuál es la capital de España?\n'
+ 'assistant\n'
+ 'GA:  Barcelona')</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="adaptando-el-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="adaptando-el-dataset">Adaptando el dataset</h2>
+<p>En esta sección adaptaremos el dataset del capítulo anterior a la plantilla de instrucciones del modelo que vamos a ajustar.</p>
+<p>Cargamos el conjunto de datos previamente codificado desde el almacenamiento local y extraemos las etiquetas de clasificación disponibles.</p>
+<div id="da9b465f" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_from_disk, Dataset, DatasetDict</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Resolución de rutas locales para la carga de datos</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>base_path <span class="op">=</span> Path(<span class="st">"."</span>).resolve() <span class="op">/</span> <span class="st">'87_demo'</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_from_disk(base_path <span class="op">/</span> <span class="st">"data/dataset_encoded"</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Extracción de los nombres de las categorías objetivo</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>label_names <span class="op">=</span> dataset[<span class="st">"train"</span>].features[<span class="st">"label"</span>].names</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>dataset</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>DatasetDict({
+    train: Dataset({
+        features: ['text', 'label'],
+        num_rows: 168
+    })
+    validation: Dataset({
+        features: ['text', 'label'],
+        num_rows: 21
+    })
+    test: Dataset({
+        features: ['text', 'label'],
+        num_rows: 22
+    })
+})</code></pre>
+</div>
+</div>
+<div id="a31a6f6d" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model_id <span class="op">=</span> <span class="st">"Qwen/Qwen2.5-0.5B-Instruct"</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Definimos el mensaje de sistema (message_system). Este actuará como el conjunto de reglas e instrucciones fijas que le dictan al LLM cómo comportarse y qué formato estricto debe retornar.</p>
+<div id="8a70dbce" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>message_system <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="st">Eres un asistente para la clasificación de mensajes.</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="st">Clasificarás el mensaje en una de las siguientes categorías: "Escuela de India", "Escuela de España".</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="st">No se necesita ninguna explicación.</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="st">La salida debe ser únicamente una de las siguientes: "Escuela de India", "Escuela de España"</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Creamos la función de mapeo para los subconjuntos de entrenamiento y validación. Aquí incluimos los tres roles completos (system, user, assistant), ya que durante el entrenamiento el modelo necesita aprender tanto a interpretar el contexto como a predecir la respuesta esperada.</p>
+<div id="ac07c7f3" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> convert_to_training_messages(dataset):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [[    </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"system"</span>, </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: message_system</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: <span class="ss">f"Categorise: </span><span class="sc">{</span>ds[<span class="st">'text'</span>]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"assistant"</span>,</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: <span class="ss">f"Category: </span><span class="sc">{</span>label_names[ds[<span class="st">'label'</span>]]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    ] <span class="cf">for</span> ds <span class="kw">in</span> dataset]</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    texts <span class="op">=</span> [</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>        tokenizer.apply_chat_template(message, tokenize<span class="op">=</span><span class="va">False</span>) </span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> message <span class="kw">in</span> messages</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"text"</span>: texts}</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Aplicamos la función de transformación a los bloques de entrenamiento y validación, reconstruyendo los objetos nativos de Python en objetos de tipo <code>Dataset</code>.</p>
+<div id="86a82f90" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ds_train <span class="op">=</span> convert_to_training_messages(dataset[<span class="st">"train"</span>])</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ds_val <span class="op">=</span> convert_to_training_messages(dataset[<span class="st">"validation"</span>])</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>ds_train <span class="op">=</span> Dataset.from_dict(ds_train)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>ds_val <span class="op">=</span> Dataset.from_dict(ds_val)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Para el conjunto de evaluación (test), implementamos una lógica ligeramente distinta: el rol del assistant se omite y se activa add_generation_prompt=True. Esto deja el prompt preparado en el punto exacto donde el modelo debe realizar la predicción autónoma sin conocer la respuesta de antemano. Además, devolvemos un dataset plano con columnas text y label independientes para facilitar el bucle de evaluación final.</p>
+<div id="a7b142c5" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> convert_to_prompting_messages(dataset):</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    texts <span class="op">=</span> []</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> []</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ds <span class="kw">in</span> dataset:</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        message <span class="op">=</span> [</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"system"</span>, </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"content"</span>: message_system</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>          },</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>              <span class="st">"role"</span>: <span class="st">"user"</span>,</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>              <span class="st">"content"</span>: <span class="ss">f"Categorise: </span><span class="sc">{</span>ds[<span class="st">'text'</span>]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Formateo del prompt omitiendo la respuesta pero forzando el trigger de generación</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>        chat_message <span class="op">=</span> tokenizer.apply_chat_template(</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>          message,</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>          tokenize<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>          add_generation_prompt<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>        texts.append(chat_message)</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>        labels.append(ds[<span class="st">"label"</span>])</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"text"</span>: texts, <span class="st">"label"</span>: labels}</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="4c024a33" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ds_test <span class="op">=</span> convert_to_prompting_messages(dataset[<span class="st">"test"</span>])</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>ds_test <span class="op">=</span> Dataset.from_dict(ds_test)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Agrupamos los tres conjuntos procesados bajo un único objeto centralizado <code>DatasetDict</code> para mantener la organización de los datos.</p>
+<div id="2e72c406" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>ds_combined <span class="op">=</span> DatasetDict({</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"train"</span>: ds_train,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"validation"</span>: ds_val,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test"</span>: ds_test</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Almacenamos de forma persistente en disco el dataset resultante para optimizar los accesos en la fase de entrenamiento.</p>
+<div id="8077eab6" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Guardado del DatasetDict procesado en el almacenamiento local</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>ds_combined.save_to_disk(base_path <span class="op">/</span> <span class="st">"data/llm_dataset"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"4564735b4dd4483888bb355bb58f686d","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"903c2b5916734a19a98bfef56214eee6","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"91596fb924e64f52a80467feaabff578","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+</section>
+<section id="entrenamiento-con-lora" class="level2">
+<h2 class="anchored" data-anchor-id="entrenamiento-con-lora">Entrenamiento con LoRA</h2>
+<div id="a3521ad1" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_from_disk, Dataset</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="822e32dd" class="cell" data-execution_count="22">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> torch.cuda.is_available():</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(<span class="st">"cuda"</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Using CUDA device."</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    device <span class="op">=</span> torch.device(<span class="st">"cpu"</span>)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"CUDA not available, using CPU."</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using CUDA device.</code></pre>
+</div>
+</div>
+<p>Para inicializar el modelo de manera eficiente, utilizamos cuantización a 4-bits mediante la librería <code>bitsandbytes</code>. Esto reduce significativamente el consumo de VRAM.</p>
+<div id="24173657" class="cell" data-execution_count="23">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>model_id <span class="op">=</span> <span class="st">"Qwen/Qwen2.5-0.5B-Instruct"</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_id)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuración de 4-bits</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>bnb_config <span class="op">=</span> BitsAndBytesConfig(</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    load_in_4bit<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    bnb_4bit_compute_dtype<span class="op">=</span>torch.bfloat16,</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    bnb_4bit_quant_type<span class="op">=</span><span class="st">"nf4"</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    model_id,</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    quantization_config<span class="op">=</span>bnb_config,</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"2e356a480d0b47eb92bc2512da4dc9f7","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<div id="680ec0d6" class="cell" data-execution_count="24">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>base_path <span class="op">=</span> Path(<span class="st">"."</span>).resolve() <span class="op">/</span> <span class="st">'87_demo'</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_from_disk(base_path <span class="op">/</span> <span class="st">"data/llm_dataset"</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>dataset</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<pre><code>DatasetDict({
+    train: Dataset({
+        features: ['text'],
+        num_rows: 168
+    })
+    validation: Dataset({
+        features: ['text'],
+        num_rows: 21
+    })
+    test: Dataset({
+        features: ['text', 'label'],
+        num_rows: 22
+    })
+})</code></pre>
+</div>
+</div>
+<p>Configuramos los hiperparámetros de LoRA para el entrenamiento.</p>
+<ul>
+<li><strong><code>r</code> (El rango de LoRA):</strong> Como ya se ha mencionado, es el parámetro más crítico para controlar el tamaño de las pequeñas matrices de adaptación que se añaden a las capas del modelo y, por lo tanto, determina el número de parámetros entrenables. Un valor de <code>r</code> más bajo significa menos parámetros, pero potencialmente una menor capacidad para adaptaciones complejas. En este ejemplo, <code>r=4</code>, lo que indica matrices de adaptación bastante pequeñas.</li>
+<li><strong><code>lora_alpha</code>:</strong> Un factor de escala que ajusta la magnitud de las actualizaciones aprendidas por las capas LoRA. A menudo se configura de forma proporcional a <code>r</code> (por ejemplo, igual a <code>r</code>o <code>2 × r</code>) para controlar el nivel de influencia que las adaptaciones de LoRA tienen sobre el comportamiento del modelo original. El escalado real que se aplica es típicamente <code>lora_alpha / r</code>. Aquí, <code>lora_alpha=32</code>.</li>
+<li><strong><code>lora_dropout</code>:</strong> Especifica la tasa de <em>dropout</em> que se aplicará a las capas del adaptador LoRA durante el entrenamiento. Con la técnica de <em>dropout</em>, una fracción de las conexiones se ignora aleatoriamente durante cada paso de entrenamiento. Esto ayuda a evitar que los pequeños adaptadores LoRA sufran de sobreajuste (<em>overfitting</em>) con los datos de entrenamiento. Aquí se establece una tasa de <em>dropout</em> de 0.05 (5 por ciento).</li>
+<li><strong><code>bias</code>:</strong> Controla la forma en que se manejan los términos de sesgo (<em>bias</em>) en las capas objetivo durante el entrenamiento de LoRA. Configurar <code>bias="none"</code> significa que los parámetros de sesgo en las capas específicas por <code>target_modules</code> no se entrenarán; permanecerán congelados en sus valores preentrenados. Otras opciones podrían entrenar todos los términos de sesgo o solo algunos específicos.</li>
+<li><strong><code>task_type</code>:</strong> Le indica a la librería <code>peft</code> el tipo de tarea derivada (<em>downstream task</em>) para la que estás realizando el ajuste fino. Esto ayuda a la librería a identificar correctamente las capas o aplicar consideraciones específicas de la tarea. <code>CAUSAL_LM</code> indica modelado de lenguaje causal (<em>causal language modeling</em>), que es la tarea estándar para la mayoría de los LLM de generación de texto (predecir el próximo tóken basándose en los tókens anteriores).</li>
+<li><strong><code>target_modules</code>:</strong> Una lista de cadenas de texto (<em>strings</em>) que especifica los nombres exactos de las subcapas o módulos dentro del modelo base preentrenado donde se deben inyectar las matrices del adaptador LoRA. Los objetivos habituales en los modelos Transformer son las matrices de pesos en el mecanismo de atención (como la consulta <code>q_proj</code>, clave <code>k_proj</code>, valor <code>v_proj</code> y salida <code>o_proj</code>) y las capas <em>feed-forward</em> (<code>gate_proj</code>, <code>up_proj</code>, <code>down_proj</code>). Al dirigirse solo a módulos específicos e importantes, LoRA mantiene el número de parámetros entrenables notablemente más bajo que en un ajuste fino completo (<em>full fine-tuning</em>).</li>
+<li><strong><code>modules_to_save</code>:</strong> Especifica componentes adicionales del modelo, como <code>lm_head</code>, cuyos pesos originales también se volverán entrenables y se guardarán junto con los adaptadores LoRA. Ajustar de forma fina la capa <code>lm_head</code> es crucial, ya que afecta directamente a las probabilidades de salida del modelo y se beneficia de una adaptación directa a tu tarea específica.</li>
+</ul>
+<div id="297bbb07" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> LoraConfig</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuración del adaptador alineada con las especificaciones del diseño teórico</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>lora_config <span class="op">=</span> LoraConfig(</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  r<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  lora_alpha<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  lora_dropout<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  bias<span class="op">=</span><span class="st">"none"</span>,</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  task_type<span class="op">=</span><span class="st">"CAUSAL_LM"</span>,</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  target_modules <span class="op">=</span> [<span class="st">"q_proj"</span>, <span class="st">"k_proj"</span>, <span class="st">"v_proj"</span>, <span class="st">"o_proj"</span>, <span class="st">"gate_proj"</span>, <span class="st">"up_proj"</span>, <span class="st">"down_proj"</span>],</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  modules_to_save<span class="op">=</span>[<span class="st">"lm_head"</span>]</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Inyectamos la configuración PEFT definida sobre la arquitectura de nuestro modelo base, congelando los pesos originales y exponiendo únicamente los parámetros entrenables del adaptador.</p>
+<div id="2ab93b5d" class="cell" data-execution_count="26">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> get_peft_model</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>peft_model <span class="op">=</span> get_peft_model(</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    lora_config,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>peft_model</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>PeftModelForCausalLM(
+  (base_model): LoraModel(
+    (model): Qwen2ForCausalLM(
+      (model): Qwen2Model(
+        (embed_tokens): Embedding(151936, 896)
+        (layers): ModuleList(
+          (0-23): 24 x Qwen2DecoderLayer(
+            (self_attn): Qwen2Attention(
+              (q_proj): lora.Linear4bit(
+                (base_layer): Linear4bit(in_features=896, out_features=896, bias=True)
+                (lora_dropout): ModuleDict(
+                  (default): Dropout(p=0.05, inplace=False)
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=896, out_features=4, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=4, out_features=896, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (k_proj): lora.Linear4bit(
+                (base_layer): Linear4bit(in_features=896, out_features=128, bias=True)
+                (lora_dropout): ModuleDict(
+                  (default): Dropout(p=0.05, inplace=False)
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=896, out_features=4, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=4, out_features=128, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (v_proj): lora.Linear4bit(
+                (base_layer): Linear4bit(in_features=896, out_features=128, bias=True)
+                (lora_dropout): ModuleDict(
+                  (default): Dropout(p=0.05, inplace=False)
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=896, out_features=4, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=4, out_features=128, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (o_proj): lora.Linear4bit(
+                (base_layer): Linear4bit(in_features=896, out_features=896, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Dropout(p=0.05, inplace=False)
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=896, out_features=4, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=4, out_features=896, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+            )
+            (mlp): Qwen2MLP(
+              (gate_proj): lora.Linear4bit(
+                (base_layer): Linear4bit(in_features=896, out_features=4864, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Dropout(p=0.05, inplace=False)
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=896, out_features=4, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=4, out_features=4864, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (up_proj): lora.Linear4bit(
+                (base_layer): Linear4bit(in_features=896, out_features=4864, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Dropout(p=0.05, inplace=False)
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=896, out_features=4, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=4, out_features=4864, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (down_proj): lora.Linear4bit(
+                (base_layer): Linear4bit(in_features=4864, out_features=896, bias=False)
+                (lora_dropout): ModuleDict(
+                  (default): Dropout(p=0.05, inplace=False)
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=4864, out_features=4, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=4, out_features=896, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (act_fn): SiLUActivation()
+            )
+            (input_layernorm): Qwen2RMSNorm((896,), eps=1e-06)
+            (post_attention_layernorm): Qwen2RMSNorm((896,), eps=1e-06)
+          )
+        )
+        (norm): Qwen2RMSNorm((896,), eps=1e-06)
+        (rotary_emb): Qwen2RotaryEmbedding()
+      )
+      (lm_head): ModulesToSaveWrapper(
+        (original_module): Linear(in_features=896, out_features=151936, bias=False)
+        (modules_to_save): ModuleDict(
+          (default): Linear(in_features=896, out_features=151936, bias=False)
+        )
+      )
+    )
+  )
+)</code></pre>
+</div>
+</div>
+<div id="84f2cec7" class="cell" data-execution_count="27">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>peft_model.print_trainable_parameters()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>trainable params: 138,334,208 || all params: 632,366,976 || trainable%: 21.8756</code></pre>
+</div>
+</div>
+</section>
+<section id="entrenamiento" class="level2">
+<h2 class="anchored" data-anchor-id="entrenamiento">Entrenamiento</h2>
+<p>Para gestionar el entrenamiento, utilizaremos <code>SFTTrainer</code> de la librería <code>trl</code> (<em>Transformer Reinforcement Learning</em>) de Hugging Face. Este conjunto de herramientas especializado simplifica el proceso de post-entrenamiento al proporcionar herramientas de alto nivel para el ajuste fino supervisado (<em>supervised fine-tuning</em>) y otras técnicas de alineación diseñadas para enseñar al modelo las preferencias humanas.</p>
+<p><code>SFTTrainer</code> es especialmente útil cuando se trabaja con técnicas PEFT como LoRA, ya que optimiza la transición desde la configuración de los parámetros de entrenamiento hasta la inicialización del entrenador con su modelo y <em>datasets</em> específicos.</p>
+<div id="083384a3" class="cell" data-execution_count="28">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> trl <span class="im">import</span> SFTTrainer, SFTConfig</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<ul>
+<li><strong><code>output_dir</code></strong>: Especifica dónde se guardarán los puntos de control (<em>checkpoints</em>) del modelo entrenado, los registros (<em>logs</em>) y otras salidas.</li>
+<li><strong><code>report_to</code></strong>: Se establece en <code>"none"</code> para evitar que se informen o reporten las métricas de entrenamiento a plataformas externas.</li>
+<li><strong><code>overwrite_output_dir</code></strong>: Al configurarlo en <code>True</code>, se permite al <code>Trainer</code> eliminar y volver a crear el directorio de salida (<code>output_dir</code>) si este ya existe.</li>
+<li><strong><code>do_train</code></strong>: Confirma que se debe ejecutar el proceso de entrenamiento.</li>
+<li><strong><code>learning_rate</code></strong>: Establece la tasa de aprendizaje (<em>learning rate</em>) inicial para el optimizador del modelo.</li>
+<li><strong><code>num_train_epochs</code></strong>: Define el número de veces (épocas) que el <code>Trainer</code> iterará sobre el conjunto de datos de entrenamiento (<em>dataset</em>) completo.</li>
+<li><strong><code>bf16=True</code></strong>: Activa el formato <code>bfloat16</code>. Esto reduce a la mitad el consumo de memoria frente a <code>float32</code> y es altamente recomendado para GPUs modernas (Arquitectura Ampere o superior).</li>
+<li><strong><code>fp16=False</code></strong>: Desactivado a favor de <code>bf16</code>.</li>
+<li><strong><code>gradient_checkpointing=True</code></strong>: Crítico para la VRAM. Sacrifica una pequeña cantidad de velocidad de cómputo para re-calcular activaciones durante el paso backward en lugar de almacenarlas, ahorrando una cantidad masiva de memoria.</li>
+<li><strong><code>gradient_accumulation_steps=8</code></strong>: Acumula los gradientes durante 8 pasos antes de realizar una actualización de pesos. Esto permite simular un tamaño de batch mayor sin aumentar el consumo de memoria.</li>
+<li><strong><code>per_device_train_batch_size=1</code></strong>: Mantiene el batch en un sólo ejemplo para ahorrar memoria.</li>
+</ul>
+<div id="9a4c7a22" class="cell" data-execution_count="29">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>training_args <span class="op">=</span> SFTConfig(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>   output_dir<span class="op">=</span>base_path <span class="op">/</span> <span class="st">"data/trainer_output/my_classifier_llm"</span>,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>   report_to<span class="op">=</span><span class="st">"none"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>   do_train<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>   learning_rate<span class="op">=</span><span class="fl">2e-4</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>   num_train_epochs<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>   bf16<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>   fp16<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>   gradient_checkpointing<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>   gradient_accumulation_steps<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>   per_device_train_batch_size<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Instanciamos la clase entrenadora <code>SFTTrainer</code>, enlazando el modelo adaptado con las particiones de entrenamiento y validación correctas tomadas desde nuestro dataset cargado.</p>
+<div id="77265f38" class="cell" data-execution_count="30">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> SFTTrainer(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>   model<span class="op">=</span>peft_model,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>   args<span class="op">=</span>training_args,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>   train_dataset<span class="op">=</span>dataset[<span class="st">"train"</span>],</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>   eval_dataset<span class="op">=</span>dataset[<span class="st">"validation"</span>],</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="b45e442e" class="cell" data-execution_count="31">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>trainer.train()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+      
+      <progress value="63" max="63" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      [63/63 01:08, Epoch 3/3]
+    </div>
+    
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Step</th>
+<th data-quarto-table-cell-role="th">Training Loss</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>1.719697</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>0.983199</td>
+</tr>
+<tr class="odd">
+<td>30</td>
+<td>0.642650</td>
+</tr>
+<tr class="even">
+<td>40</td>
+<td>0.599334</td>
+</tr>
+<tr class="odd">
+<td>50</td>
+<td>0.500581</td>
+</tr>
+<tr class="even">
+<td>60</td>
+<td>0.448936</td>
+</tr>
+</tbody>
+</table>
+<p>
+</p></div>
+<div class="cell-output cell-output-display" data-execution_count="31">
+<pre><code>TrainOutput(global_step=63, training_loss=0.7991815540525649, metrics={'train_runtime': 69.571, 'train_samples_per_second': 7.244, 'train_steps_per_second': 0.906, 'total_flos': 212550197160960.0, 'train_loss': 0.7991815540525649, 'entropy': 0.5348093447585901, 'num_tokens': 71388.0, 'mean_token_accuracy': 0.8821052139004072, 'epoch': 3.0})</code></pre>
+</div>
+</div>
+<div id="e634981a" class="cell" data-execution_count="32">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> base_path <span class="op">/</span> <span class="st">"data/models/my_llm_classifier"</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>trainer.save_model(model_path)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="evaluación-del-ajuste-fino" class="level2">
+<h2 class="anchored" data-anchor-id="evaluación-del-ajuste-fino">Evaluación del ajuste fino</h2>
+<div id="c5a69d90" class="cell" data-execution_count="33">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> PeftModel</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForCausalLM</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_from_disk, Dataset</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>base_path <span class="op">=</span> Path(<span class="st">"."</span>).resolve() <span class="op">/</span> <span class="st">'87_demo'</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="77c22a61" class="cell" data-execution_count="34">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> base_path <span class="op">/</span> <span class="st">"data/models/my_llm_classifier"</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Realizamos una carga del modelo en dos pasos. Dado que PEFT guarda los cambios de manera incremental (como una “capa” sobre el modelo original), primero cargamos el modelo base y posteriormente inyectamos los adaptadores aprendidos.</p>
+<ul>
+<li><p>Carga del modelo base: Inicializamos el modelo original (model_id).</p></li>
+<li><p>Integración de PeftModel: `PeftModel.from_pretrained combina el modelo base con los pesos de entrenamienot (incluyendo el lm_head personalizado). Es aquí donde se restauran todas las configuraciones específicas del fine-tuning almacenadas.</p></li>
+<li><p>Tokenizador: Cargamos el tokenizador desde el directorio del modelo para asegurar que coincida exactamente con el vocabulario utilizado durante el entrenamiento.</p></li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Advertencia</span>Diferencias al cargar un modelo: Modelo Completo vs.&nbsp;Adaptadores LoRA
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Al intentar cargar un modelo entrenado mediante técnicas PEFT (LoRA) utilizando únicamente la función <code>AutoModelForCausalLM.from_pretrained(model_path)</code>, se producirá un error o una inicialización incorrecta. La explicación técnica reside en la naturaleza del almacenamiento de estos modelos:</p>
+<ol type="1">
+<li><p><strong>Estructura del directorio (<code>model_path</code>)</strong>: El directorio resultante tras el entrenamiento con LoRA no contiene el modelo completo. Únicamente almacena los archivos de configuración de los adaptadores (<code>adapter_config.json</code>) y los pesos de las matrices de entrenamiento (<code>adapter_model.safetensors</code>), junto con las capas explícitamente marcadas para guardarse (ej. <code>lm_head</code>). Los pesos del modelo base, que comprenden la mayor parte de la arquitectura (capas de atención, bloques transformadores, etc.), no están presentes.</p></li>
+<li><p><strong>Comportamiento del cargador</strong>: La función <code>AutoModelForCausalLM.from_pretrained</code> espera encontrar los pesos completos del modelo (ej. <code>model.safetensors</code>). Al no localizar estos archivos, el proceso genera errores de “archivo no encontrado” o intenta inicializar una arquitectura vacía, lo cual resulta inoperativo.</p></li>
+<li><p><strong>Advertencias de carga (<code>MISSING / UNEXPECTED</code>)</strong>: Cuando se intenta forzar la carga, el sistema reporta parámetros inesperados (los adaptadores, que no tienen dónde encajarse) y parámetros faltantes (la estructura base del modelo), lo que confirma la incapacidad del cargador estándar para reconocer la arquitectura completa sin el modelo base como referencia.</p></li>
+</ol>
+<p><strong>Conclusión</strong>: Para que el modelo sea funcional, es indispensable realizar la carga en dos pasos: * Primero, se inicializa el modelo base (<code>AutoModelForCausalLM</code>). * Segundo, se inyectan los adaptadores mediante <code>PeftModel.from_pretrained</code>, permitiendo que el sistema ensamble correctamente la arquitectura final.</p>
+</div>
+</div>
+</div>
+<div id="e1468281" class="cell" data-execution_count="35">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Carga el modelo base</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>base_model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    model_id, </span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Carga los adaptadores (esto integra el lm_head y los demás cambios)</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> PeftModel.from_pretrained(</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>base_model, </span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    model_id<span class="op">=</span>model_path  <span class="co"># Aquí pasas la ruta donde guardaste el entrenamiento</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Carga el tokenizer</span></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_path)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"c452da51eaa74115a479f59818de4b3c","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<div id="d3cbca8f" class="cell" data-execution_count="36">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_from_disk(base_path <span class="op">/</span> <span class="st">"data/llm_dataset"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="54f3fc9f" class="cell" data-execution_count="37">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(model, tokenizer, data):</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Tokenización y mapeo explícito de todo el diccionario al dispositivo acelerador</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    tokenized_input <span class="op">=</span> tokenizer(data, return_tensors<span class="op">=</span><span class="st">"pt"</span>).to(device)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generación segura pasando los tensores estructurados completos</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> model.generate(</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>tokenized_input,</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>        max_new_tokens<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Decodificación y segmentación guiada por el prefijo de respuesta</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>    decoded_message <span class="op">=</span> tokenizer.batch_decode(response, skip_special_tokens<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>]</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>    decoded_category <span class="op">=</span> decoded_message.split(<span class="st">"Category: "</span>)[<span class="dv">1</span>].strip()</span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> decoded_category</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="847e4cac" class="cell" data-execution_count="38">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>error_counter <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>total_messages <span class="op">=</span> <span class="bu">len</span>(dataset[<span class="st">'test'</span>])</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Bucle optimizado sobre el dataset plano corregido</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> index, data <span class="kw">in</span> <span class="bu">enumerate</span>(dataset[<span class="st">'test'</span>]):</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Inferencia del modelo sobre la columna de texto plano</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> evaluate(model, tokenizer, data[<span class="st">'text'</span>])</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    actual <span class="op">=</span> label_names[data[<span class="st">'label'</span>]]</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Impresión de reportes y diagnóstico selectivo ante fallos de predicción</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> actual <span class="op">!=</span> result:</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Actual: </span><span class="sc">{</span>actual<span class="sc">}</span><span class="ss">, Result: </span><span class="sc">{</span>result<span class="sc">}</span><span class="ss">, Index: </span><span class="sc">{</span>index<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>        error_counter <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Presentación estructurada del reporte de rendimiento final del clasificador</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"="</span><span class="op">*</span><span class="dv">50</span>)</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total messages: </span><span class="sc">{</span>total_messages<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total Error: </span><span class="sc">{</span>error_counter<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span><span class="op">*</span><span class="dv">50</span>)</span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy: </span><span class="sc">{</span>((<span class="dv">1</span> <span class="op">-</span> error_counter <span class="op">/</span> total_messages) <span class="op">*</span> <span class="dv">100</span>)<span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"="</span><span class="op">*</span><span class="dv">50</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Actual: india_school, Result: spain_school, Index: 8
+Actual: india_school, Result: spain_school, Index: 12
+
+==================================================
+Total messages: 22
+Total Error: 2
+--------------------------------------------------
+Accuracy: 90.91%
+==================================================</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script type="application/vnd.jupyter.widget-state+json">
+{"state":{"03f9623196e547a99c897016669a0ba6":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"0893d00671b746a5b968df788039656d":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"0ee9b7a11d0145fda2e134ef6f92d3f9":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"146cfb5ac1aa4d2eb773f8264ada3431":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_76bba0d3cf6a4e3ab66918908c3b6ce7","max":290,"min":0,"orientation":"horizontal","style":"IPY_MODEL_f9b38e8f9bcf4a19913327e740d3a13e","tabbable":null,"tooltip":null,"value":290}},"1b9d6b7c06384a32b4d3c00af77be00b":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"1d9f045412094876a2345806d17cc47b":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"1e2db1ac89d148efbd38c1ac0348f481":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_a84895db395644d5b287aaeec0134b45","placeholder":"​","style":"IPY_MODEL_c889361a4e4e44caba960041b60b4ed0","tabbable":null,"tooltip":null,"value":"Loading weights: 100%"}},"2a2fe2c53fbe4dcfb81fb983234ce8bf":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"2e0eb61b8a8f4c1d9c66ee4f08b098c5":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"2e356a480d0b47eb92bc2512da4dc9f7":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_a46239b660a74e49ab301866b2b7ff9f","IPY_MODEL_7afb212e4aa6451f9db9c62e783bd1a4","IPY_MODEL_9f5886a5f6fb443bba0ab705ecb80b68"],"layout":"IPY_MODEL_c689d2ab524847bc9e25d9ec912887a9","tabbable":null,"tooltip":null}},"2ea855eb93d04c7f963d27267d2f7b26":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"2ecb26c9581c44218b182f4e15cc6506":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"3b497e26657b4b5295bbe17c85444f6c":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"4564735b4dd4483888bb355bb58f686d":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_bb155b88a0fa46dbb60d808252e7eb98","IPY_MODEL_968ae32cad314d158a08931a170054c8","IPY_MODEL_f9548ce4a96c46188becaded34039fb7"],"layout":"IPY_MODEL_e54afbe0213d403295a3f74cdd3f9ad7","tabbable":null,"tooltip":null}},"51605a9379fd45a6a2e438749b7a46f4":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_baf9e53a7d7a49d0a3095e7a7700c702","max":290,"min":0,"orientation":"horizontal","style":"IPY_MODEL_b363245880ed4ec28ad49de66e7420c5","tabbable":null,"tooltip":null,"value":290}},"525c235026dc4775b993b6ba9f906e75":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"56a0aab0a0f9491db78a059d8b3b0303":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"5b615680f2844142821df85312f19f4d":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"5b9a7ed564e34a21842168a04c1712af":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"60853b5ff1994b36b10fad7e2e2521f7":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_1b9d6b7c06384a32b4d3c00af77be00b","max":21,"min":0,"orientation":"horizontal","style":"IPY_MODEL_deb6f0f42e3a4651a083e44db12e0b25","tabbable":null,"tooltip":null,"value":21}},"654d8d816d8c4e9f95f23bdf98544024":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_0893d00671b746a5b968df788039656d","placeholder":"​","style":"IPY_MODEL_94ff83063b1c44fca39842f7a1a1cbae","tabbable":null,"tooltip":null,"value":"Loading weights: 100%"}},"666fbabe6f0449c5bef521eb79b009c8":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"6d484548056e48d6b7e308bb4381ef9c":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"6e73072445a840cd9285081019008538":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_6d484548056e48d6b7e308bb4381ef9c","placeholder":"​","style":"IPY_MODEL_d5fc3a6a7f164931ae8e7a231755b5fd","tabbable":null,"tooltip":null,"value":" 21/21 [00:00&lt;00:00, 8480.68 examples/s]"}},"719fa139172e41cca922fdc51355679d":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_cea10c08b43545198934c70f0deb4ccc","placeholder":"​","style":"IPY_MODEL_1d9f045412094876a2345806d17cc47b","tabbable":null,"tooltip":null,"value":"Saving the dataset (1/1 shards): 100%"}},"725851c5375d46f281e862ac45d0dd72":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"74b093ab501c459ea93f0c21b2e2f969":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_2a2fe2c53fbe4dcfb81fb983234ce8bf","placeholder":"​","style":"IPY_MODEL_e0299a3b061141ed9af1841557f9c87a","tabbable":null,"tooltip":null,"value":" 290/290 [00:00&lt;00:00, 14902.39it/s]"}},"76bba0d3cf6a4e3ab66918908c3b6ce7":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"7afb212e4aa6451f9db9c62e783bd1a4":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_56a0aab0a0f9491db78a059d8b3b0303","max":290,"min":0,"orientation":"horizontal","style":"IPY_MODEL_9f08aaad4f7946339ae8f4c00cf93eff","tabbable":null,"tooltip":null,"value":290}},"7ef59fe39cc5495ba436e6d36cfbcc8a":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"84bd917ef3cb4296938916f5c1adb155":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"854e25af1fee4c0ea937ba91bde49476":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_2ecb26c9581c44218b182f4e15cc6506","placeholder":"​","style":"IPY_MODEL_f6db38a92e0a4d62aab217257b7d7c92","tabbable":null,"tooltip":null,"value":" 22/22 [00:00&lt;00:00, 8925.78 examples/s]"}},"903c2b5916734a19a98bfef56214eee6":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_719fa139172e41cca922fdc51355679d","IPY_MODEL_60853b5ff1994b36b10fad7e2e2521f7","IPY_MODEL_6e73072445a840cd9285081019008538"],"layout":"IPY_MODEL_ccebbdb792924add9b90b77bdd2a9593","tabbable":null,"tooltip":null}},"91596fb924e64f52a80467feaabff578":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_a1a925d0e01f408ca888d42851248c53","IPY_MODEL_e6ba13cd7f4b4416a1c4ccf2f4a4d97a","IPY_MODEL_854e25af1fee4c0ea937ba91bde49476"],"layout":"IPY_MODEL_2e0eb61b8a8f4c1d9c66ee4f08b098c5","tabbable":null,"tooltip":null}},"94ff83063b1c44fca39842f7a1a1cbae":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"968ae32cad314d158a08931a170054c8":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_2ea855eb93d04c7f963d27267d2f7b26","max":168,"min":0,"orientation":"horizontal","style":"IPY_MODEL_84bd917ef3cb4296938916f5c1adb155","tabbable":null,"tooltip":null,"value":168}},"9f08aaad4f7946339ae8f4c00cf93eff":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"9f5886a5f6fb443bba0ab705ecb80b68":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_7ef59fe39cc5495ba436e6d36cfbcc8a","placeholder":"​","style":"IPY_MODEL_b376533dae8140de9f46a8e40dc9b39d","tabbable":null,"tooltip":null,"value":" 290/290 [00:00&lt;00:00, 1305.66it/s]"}},"a1a925d0e01f408ca888d42851248c53":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_b491f032b61d423790412756fa5f9496","placeholder":"​","style":"IPY_MODEL_ba5aea73150f47169a3f01ade79ebfc4","tabbable":null,"tooltip":null,"value":"Saving the dataset (1/1 shards): 100%"}},"a46239b660a74e49ab301866b2b7ff9f":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_5b9a7ed564e34a21842168a04c1712af","placeholder":"​","style":"IPY_MODEL_0ee9b7a11d0145fda2e134ef6f92d3f9","tabbable":null,"tooltip":null,"value":"Loading weights: 100%"}},"a84895db395644d5b287aaeec0134b45":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"afc8818dabd442d7a81ce05a96c161e3":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_1e2db1ac89d148efbd38c1ac0348f481","IPY_MODEL_146cfb5ac1aa4d2eb773f8264ada3431","IPY_MODEL_74b093ab501c459ea93f0c21b2e2f969"],"layout":"IPY_MODEL_ec1be6ed263e4919b4f6a88c3a368b3e","tabbable":null,"tooltip":null}},"b363245880ed4ec28ad49de66e7420c5":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"b376533dae8140de9f46a8e40dc9b39d":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"b491f032b61d423790412756fa5f9496":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"ba5aea73150f47169a3f01ade79ebfc4":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"baf9e53a7d7a49d0a3095e7a7700c702":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"bb155b88a0fa46dbb60d808252e7eb98":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_725851c5375d46f281e862ac45d0dd72","placeholder":"​","style":"IPY_MODEL_cfaa558c3bad4ceb874f8347408f184d","tabbable":null,"tooltip":null,"value":"Saving the dataset (1/1 shards): 100%"}},"c452da51eaa74115a479f59818de4b3c":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HBoxModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HBoxModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HBoxView","box_style":"","children":["IPY_MODEL_654d8d816d8c4e9f95f23bdf98544024","IPY_MODEL_51605a9379fd45a6a2e438749b7a46f4","IPY_MODEL_f1b194289126456e8991c6975770e3dd"],"layout":"IPY_MODEL_3b497e26657b4b5295bbe17c85444f6c","tabbable":null,"tooltip":null}},"c689d2ab524847bc9e25d9ec912887a9":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"c886f393756846ec8f596f5aa8426f69":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"c889361a4e4e44caba960041b60b4ed0":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"ccebbdb792924add9b90b77bdd2a9593":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"cea10c08b43545198934c70f0deb4ccc":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"cfaa558c3bad4ceb874f8347408f184d":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"d5fc3a6a7f164931ae8e7a231755b5fd":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"deb6f0f42e3a4651a083e44db12e0b25":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"e0299a3b061141ed9af1841557f9c87a":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"e54afbe0213d403295a3f74cdd3f9ad7":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"e6ba13cd7f4b4416a1c4ccf2f4a4d97a":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"FloatProgressModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"FloatProgressModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"ProgressView","bar_style":"success","description":"","description_allow_html":false,"layout":"IPY_MODEL_666fbabe6f0449c5bef521eb79b009c8","max":22,"min":0,"orientation":"horizontal","style":"IPY_MODEL_525c235026dc4775b993b6ba9f906e75","tabbable":null,"tooltip":null,"value":22}},"ec1be6ed263e4919b4f6a88c3a368b3e":{"model_module":"@jupyter-widgets/base","model_module_version":"2.0.0","model_name":"LayoutModel","state":{"_model_module":"@jupyter-widgets/base","_model_module_version":"2.0.0","_model_name":"LayoutModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"LayoutView","align_content":null,"align_items":null,"align_self":null,"border_bottom":null,"border_left":null,"border_right":null,"border_top":null,"bottom":null,"display":null,"flex":null,"flex_flow":null,"grid_area":null,"grid_auto_columns":null,"grid_auto_flow":null,"grid_auto_rows":null,"grid_column":null,"grid_gap":null,"grid_row":null,"grid_template_areas":null,"grid_template_columns":null,"grid_template_rows":null,"height":null,"justify_content":null,"justify_items":null,"left":null,"margin":null,"max_height":null,"max_width":null,"min_height":null,"min_width":null,"object_fit":null,"object_position":null,"order":null,"overflow":null,"padding":null,"right":null,"top":null,"visibility":null,"width":null}},"f1b194289126456e8991c6975770e3dd":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_5b615680f2844142821df85312f19f4d","placeholder":"​","style":"IPY_MODEL_03f9623196e547a99c897016669a0ba6","tabbable":null,"tooltip":null,"value":" 290/290 [00:00&lt;00:00, 2759.84it/s]"}},"f6db38a92e0a4d62aab217257b7d7c92":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}},"f9548ce4a96c46188becaded34039fb7":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLModel","state":{"_dom_classes":[],"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLModel","_view_count":null,"_view_module":"@jupyter-widgets/controls","_view_module_version":"2.0.0","_view_name":"HTMLView","description":"","description_allow_html":false,"layout":"IPY_MODEL_c886f393756846ec8f596f5aa8426f69","placeholder":"​","style":"IPY_MODEL_fe4f38730513436cb8c6f8d1b028994e","tabbable":null,"tooltip":null,"value":" 168/168 [00:00&lt;00:00, 53112.46 examples/s]"}},"f9b38e8f9bcf4a19913327e740d3a13e":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"ProgressStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"ProgressStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","bar_color":null,"description_width":""}},"fe4f38730513436cb8c6f8d1b028994e":{"model_module":"@jupyter-widgets/controls","model_module_version":"2.0.0","model_name":"HTMLStyleModel","state":{"_model_module":"@jupyter-widgets/controls","_model_module_version":"2.0.0","_model_name":"HTMLStyleModel","_view_count":null,"_view_module":"@jupyter-widgets/base","_view_module_version":"2.0.0","_view_name":"StyleView","background":null,"description_width":"","font_size":null,"text_color":null}}},"version_major":2,"version_minor":0}
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/surtich\.github\.io\/IA-para-desarrolladores\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

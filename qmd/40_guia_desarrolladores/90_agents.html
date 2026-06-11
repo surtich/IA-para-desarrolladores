@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Agentes de IA – IA para desarrolladores</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-ab5985e7cd7d0abcbf09aae1c15bbc81.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">IA para desarrolladores</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../qmd/index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/40_guia_desarrolladores/10_ollama.html">Guía para desarrolladores</a></li><li class="breadcrumb-item"><a href="../../qmd/40_guia_desarrolladores/90_agents.html">Agentes de IA</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Buscar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal simple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal múltiple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/40_logistic_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/50_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Redes neuronales</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">LLM</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/00_introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">¿Qué es LLM?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/05_tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tokenización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/20_word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/30_similarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Similitud entre palabras</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/40_attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mecanismo de Atención</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/50_decoder.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decoder-Only Transformers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Hugging Face</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+ <span class="menu-text">qmd/30_hugging_face/10_intro.qmd</span>
+  </li>
+          <li class="sidebar-item">
+ <span class="menu-text">qmd/30_hugging_face/20_fine_tunning.qmd</span>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guía para desarrolladores</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/10_ollama.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ollama</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/20_api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Llamadas a APIs de LLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/30_params.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parametros en LLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/40_templates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Plantillas de promting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/50_memory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Memoria en LLM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/60_ingenieria_prompts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ingeniería de Prompts</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/70_structured_output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Salida estructurada</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/75_vector_db.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bases de datos vectoriales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/80_rag.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RAG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/85_hugging_face.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hugging Face</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/87_fine_tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fine-Tunning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/87a_ft_data_preparation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preparación de datos para el ajuste fino</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/87b_ft_classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ajuste fino en un modelo de clasificación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/90_agents.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Agentes de IA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Apéndices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/10_derivadas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derivadas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/20_matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Álgebra Lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../linear_transformations.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Demo: Transformaciones lineales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../presentacion_2025.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Presentación 2025</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#introducción" id="toc-introducción" class="nav-link active" data-scroll-target="#introducción">Introducción</a></li>
+  <li><a href="#qué-son-los-agentes-de-ia" id="toc-qué-son-los-agentes-de-ia" class="nav-link" data-scroll-target="#qué-son-los-agentes-de-ia">¿Qué son los Agentes de IA?</a></li>
+  <li><a href="#workflows-vs.-agentes-de-ia" id="toc-workflows-vs.-agentes-de-ia" class="nav-link" data-scroll-target="#workflows-vs.-agentes-de-ia">Workflows vs.&nbsp;Agentes de IA</a></li>
+  <li><a href="#tools" id="toc-tools" class="nav-link" data-scroll-target="#tools">Tools</a>
+  <ul class="collapse">
+  <li><a href="#ejemplo-de-aplicación" id="toc-ejemplo-de-aplicación" class="nav-link" data-scroll-target="#ejemplo-de-aplicación">Ejemplo de aplicación</a></li>
+  </ul></li>
+  <li><a href="#api-tools" id="toc-api-tools" class="nav-link" data-scroll-target="#api-tools">API Tools</a></li>
+  <li><a href="#sdk-de-agentes" id="toc-sdk-de-agentes" class="nav-link" data-scroll-target="#sdk-de-agentes">SDK de Agentes</a>
+  <ul class="collapse">
+  <li><a href="#por-qué-utilizar-un-sdk-de-agentes" id="toc-por-qué-utilizar-un-sdk-de-agentes" class="nav-link" data-scroll-target="#por-qué-utilizar-un-sdk-de-agentes">¿Por qué utilizar un SDK de agentes?</a></li>
+  </ul></li>
+  <li><a href="#frameworks-y-sdks-destacados" id="toc-frameworks-y-sdks-destacados" class="nav-link" data-scroll-target="#frameworks-y-sdks-destacados">Frameworks y SDKs destacados</a></li>
+  <li><a href="#smolagents" id="toc-smolagents" class="nav-link" data-scroll-target="#smolagents">smolagents</a>
+  <ul class="collapse">
+  <li><a href="#code-agents" id="toc-code-agents" class="nav-link" data-scroll-target="#code-agents">Code Agents</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/40_guia_desarrolladores/10_ollama.html">Guía para desarrolladores</a></li><li class="breadcrumb-item"><a href="../../qmd/40_guia_desarrolladores/90_agents.html">Agentes de IA</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Agentes de IA</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introducción" class="level2">
+<h2 class="anchored" data-anchor-id="introducción">Introducción</h2>
+<p>Hasta ahora, nuestro recorrido por el mundo de los LLMs ha seguido una progresión lógica:</p>
+<ul>
+<li><strong>Fundamentos:</strong> Aprendimos cómo los modelos generan texto a partir de la arquitectura y los pesos.</li>
+<li><strong>Contextualización (RAG):</strong> Vimos cómo enriquecer el conocimiento del modelo con datos externos mediante la recuperación de información.</li>
+<li><strong>Adaptación (PEFT):</strong> Exploramos cómo especializar un modelo preentrenado para tareas específicas.</li>
+</ul>
+<p>Sin embargo, en todos estos casos, nos hemos limitado a un paradigma de <strong>“Generación Pasiva”</strong>: el modelo recibe una entrada y devuelve una salida. El LLM actúa como un procesador de texto, pero no interactúa con el mundo real.</p>
+<p>Para que la IA alcance su máximo potencial, necesitamos trascender la generación de texto. Necesitamos sistemas que puedan navegar por la web, gestionar calendarios, ejecutar código o procesar correos electrónicos de forma autónoma. Es aquí donde entran los <strong>Agentes de IA</strong>: sistemas capaces de razonar, planificar y, crucialmente, <strong>actuar</strong> sobre su entorno.</p>
+</section>
+<section id="qué-son-los-agentes-de-ia" class="level2">
+<h2 class="anchored" data-anchor-id="qué-son-los-agentes-de-ia">¿Qué son los Agentes de IA?</h2>
+<p>Un agente de IA es un sistema que utiliza un LLM como su “motor de razonamiento” para completar tareas complejas. A diferencia de un modelo de chat convencional, que solo responde a una consulta, un agente opera bajo un <strong>ciclo de razonamiento y acción</strong>.</p>
+<p>El agente no solo procesa una instrucción; él decide: 1. <strong>Qué pasos seguir</strong> para desglosar una meta de alto nivel. 2. <strong>Qué herramientas utilizar</strong> (calculadora, navegador, APIs) para obtener información o realizar acciones. 3. <strong>Cómo evaluar los resultados</strong> de cada paso para ajustar su estrategia si es necesario.</p>
+<p>En esencia, el agente actúa como un <strong>orquestador autónomo</strong>.</p>
+</section>
+<section id="workflows-vs.-agentes-de-ia" class="level2">
+<h2 class="anchored" data-anchor-id="workflows-vs.-agentes-de-ia">Workflows vs.&nbsp;Agentes de IA</h2>
+<p>Es común confundir un flujo de trabajo (workflow) automatizado con un agente, pero la diferencia fundamental radica en la <strong>autonomía y la toma de decisiones</strong>.</p>
+<p>En un workflow, el desarrollador define exactamente qué pasos se ejecutan y en qué orden. El sistema simplemente sigue esa receta. En cambio, un agente de IA tiene la capacidad de <strong>decidir por sí mismo</strong> cómo alcanzar un objetivo, lo que le permite adaptarse a situaciones imprevistas o cambiar de estrategia sobre la marcha.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Característica</th>
+<th style="text-align: left;">Flujo de Trabajo (Workflow)</th>
+<th style="text-align: left;">Agente de IA</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Estructura</strong></td>
+<td style="text-align: left;">Lineal, predefinida y rígida.</td>
+<td style="text-align: left;">Dinámica, basada en objetivos.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Toma de decisiones</strong></td>
+<td style="text-align: left;">Programada por el desarrollador.</td>
+<td style="text-align: left;">Delegada al LLM durante la ejecución.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Flexibilidad</strong></td>
+<td style="text-align: left;">Baja; sigue pasos fijos.</td>
+<td style="text-align: left;">Alta; puede elegir herramientas y caminos.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Determinismo</strong></td>
+<td style="text-align: left;">Altamente determinista.</td>
+<td style="text-align: left;">No determinista (varía según el contexto).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Caso de uso ideal</strong></td>
+<td style="text-align: left;">Tareas repetitivas y estables.</td>
+<td style="text-align: left;">Tareas complejas y ambiguas.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="tools" class="level2">
+<h2 class="anchored" data-anchor-id="tools">Tools</h2>
+<p>Una <strong>tool</strong> o herramienta es cualquier recurso externo que un LLM puede utilizar para obtener información o realizar una acción. Las herramientas pueden ser tan simples como una calculadora o tan complejas como sistemas de reserva de vuelos.</p>
+<section id="ejemplo-de-aplicación" class="level3">
+<h3 class="anchored" data-anchor-id="ejemplo-de-aplicación">Ejemplo de aplicación</h3>
+<p>Supongamos que queremos conocer la temperatura actual de una ciudad.</p>
+<p>Si probamos a hacer esta pregunta a un LLM podemos comprobar que no será capaz de satisfacer nuestra petición:</p>
+<div id="c8eac8a2" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>load_dotenv(override<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> os.getenv(<span class="st">'OLLAMA_MODEL'</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>openai <span class="op">=</span> OpenAI(base_url<span class="op">=</span><span class="st">"http://localhost:11434/v1"</span>, api_key<span class="op">=</span><span class="st">"ollama"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> openai.chat.completions.create(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a> model<span class="op">=</span>model,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a> messages<span class="op">=</span>[</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"Eres un agente de viajes especializado en proporcionar información sobre una ciudad: lugares de interés, cultura, gastronomía, consejos de viaje, información meteorológica, etc. Tu objetivo es ayudar a los usuarios a planificar sus viajes proporcionando información precisa y útil sobre la ciudad que elijan."</span>},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"Estoy planificando un viaje a España. Concretamente, visitaré Majadahonda y necesito saber cuál es la temperatura actual."</span>}]</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.choices[<span class="dv">0</span>].message.content)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>¡Hola! Me alegra poder ayudarte con tu planificación de tu viaje a España.
+
+La Majadahonda es una localidad española en la comunidad autónoma de La Rioja, en el departamento de Biscaygas (antes de ser independentista y luego se convirtió en Biscaygas independiente... ¡pero eso sucede muy poco ahora!). Aunque no tenga un término genérico como "Majadahonda", la mayoría de los lugares y hoteles están ubicados cerca de esta localidad.
+
+Por lo tanto, te proporcionaré la temperatura actual para el último día de junio, pero si quieres conocer las condiciones más recientes, te sugiero ver si hay opciones en el sitio web del Instituto Nacional de Estudios Estadísticos (INE) o aplicaciones móviles como "Tenp" de esta comunidad autónoma. También puedes intentar buscar información en redes sociales o sitios web locales.
+
+Sin embargo, gracias a mi entrenamiento, puedo darte la temperatura actual aproximada para el último día de junio en Majadahonda:
+
+**Junio 28**, la temperatura promedio diaria es de **16,2 °C**
+
+Puedes calcular la mediana y máximo actual y las temperaturas para los días anteriores.
+
+Si necesitas más ayuda o información sobre la comunidad autónoma de Biscaygas, estaré encantado de ayudarte.</code></pre>
+</div>
+</div>
+<p>El modelo no tiene acceso a información en tiempo real, por lo que no puede responder a esta consulta. Sin embargo, si le proporcionamos una herramienta que le permita consultar la temperatura actual, el LLM podrá utilizarla para obtener la información necesaria.</p>
+<div id="9a4d6ab7" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> obtener_coordenadas(ciudad):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"https://geocoding-api.open-meteo.com/v1/search?name=</span><span class="sc">{</span>ciudad<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    respuesta <span class="op">=</span> requests.get(url).json()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"results"</span> <span class="kw">in</span> respuesta:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Tomamos el primer resultado que suele ser el más relevante</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        datos <span class="op">=</span> respuesta[<span class="st">"results"</span>][<span class="dv">0</span>]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> datos[<span class="st">"latitude"</span>], datos[<span class="st">"longitude"</span>]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>ciudad <span class="op">=</span> <span class="st">"Majadahonda"</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>coords <span class="op">=</span> obtener_coordenadas(ciudad)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>coords</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>(40.47353, -3.87182)</code></pre>
+</div>
+</div>
+<div id="6b8ff397" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> obtener_temperatura(lat, lon):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Consultamos la API de clima directamente con latitud y longitud</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"https://api.open-meteo.com/v1/forecast?latitude=</span><span class="sc">{</span>lat<span class="sc">}</span><span class="ss">&amp;longitude=</span><span class="sc">{</span>lon<span class="sc">}</span><span class="ss">&amp;current=temperature_2m"</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    respuesta <span class="op">=</span> requests.get(url)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> respuesta.status_code <span class="op">==</span> <span class="dv">200</span>:</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        datos <span class="op">=</span> respuesta.json()</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        temp <span class="op">=</span> datos[<span class="st">"current"</span>][<span class="st">"temperature_2m"</span>]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        unidad <span class="op">=</span> datos[<span class="st">"current_units"</span>][<span class="st">"temperature_2m"</span>]</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f"La temperatura actual en las coordenadas (</span><span class="sc">{</span>lat<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>lon<span class="sc">}</span><span class="ss">) es de </span><span class="sc">{</span>temp<span class="sc">}{</span>unidad<span class="sc">}</span><span class="ss">."</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Error al obtener los datos del clima."</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Ejemplo de uso (coordenadas de Majadahonda):</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#print(obtener_temperatura(*coords))</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Observe que hemos usado el modelo de Gemini ya que el que estábamos usando en Ollama no estaba llamando correctamente a las herramientas.</p>
+<p>Por otro lado, el modelo es el que decide autónomamente si hay que llamar a una herramienta o no, y en caso de que lo haga, qué herramienta usar y con qué argumentos. Para ello, es necesario definir un <strong>prompt de sistema</strong> que le indique al modelo cómo debe usar las herramientas disponibles. Además, el modelo no tiene acceso directamente a las herramientas, por lo que es necesario implementar un mecanismo de <strong>ejecución de herramientas</strong> que interprete las llamadas a herramientas generadas por el modelo y ejecute la función correspondiente. Las herramientas se llaman desde un código escrito en Python.</p>
+<div id="20db733f" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>load_dotenv(override<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>api_key <span class="op">=</span> os.getenv(<span class="st">'GOOGLE_API_KEY'</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> <span class="st">"gemini-2.5-flash"</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>openai <span class="op">=</span> OpenAI(base_url<span class="op">=</span><span class="st">"https://generativelanguage.googleapis.com/v1beta"</span>, api_key<span class="op">=</span>api_key)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>system_prompt <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="st">Eres un agente de viajes especializado en proporcionar información sobre una ciudad.</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="st">Cuando te pregunten por la temperatura actual de una ciudad, no confíes en la información que tienes de esa ciudad y usa estas herramientas en orden:</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="st">1.- Obtener coordenadas de la </span><span class="sc">{ciudad}</span><span class="st">, responde exactamente:</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="st">  TOOL CALL: obtener_coordenadas ciudad=</span><span class="sc">{ciudad}</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="st">Esto te dará la </span><span class="sc">{latitud}</span><span class="st"> y </span><span class="sc">{longitud}</span><span class="st"> de la ciudad. Luego, con esa información, haz lo siguiente:</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="st">2.- Obtener temperatura de unas coordenadas, responde exactamente:</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="st">  TOOL CALL: obtener_temperatura lat=</span><span class="sc">{latitud}</span><span class="st"> lon=</span><span class="sc">{longitud}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="st">No añadas nada más cuando uses una herramienta. Cuando tengas la respuesta, responde con texto normal</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Definimos las herramientas disponibles</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>tools <span class="op">=</span> {</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"obtener_coordenadas"</span>: obtener_coordenadas,</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">"obtener_temperatura"</span>: obtener_temperatura</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ejecutar_agente(user_input, max_turns<span class="op">=</span><span class="dv">5</span>):</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_prompt},</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_input}</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(max_turns):</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> openai.chat.completions.create(model<span class="op">=</span>model, messages<span class="op">=</span>messages)</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        content <span class="op">=</span> response.choices[<span class="dv">0</span>].message.content</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>        messages.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: content})</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"🧠 LLM: </span><span class="sc">{</span>content<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>        match <span class="op">=</span> re.search(<span class="vs">r"TOOL CALL:</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\w</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="ch">\{</span><span class="dv">.</span><span class="op">*</span><span class="ch">\}</span><span class="kw">)</span><span class="vs">"</span>, content)</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Regex genérico para: TOOL CALL: nombre_tool key1=val1 key2=val2...</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        match <span class="op">=</span> re.search(<span class="vs">r"TOOL CALL: </span><span class="kw">(</span><span class="dv">\w</span><span class="op">+</span><span class="kw">)</span><span class="vs"> </span><span class="kw">(</span><span class="dv">.</span><span class="op">*</span><span class="kw">)</span><span class="vs">"</span>, content)</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> match:</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>            tool_name <span class="op">=</span> match.group(<span class="dv">1</span>)</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>            args_string <span class="op">=</span> match.group(<span class="dv">2</span>)</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Buscar la función en el registro de tools</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tool_name <span class="kw">in</span> tools:</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>                func <span class="op">=</span> tools[tool_name]</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Parsear argumentos (convirtiendo x=y en diccionario)</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Ejemplo: lat=40.47 lon=-3.87 -&gt; {"lat": "40.47", "lon": "-3.87"}</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>                <span class="cf">try</span>:</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>                    args <span class="op">=</span> <span class="bu">dict</span>(item.split(<span class="st">"="</span>) <span class="cf">for</span> item <span class="kw">in</span> args_string.split())</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># TIP: Conversión de tipos básica (opcional, si tus funciones esperan int/float)</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Aquí podrías añadir lógica para convertir "40.47" a float(40.47)</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f"🛠️ Ejecutando </span><span class="sc">{</span>tool_name<span class="sc">}</span><span class="ss"> con </span><span class="sc">{</span>args<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>                    resultado <span class="op">=</span> func(<span class="op">**</span>args)</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>                   </span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>                    messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"OBSERVACIÓN: </span><span class="sc">{</span>resultado<span class="sc">}</span><span class="ss">"</span>})</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>                <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>                    messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"ERROR: Fallo al ejecutar </span><span class="sc">{</span>tool_name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">str</span>(e)<span class="sc">}</span><span class="ss">"</span>})</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>                messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"ERROR: La herramienta '</span><span class="sc">{</span>tool_name<span class="sc">}</span><span class="ss">' no existe."</span>})</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> content</span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"Límite de turnos alcanzado."</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Ejecución</span></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>respuesta_final <span class="op">=</span> ejecutar_agente(<span class="st">"Quiero saber institutos públicos en Majadahonda y la temperatura actual."</span>)</span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">✅ Respuesta final: </span><span class="sc">{</span>respuesta_final<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>🧠 LLM: TOOL CALL: obtener_coordenadas ciudad=Majadahonda
+🛠️ Ejecutando obtener_coordenadas con {'ciudad': 'Majadahonda'}
+🧠 LLM: TOOL CALL: obtener_temperatura lat=40.47353 lon=-3.87182
+🛠️ Ejecutando obtener_temperatura con {'lat': '40.47353', 'lon': '-3.87182'}
+🧠 LLM: La temperatura actual en Majadahonda es de 22.3°C.
+
+No tengo información sobre institutos públicos en Majadahonda.
+
+✅ Respuesta final: La temperatura actual en Majadahonda es de 22.3°C.
+
+No tengo información sobre institutos públicos en Majadahonda.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="api-tools" class="level2">
+<h2 class="anchored" data-anchor-id="api-tools">API Tools</h2>
+<p>Muchas API de LLMs (incluyendo la API de OpenAI) ya tienen soporte nativo para herramientas, lo que simplifica mucho este proceso. En lugar de tener que parsear manualmente las llamadas a herramientas, podemos definir un esquema de herramientas directamente en la llamada a la API, y el modelo generará una estructura de respuesta específica para indicar qué herramienta quiere usar y con qué argumentos. Esto elimina la necesidad de regex o parsing manual, ya que el modelo seguirá un formato predefinido para las llamadas a herramientas.</p>
+<p>En el siguiente ejemplo, se muestra cómo definir herramientas usando el esquema nativo de la API de OpenAI, lo que hace que la interacción con las herramientas sea mucho más fluida y estructurada. El modelo generará automáticamente una sección <code>tool_calls</code> en su respuesta cuando quiera usar una herramienta, y el código de ejecución simplemente necesita procesar esa sección para ejecutar la herramienta correspondiente. Cuando se quiera informar al modelo del resultado de la herramienta, se debe usar el rol <code>tool</code> para que el modelo lo reciba como una respuesta de la herramienta, lo que mejora la claridad y la organización de la conversación. Este rol <code>tool</code> debe incluir el parametro <code>tool_call_id</code> que corresponde al ID de la llamada a herramienta que se está respondiendo, lo que permite al modelo asociar correctamente la respuesta con la herramienta utilizada.</p>
+<p>Observe que el modelo informa bien de la temperatura de Majadahonda, pero no de los institutos públicos, que se los inventa. Esto se debe a que el modelo no tiene acceso a una herramienta para obtener esa información, por lo que intenta responder con su conocimiento previo, que en este caso es inventado. Para evitar esto, es importante diseñar el prompt de sistema de manera que el modelo entienda claramente cuándo debe usar una herramienta y que no intente responder con información inventada si no tiene acceso a los datos necesarios. En este caso, podríamos mejorar el prompt para indicar explícitamente que si no tiene acceso a la información actualizada sobre los institutos públicos, debe responder con un mensaje indicando que no puede proporcionar esa información en lugar de inventarla.</p>
+<div id="313d0998" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openai <span class="im">import</span> OpenAI</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>api_key <span class="op">=</span> os.getenv(<span class="st">'GROQ_API_KEY'</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> <span class="st">"llama-3.3-70b-versatile"</span> </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>openai <span class="op">=</span> OpenAI(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    base_url<span class="op">=</span><span class="st">"https://api.groq.com/openai/v1"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    api_key<span class="op">=</span>api_key</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Definición de herramientas (Esquema nativo)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>tools_schema <span class="op">=</span> [</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"function"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"function"</span>: {</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"name"</span>: <span class="st">"obtener_coordenadas"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"description"</span>: <span class="st">"Obtiene la latitud y longitud de una ciudad."</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">"parameters"</span>: {</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                <span class="st">"type"</span>: <span class="st">"object"</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                <span class="st">"properties"</span>: {</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"ciudad"</span>: {<span class="st">"type"</span>: <span class="st">"string"</span>, <span class="st">"description"</span>: <span class="st">"Nombre de la ciudad"</span>}</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>                <span class="st">"required"</span>: [<span class="st">"ciudad"</span>]</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"function"</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">"function"</span>: {</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>            <span class="st">"name"</span>: <span class="st">"obtener_temperatura"</span>,</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>            <span class="st">"description"</span>: <span class="st">"Obtiene la temperatura de unas coordenadas."</span>,</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            <span class="st">"parameters"</span>: {</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>                <span class="st">"type"</span>: <span class="st">"object"</span>,</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>                <span class="st">"properties"</span>: {</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"lat"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>, <span class="st">"description"</span>: <span class="st">"Latitud"</span>},</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"lon"</span>: {<span class="st">"type"</span>: <span class="st">"number"</span>, <span class="st">"description"</span>: <span class="st">"Longitud"</span>}</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>                },</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>                <span class="st">"required"</span>: [<span class="st">"lat"</span>, <span class="st">"lon"</span>]</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Definimos las funciones reales</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>tools_map <span class="op">=</span> {</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">"obtener_coordenadas"</span>: obtener_coordenadas,</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">"obtener_temperatura"</span>: obtener_temperatura</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>system_prompt <span class="op">=</span> <span class="st">"Eres un agente de viajes experto. Si necesitas datos, usa las herramientas."</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ejecutar_agente(user_input, max_turns<span class="op">=</span><span class="dv">5</span>):</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_prompt},</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_input}</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(max_turns):</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Llamada con tools</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> openai.chat.completions.create(</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>            model<span class="op">=</span>model, </span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>            messages<span class="op">=</span>messages, </span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>            tools<span class="op">=</span>tools_schema</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        message <span class="op">=</span> response.choices[<span class="dv">0</span>].message</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>        messages.append(message)</span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"🧠 LLM: </span><span class="sc">{</span>message<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Si el modelo decide llamar a herramientas (tool_calls)</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> message.tool_calls:</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Procesamos cada llamada (el modelo puede pedir varias a la vez)</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> tool_call <span class="kw">in</span> message.tool_calls:</span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>                tool_name <span class="op">=</span> tool_call.function.name</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>                args <span class="op">=</span> json.loads(tool_call.function.arguments)</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"🛠️ Ejecutando </span><span class="sc">{</span>tool_name<span class="sc">}</span><span class="ss"> con </span><span class="sc">{</span>args<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> tool_name <span class="kw">in</span> tools_map:</span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Ejecutar función</span></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>                    resultado <span class="op">=</span> tools_map[tool_name](<span class="op">**</span>args)</span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Añadir resultado (Rol: tool)</span></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>                    messages.append({</span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"role"</span>: <span class="st">"tool"</span>,</span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"tool_call_id"</span>: tool_call.<span class="bu">id</span>,</span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"content"</span>: json.dumps(resultado)</span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>                    })</span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>                    messages.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="ss">f"ERROR: Herramienta </span><span class="sc">{</span>tool_name<span class="sc">}</span><span class="ss"> no existe."</span>})</span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span> <span class="co"># Volvemos al inicio del bucle para que el modelo procese el resultado</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>            <span class="co"># No hay más herramientas, el modelo responde normalmente</span></span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> message.content</span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">"Límite de turnos alcanzado."</span></span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a><span class="co"># Ejecución</span></span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>respuesta_final <span class="op">=</span> ejecutar_agente(<span class="st">"Quiero saber institutos públicos en Majadahonda y la temperatura actual."</span>)</span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">✅ Respuesta final: </span><span class="sc">{</span>respuesta_final<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>🧠 LLM: ChatCompletionMessage(content=None, refusal=None, role='assistant', annotations=None, audio=None, function_call=None, tool_calls=[ChatCompletionMessageFunctionToolCall(id='xtwvdkbs8', function=Function(arguments='{"ciudad":"Majadahonda"}', name='obtener_coordenadas'), type='function')])
+🛠️ Ejecutando obtener_coordenadas con {'ciudad': 'Majadahonda'}
+🧠 LLM: ChatCompletionMessage(content=None, refusal=None, role='assistant', annotations=None, audio=None, function_call=None, tool_calls=[ChatCompletionMessageFunctionToolCall(id='ckz1kz3nx', function=Function(arguments='{"lat":40.47353,"lon":-3.87182}', name='obtener_temperatura'), type='function')])
+🛠️ Ejecutando obtener_temperatura con {'lat': 40.47353, 'lon': -3.87182}
+🧠 LLM: ChatCompletionMessage(content='Algunos institutos públicos en Majadahonda son:\n\n*   IES Majadahonda\n*   IES Sierra de Guadarrama\n*   IES Vega del Tajo \n\nLa temperatura actual es de 22.3ºC.', refusal=None, role='assistant', annotations=None, audio=None, function_call=None, tool_calls=None)
+
+✅ Respuesta final: Algunos institutos públicos en Majadahonda son:
+
+*   IES Majadahonda
+*   IES Sierra de Guadarrama
+*   IES Vega del Tajo 
+
+La temperatura actual es de 22.3ºC.</code></pre>
+</div>
+</div>
+</section>
+<section id="sdk-de-agentes" class="level2">
+<h2 class="anchored" data-anchor-id="sdk-de-agentes">SDK de Agentes</h2>
+<p>Un agente es un sistema basado en un LLM capaz de interactuar con el entorno mediante el uso de herramientas. En las secciones anteriores hemos visto que podemos definir las herramientas, que tiene a su disposición el LLM, en el prompt de forma manual. Sin embargo, vimos que es más conveniente usar el soporte nativo de herramientas que ofrecen algunas API de LLMs. Esto sigue siendo un proceso manual que requiere escribir código específico para manejar las llamadas a herramientas y su ejecución.</p>
+<p>Para facilitar este proceso, algunas plataformas y bibliotecas han desarrollado SDKs específicos para agentes, que abstraen gran parte de la lógica de manejo de herramientas y permiten a los desarrolladores centrarse en la definición de la lógica del agente y las herramientas que quiere usar, sin preocuparse por los detalles de la implementación. Estos SDKs suelen proporcionar una interfaz más sencilla para definir herramientas, gestionar el ciclo de razonamiento y acción del agente, y manejar la comunicación entre el modelo y las herramientas, lo que hace que el desarrollo de agentes de IA sea más accesible y eficiente.</p>
+<section id="por-qué-utilizar-un-sdk-de-agentes" class="level3">
+<h3 class="anchored" data-anchor-id="por-qué-utilizar-un-sdk-de-agentes">¿Por qué utilizar un SDK de agentes?</h3>
+<p>El uso de un SDK profesional proporciona ventajas críticas sobre la implementación manual:</p>
+<ul>
+<li><strong>Abstracción del ciclo de razonamiento:</strong> Automatizan el bucle <code>ReAct</code> (Reasoning + Acting), encargándose de analizar cuándo el modelo debe detenerse, invocar una función o responder al usuario.</li>
+<li><strong>Gestión estandarizada de herramientas:</strong> Ofrecen interfaces unificadas para definir herramientas, simplificando la serialización de parámetros y la validación de esquemas (JSON Schema).</li>
+<li><strong>Gestión de memoria y estado:</strong> Permiten persistir el historial de conversaciones y el estado del agente entre ejecuciones de manera transparente.</li>
+<li><strong>Interoperabilidad:</strong> Facilitan la integración con diversas APIs de modelos (OpenAI, Anthropic, Google Gemini, modelos locales) sin necesidad de reescribir la lógica central.</li>
+</ul>
+</section>
+</section>
+<section id="frameworks-y-sdks-destacados" class="level2">
+<h2 class="anchored" data-anchor-id="frameworks-y-sdks-destacados">Frameworks y SDKs destacados</h2>
+<p>Existen diversas herramientas que se han convertido en estándares de la industria, categorizadas según su enfoque:</p>
+<section id="frameworks-de-orquestación-agentes-individuales" class="level4">
+<h4 class="anchored" data-anchor-id="frameworks-de-orquestación-agentes-individuales">1. Frameworks de Orquestación (Agentes Individuales)</h4>
+<p>Diseñados para construir agentes capaces de realizar tareas complejas utilizando una variedad de herramientas integradas.</p>
+<ul>
+<li><strong>LangChain:</strong> El estándar de facto en la industria. Ofrece una estructura modular para conectar LLMs con fuentes de datos y APIs externas.</li>
+<li><strong>LlamaIndex:</strong> Aunque nació enfocado en la recuperación de datos (RAG), destaca por su capacidad para crear agentes que interactúan con datos estructurados y no estructurados.</li>
+<li><strong>OpenAI Assistants API:</strong> Un SDK gestionado por OpenAI que abstrae gran parte de la infraestructura (archivos, recuperación, ejecución de código) directamente en la plataforma.</li>
+</ul>
+</section>
+<section id="sistemas-multi-agente" class="level4">
+<h4 class="anchored" data-anchor-id="sistemas-multi-agente">2. Sistemas Multi-Agente</h4>
+<p>Estos frameworks permiten crear arquitecturas donde varios agentes especializados colaboran entre sí. Esta especialización (por ejemplo, un “Agente de Análisis” trabajando con un “Agente de Redacción”) mejora significativamente el rendimiento en tareas complejas.</p>
+<ul>
+<li><strong>LangGraph:</strong> Una extensión de LangChain diseñada específicamente para crear flujos de agentes cíclicos y con estado, ideal para flujos de trabajo multi-agente robustos.</li>
+<li><strong>CrewAI:</strong> Enfocado en la orquestación de roles. Permite definir “equipos” de agentes con objetivos, herramientas y procesos de colaboración predefinidos.</li>
+<li><strong>Microsoft AutoGen:</strong> Un framework potente que permite la conversación entre múltiples agentes para resolver tareas, destacando por su capacidad para permitir la interacción entre agentes humanos y virtuales.</li>
+</ul>
+</section>
+</section>
+<section id="smolagents" class="level2">
+<h2 class="anchored" data-anchor-id="smolagents">smolagents</h2>
+<p><a href="https://huggingface.co/learn/agents-course/unit2/smolagents/introduction">smolagents</a> es una librería para agentes creada por Hugging Face.</p>
+<section id="code-agents" class="level3">
+<h3 class="anchored" data-anchor-id="code-agents">Code Agents</h3>
+<p>Los Code agents (agentes de código) son el tipo de agente predeterminado en smolagents. Generan llamadas a herramientas en Python para realizar acciones, logrando representaciones de acción que son eficientes, expresivas y precisas.</p>
+<div id="060b89e5" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> huggingface_hub <span class="im">import</span> login</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>load_dotenv(override<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>hf_token <span class="op">=</span> os.getenv(<span class="st">"HUGGINGFACE_API_KEY"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>login(token<span class="op">=</span>hf_token)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>En el siguiente ejemplo se usa InferenceClientModel, que permite ejecutar la API de inferencia de Hugging Face. El agente tiene acceso a la herramienta DuckDuckGoSearchTool, que le permite realizar búsquedas en la web.</p>
+<div id="4d5469b4" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> smolagents <span class="im">import</span> CodeAgent, DuckDuckGoSearchTool, InferenceClientModel</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>agent <span class="op">=</span> CodeAgent(tools<span class="op">=</span>[DuckDuckGoSearchTool()], model<span class="op">=</span>InferenceClientModel())</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>agent.run(<span class="st">"Busca música adecuada para una fiesta de graduación de un instituto de formación profesional."</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #d4b702; text-decoration-color: #d4b702">╭──────────────────────────────────────────────────── </span><span style="color: #d4b702; text-decoration-color: #d4b702; font-weight: bold">New run</span><span style="color: #d4b702; text-decoration-color: #d4b702"> ────────────────────────────────────────────────────╮</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">│</span>                                                                                                                 <span style="color: #d4b702; text-decoration-color: #d4b702">│</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">│</span> <span style="font-weight: bold">Busca música adecuada para una fiesta de graduación de un instituto de formación profesional.</span>                   <span style="color: #d4b702; text-decoration-color: #d4b702">│</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">│</span>                                                                                                                 <span style="color: #d4b702; text-decoration-color: #d4b702">│</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">╰─ InferenceClientModel - Qwen/Qwen3-Next-80B-A3B-Thinking ───────────────────────────────────────────────────────╯</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #d4b702; text-decoration-color: #d4b702">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ </span><span style="color: #c0c0c0; text-decoration-color: #c0c0c0; font-weight: bold">Step 1</span><span style="color: #d4b702; text-decoration-color: #d4b702"> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"> ─ <span style="font-weight: bold">Executing parsed code:</span> ──────────────────────────────────────────────────────────────────────────────────────── 
+  <span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">query </span><span style="color: #ff4689; text-decoration-color: #ff4689; background-color: #272822">=</span><span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822"> </span><span style="color: #e6db74; text-decoration-color: #e6db74; background-color: #272822">"música adecuada para fiesta de graduación instituto formación profesional"</span><span style="background-color: #272822">                            </span>  
+  <span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">results </span><span style="color: #ff4689; text-decoration-color: #ff4689; background-color: #272822">=</span><span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822"> web_search(query</span><span style="color: #ff4689; text-decoration-color: #ff4689; background-color: #272822">=</span><span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">query)</span><span style="background-color: #272822">                                                                              </span>  
+  <span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">print(results)</span><span style="background-color: #272822">                                                                                                 </span>  
+ ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Execution logs:</span>
+## Search Results
+
+[Las 30 mejores canciones clásicas de graduación | Rock Your Celebration con Música 
+personalizada](https://www.capcut.com/es-es/resource/best-graduation-songs)
+May 15, 2025 - Una de las mejores canciones de graduación de todos los tiempos es "We Are Young". Este poderoso 
+himno captura el espíritu de la juventud y la nostalgia, por lo que es una elección perfecta para los graduados que
+reflexionan sobre sus años ...
+
+[Canciones Para Bailes De Graduacion | TikTok](https://www.tiktok.com/discover/canciones-para-bailes-de-graduacion)
+March 2, 2026 - Descubre las mejores canciones de graduación modernas perfectas para tu baile y disfruta de una 
+celebración inolvidable.See more videos about Canciones Para Fiesta De Graduacion, Baile De Graduacion, Canciones 
+Para Competencias De Baile, Canciones Para Bailes Del Instituto, Canciones Para Concursos De Baile, Bailes De 
+Graduacion Para Niños.
+
+[15 mejores canciones de graduación de todos tiempos - 
+Filmora](https://filmora.wondershare.es/family-n-business/10-hottest-graduation-songs.html)
+March 20, 2026 - Ya sea que estés en tu computadora en casa o usando tu teléfono en cualquier lugar, podrás dar 
+rienda suelta a tu creatividad sin importar dónde estés. 🌍📱💻 ... "We Are Young" es una magnífica canción para 
+comenzar la fiesta.
+
+[Journey to Success: la lista de reproducción de música de graduación definitiva que puedes 
+usar](https://www.aiseesoft.es/resource/graduation-songs.html)
+May 12, 2023 - Vivamos mientras somos jóvenes puede usarse como música para la presentación de diapositivas de 
+graduación y reproducirse mientras recordamos y valoramos los días juveniles de la vida del candidato mientras se 
+reproduce la presentación de diapositivas.
+
+[Las 33 mejores canciones de graduación para celebrar su próximo paso - Good 
+Lifestyle](https://good-lifestyle.net/es/56028-las-33-mejores-canciones-de-graduacion-para-celebrar-su-proximo-paso
+)
+Es un clásico por una razón y una banda sonora adecuada para cualquier celebración de los buenos tiempos. (¡Vamos!)
+Como un buen momento, la graduación merece ser celebrada. Tira tu puño en el aire como Judd Nelson al final de El 
+club del desayuno Cuando esta icónica canción de la escuela secundaria de la película de 1985 se reproduce en la 
+fiesta de graduación.
+
+[Canciones para Graduación - playlist by homer_simp16 | 
+Spotify](https://open.spotify.com/playlist/0UyHen2goSadzapyKMN3Iz)
+A continuación te facilitamos directamente una lista de Spotify con canciones para la fiesta de graduación, que la 
+disfrutes.
+
+[Las Mejores Canciones para Fiestas de Graduación | Guía Definitiva 
+2026](https://www.wondera.ai/tools/es/graduation-party-songs)
+Descubre las mejores canciones para fiestas de graduación generadas por IA de Wondera AI en nuestra guía definitiva
+de 2026. Desde himnos enérgicos hasta melodías nostálgicas, encuentra la banda sonora perfecta para celebrar 
+logros, nuevos comienzos y recuerdos inolvidables con amigos y familiares.
+
+[Listo para la graduación Canciones de presentación de diapositivas? Aquí está tu lista de 
+reproducción](https://www.anymp4.com/es/video-editing/graduation-songs.html)
+December 12, 2018 - No importa si desea reproducir la música en una fiesta de graduación o para un video de 
+presentación de diapositivas, puede obtener el resultado satisfactorio aquí. Parte 1: Lista de buenas canciones de 
+graduación para presentación de diapositivas · Parte 2: magníficas plantillas de presentación de diapositivas de 
+graduación e ideas que no debes perderte
+
+[Las 19 mejores canciones de para graduación en 
+español](https://malasombra.net/post/las-19-mejores-canciones-de-para-graduacion-en-espanol.html)
+August 20, 2024 - Ya sea que se interprete en un escenario de graduación o se comparta íntimamente entre amigos, 
+"Count on Me" es un himno perdurable de apoyo y lealtad, un recordatorio invaluable de los lazos que nos unen y nos
+sostienen a través de los años.
+
+[Música para graduaciones y ceremonias escolares ( o simplemente música para escuchar) - playlist by PATRICIO 
+ALBERTO MORALES FARIÑA | Spotify](https://open.spotify.com/playlist/7wrU5XogyiPgGs2iBnnwhP)
+Playlist · Música para graduaciones y ceremonias escolares ( o simplemente música para escuchar) · 188 items · 417 
+saves
+
+Out: None
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">[Step 1: Duration 17.15 seconds| Input tokens: 2,096 | Output tokens: 2,992]</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #d4b702; text-decoration-color: #d4b702">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ </span><span style="color: #c0c0c0; text-decoration-color: #c0c0c0; font-weight: bold">Step 2</span><span style="color: #d4b702; text-decoration-color: #d4b702"> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"> ─ <span style="font-weight: bold">Executing parsed code:</span> ──────────────────────────────────────────────────────────────────────────────────────── 
+  <span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">final_answer(</span><span style="color: #e6db74; text-decoration-color: #e6db74; background-color: #272822">"Recomendaciones: 'We Are Young' de Fun, 'Don't You (Forget About Me)' de Simple Minds, 'Count on </span>  
+  <span style="color: #e6db74; text-decoration-color: #e6db74; background-color: #272822">Me' de Bruno Mars, 'Graduation (Friends Forever)' de Vitamin C, 'Bailando' de Enrique Iglesias"</span><span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">)</span><span style="background-color: #272822">               </span>  
+ ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #d4b702; text-decoration-color: #d4b702; font-weight: bold">Final answer: Recomendaciones: 'We Are Young' de Fun, 'Don't You (Forget About Me)' de Simple Minds, 'Count on Me' </span>
+<span style="color: #d4b702; text-decoration-color: #d4b702; font-weight: bold">de Bruno Mars, 'Graduation (Friends Forever)' de Vitamin C, 'Bailando' de Enrique Iglesias</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">[Step 2: Duration 18.88 seconds| Input tokens: 5,578 | Output tokens: 6,591]</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>"Recomendaciones: 'We Are Young' de Fun, 'Don't You (Forget About Me)' de Simple Minds, 'Count on Me' de Bruno Mars, 'Graduation (Friends Forever)' de Vitamin C, 'Bailando' de Enrique Iglesias"</code></pre>
+</div>
+</div>
+<p>Code agent puede invocar herramientas personalizadas.</p>
+<div id="af35863f" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> smolagents <span class="im">import</span> CodeAgent, tool, InferenceClientModel</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Herramienta para sugerir un menú según la ocasión</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="at">@tool</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> suggest_menu(occasion: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Sugiere un menú basado en la ocasión.</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">        occasion (str): El tipo de ocasión para la fiesta. Los valores permitidos son:</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">                        - "casual": Menú para una fiesta casual.</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">                        - "formal": Menú para una fiesta formal.</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">                        - "superhero": Menú para una fiesta de superhéroes.</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">                        - "custom": Menú personalizado.</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> occasion <span class="op">==</span> <span class="st">"casual"</span>:</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Pizza, snacks y bebidas."</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> occasion <span class="op">==</span> <span class="st">"formal"</span>:</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Cena de 3 platos con vino y postre."</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> occasion <span class="op">==</span> <span class="st">"superhero"</span>:</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Buffet con comida saludable y energética."</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Menú personalizado para el mayordomo."</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Alfred, el mayordomo, preparando el menú para la fiesta</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>agent <span class="op">=</span> CodeAgent(tools<span class="op">=</span>[suggest_menu], model<span class="op">=</span>InferenceClientModel())</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Preparando el menú para la fiesta</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>agent.run(<span class="st">"Prepara un menú formal para la fiesta."</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #d4b702; text-decoration-color: #d4b702">╭──────────────────────────────────────────────────── </span><span style="color: #d4b702; text-decoration-color: #d4b702; font-weight: bold">New run</span><span style="color: #d4b702; text-decoration-color: #d4b702"> ────────────────────────────────────────────────────╮</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">│</span>                                                                                                                 <span style="color: #d4b702; text-decoration-color: #d4b702">│</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">│</span> <span style="font-weight: bold">Prepara un menú formal para la fiesta.</span>                                                                          <span style="color: #d4b702; text-decoration-color: #d4b702">│</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">│</span>                                                                                                                 <span style="color: #d4b702; text-decoration-color: #d4b702">│</span>
+<span style="color: #d4b702; text-decoration-color: #d4b702">╰─ InferenceClientModel - Qwen/Qwen3-Next-80B-A3B-Thinking ───────────────────────────────────────────────────────╯</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #d4b702; text-decoration-color: #d4b702">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ </span><span style="color: #c0c0c0; text-decoration-color: #c0c0c0; font-weight: bold">Step 1</span><span style="color: #d4b702; text-decoration-color: #d4b702"> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"> ─ <span style="font-weight: bold">Executing parsed code:</span> ──────────────────────────────────────────────────────────────────────────────────────── 
+  <span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">menu </span><span style="color: #ff4689; text-decoration-color: #ff4689; background-color: #272822">=</span><span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822"> suggest_menu(occasion</span><span style="color: #ff4689; text-decoration-color: #ff4689; background-color: #272822">=</span><span style="color: #e6db74; text-decoration-color: #e6db74; background-color: #272822">"formal"</span><span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">)</span><span style="background-color: #272822">                                                                         </span>  
+  <span style="color: #f8f8f2; text-decoration-color: #f8f8f2; background-color: #272822">final_answer(menu)</span><span style="background-color: #272822">                                                                                             </span>  
+ ───────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #d4b702; text-decoration-color: #d4b702; font-weight: bold">Final answer: Cena de 3 platos con vino y postre.</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #7f7f7f; text-decoration-color: #7f7f7f">[Step 1: Duration 3.40 seconds| Input tokens: 2,137 | Output tokens: 532]</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>'Cena de 3 platos con vino y postre.'</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/surtich\.github\.io\/IA-para-desarrolladores\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

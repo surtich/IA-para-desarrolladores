@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Hugging Face – IA para desarrolladores</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-355a7b1e585df372be41497d2064860f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">IA para desarrolladores</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../qmd/index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/30_hugging_face/10_intro.html">Hugging Face</a></li><li class="breadcrumb-item"><a href="../../qmd/30_hugging_face/10_intro.html">Hugging Face</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Buscar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Buscar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/10_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/20_linear_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal simple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/30_linear_regression2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal múltiple</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/40_logistic_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/10_fundamentos/50_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Redes neuronales</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">LLM</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/00_introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">¿Qué es LLM?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/05_tokenization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tokenización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/10_word_embeddings.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word embeddings</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/20_word2vec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Word2Vec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/30_similarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Similitud entre palabras</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/40_attention.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mecanismo de Atención</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/20_LLM/50_decoder.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Decoder-Only Transformers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Hugging Face</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/30_hugging_face/10_intro.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Hugging Face</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/30_hugging_face/20_fine_tunning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fine-Tunning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guía para desarrolladores</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/40_guia_desarrolladores/10_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Primera aplicación con LLM</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Apéndices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Alternar sección">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/10_derivadas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derivadas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../qmd/90_apendices/20_matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Álgebra Lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../linear_transformations.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Demo: Transformaciones lineales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../presentacion_2025.html" class="sidebar-item-text sidebar-link" target="_blank">
+ <span class="menu-text">Presentación 2025</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#introducción-a-hugging-face" id="toc-introducción-a-hugging-face" class="nav-link active" data-scroll-target="#introducción-a-hugging-face">Introducción a Hugging Face:</a></li>
+  <li><a href="#estructura-de-la-plataforma" id="toc-estructura-de-la-plataforma" class="nav-link" data-scroll-target="#estructura-de-la-plataforma">Estructura de la plataforma</a></li>
+  <li><a href="#detalle-de-los-componentes-clave" id="toc-detalle-de-los-componentes-clave" class="nav-link" data-scroll-target="#detalle-de-los-componentes-clave">Detalle de los componentes clave</a></li>
+  <li><a href="#la-librería-transformers" id="toc-la-librería-transformers" class="nav-link" data-scroll-target="#la-librería-transformers">La librería <code>transformers</code></a></li>
+  <li><a href="#pipelines" id="toc-pipelines" class="nav-link" data-scroll-target="#pipelines">Pipelines</a>
+  <ul class="collapse">
+  <li><a href="#clasificación-zero-shot" id="toc-clasificación-zero-shot" class="nav-link" data-scroll-target="#clasificación-zero-shot">Clasificación zero-shot</a></li>
+  <li><a href="#generación-de-texto" id="toc-generación-de-texto" class="nav-link" data-scroll-target="#generación-de-texto">Generación de texto</a></li>
+  <li><a href="#utilizar-un-modelo-específico" id="toc-utilizar-un-modelo-específico" class="nav-link" data-scroll-target="#utilizar-un-modelo-específico">Utilizar un modelo específico</a></li>
+  </ul></li>
+  <li><a href="#architectures-vs.-checkpoints" id="toc-architectures-vs.-checkpoints" class="nav-link" data-scroll-target="#architectures-vs.-checkpoints">Architectures vs.&nbsp;checkpoints</a></li>
+  <li><a href="#cómo-funciona-una-pipeline" id="toc-cómo-funciona-una-pipeline" class="nav-link" data-scroll-target="#cómo-funciona-una-pipeline">¿Cómo funciona una <code>pipeline()</code>?</a>
+  <ul class="collapse">
+  <li><a href="#preprocesamiento" id="toc-preprocesamiento" class="nav-link" data-scroll-target="#preprocesamiento">1. Preprocesamiento</a></li>
+  <li><a href="#usando-el-modelo-para-obtener-los-embeddings-contextuales" id="toc-usando-el-modelo-para-obtener-los-embeddings-contextuales" class="nav-link" data-scroll-target="#usando-el-modelo-para-obtener-los-embeddings-contextuales">2. Usando el modelo para obtener los embeddings contextuales</a></li>
+  <li><a href="#la-cabeza-head-del-modelo" id="toc-la-cabeza-head-del-modelo" class="nav-link" data-scroll-target="#la-cabeza-head-del-modelo">3. La cabeza (head) del modelo</a></li>
+  </ul></li>
+  <li><a href="#modelos" id="toc-modelos" class="nav-link" data-scroll-target="#modelos">Modelos</a></li>
+  <li><a href="#codificación-de-texto-a-números" id="toc-codificación-de-texto-a-números" class="nav-link" data-scroll-target="#codificación-de-texto-a-números">Codificación de texto a números</a></li>
+  <li><a href="#tokenizers" id="toc-tokenizers" class="nav-link" data-scroll-target="#tokenizers">Tokenizers</a></li>
+  <li><a href="#obteniendo-predicciones" id="toc-obteniendo-predicciones" class="nav-link" data-scroll-target="#obteniendo-predicciones">Obteniendo predicciones</a>
+  <ul class="collapse">
+  <li><a href="#attention-mask" id="toc-attention-mask" class="nav-link" data-scroll-target="#attention-mask">Attention mask</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../qmd/30_hugging_face/10_intro.html">Hugging Face</a></li><li class="breadcrumb-item"><a href="../../qmd/30_hugging_face/10_intro.html">Hugging Face</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Hugging Face</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introducción-a-hugging-face" class="level2">
+<h2 class="anchored" data-anchor-id="introducción-a-hugging-face">Introducción a Hugging Face:</h2>
+<p>Hugging Face la plataforma más importante para la comunidad de <strong>Inteligencia Artificial y Machine Learning</strong> a nivel mundial. Si GitHub es el lugar donde los desarrolladores alojan su código, Hugging Face es el lugar donde la comunidad global aloja, comparte y colabora en modelos de IA.</p>
+<p>Se trata una empresa tecnológica que ha democratizado el acceso a la IA mediante herramientas de código abierto. Su valor reside en que permite a desarrolladores, investigadores y empresas:</p>
+<ul>
+<li><p><strong>Acceder a modelos preentrenados:</strong> Puede descargar modelos de última generación (como Llama, Mistral, Stable Diffusion, etc.) y usarlos de inmediato sin tener que entrenarlos desde cero, lo que ahorra miles de horas de cómputo.</p></li>
+<li><p><strong>Colaborar en tiempo real:</strong> Es un punto de encuentro donde se versiona tanto el código como los pesos del modelo y los datos, facilitando la transparencia y la reproducibilidad.</p></li>
+<li><p><strong>Desplegar soluciones:</strong> Ofrece infraestructura para poner modelos en producción de manera sencilla, eliminando la complejidad de gestionar servidores por cuenta propia.</p></li>
+</ul>
+</section>
+<section id="estructura-de-la-plataforma" class="level2">
+<h2 class="anchored" data-anchor-id="estructura-de-la-plataforma">Estructura de la plataforma</h2>
+<p>La web de Hugging Face está organizada en secciones que facilitan el flujo de trabajo en un proyecto de IA. Los componentes principales son:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Componente</th>
+<th style="text-align: left;">Función Principal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Models</strong></td>
+<td style="text-align: left;">Repositorio central de modelos preentrenados. Incluye filtros por tarea, métricas y documentación.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Datasets</strong></td>
+<td style="text-align: left;">Biblioteca de conjuntos de datos listos para usar, etiquetados y procesados para entrenamiento.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Spaces</strong></td>
+<td style="text-align: left;">Entorno para crear aplicaciones interactivas (demos) usando herramientas como Gradio o Streamlit.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Inference API</strong></td>
+<td style="text-align: left;">Interfaz rápida para consultar modelos vía HTTP sin necesidad de gestionar servidores propios.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Endpoints</strong></td>
+<td style="text-align: left;">Solución empresarial para despliegue en producción, escalable y segura.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="detalle-de-los-componentes-clave" class="level2">
+<h2 class="anchored" data-anchor-id="detalle-de-los-componentes-clave">Detalle de los componentes clave</h2>
+<ul>
+<li><p><strong>Models:</strong> Es el corazón del sitio. Cada modelo tiene una “card” (página de documentación) donde se explica para qué sirve, qué licencia tiene, cómo se cargó y qué limitaciones posee. Es el estándar actual para publicar investigación en IA.</p></li>
+<li><p><strong>Datasets:</strong> La calidad de la IA depende de la calidad de sus datos. En esta sección se encuentran conjuntos de datos limpios y organizados para tareas como NLP (procesamiento de lenguaje natural), visión artificial, audio, robótica, entre otros.</p></li>
+<li><p><strong>Spaces:</strong> Es fundamental para hacer <em>demos</em>. Tras crear un modelo, puede subirlo a un “Space” y cualquier persona en el mundo podrá probarlo directamente en su navegador, lo cual es vital para presentar prototipos sin configurar nada.</p></li>
+<li><p><strong>Librerías (Ecosistema de Software):</strong> Más allá de la web, Hugging Face provee librerías como <code>transformers</code>, <code>datasets</code> y <code>diffusers</code>. Estas son las herramientas de Python que permiten descargar y ejecutar casi cualquier modelo alojado en la plataforma con apenas unas líneas de código.</p></li>
+</ul>
+<p>En resumen, Hugging Face no es solo un repositorio; es un <strong>ecosistema completo</strong> que cubre todo el ciclo de vida de un modelo: desde la carga de datos y el entrenamiento, hasta la evaluación y el despliegue final.</p>
+</section>
+<section id="la-librería-transformers" class="level2">
+<h2 class="anchored" data-anchor-id="la-librería-transformers">La librería <code>transformers</code></h2>
+<p>La librería <code>transformers</code> es la herramienta más popular de Hugging Face para trabajar con modelos de lenguaje. Proporciona una interfaz unificada para cargar y usar modelos preentrenados, así como para entrenar nuevos modelos desde cero.</p>
+<p>Con <code>transformers</code>, puede:</p>
+<ul>
+<li>Cargar modelos preentrenados con una sola línea de código.</li>
+<li>Realizar tareas de NLP como clasificación, generación de texto, traducción, etc.</li>
+<li>Personalizar modelos para tareas específicas mediante fine-tuning.</li>
+<li>Acceder a una amplia variedad de modelos, desde BERT hasta GPT-3 y más allá.</li>
+</ul>
+<p>En las siguientes secciones, exploraremos cómo usar <code>transformers</code> para cargar modelos, realizar inferencias y entrenar nuevos modelos personalizados. También veremos cómo aprovechar otras herramientas de Hugging Face para mejorar su flujo de trabajo en IA.</p>
+</section>
+<section id="pipelines" class="level2">
+<h2 class="anchored" data-anchor-id="pipelines">Pipelines</h2>
+<p><code>pipelines()</code> es la forma más sencilla de usar modelos preentrenados para tareas comunes. Proporciona una interfaz de alto nivel que abstrae la complejidad de cargar modelos y tokenizadores, permitiéndole realizar tareas como clasificación, generación de texto, traducción, etc., con apenas unas líneas de código.</p>
+<p>Por ejemplo:</p>
+<div id="ebbfc87c" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Cargar un pipeline para clasificación de texto</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> pipeline(<span class="st">"sentiment-analysis"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Realizar una inferencia</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> classifier(<span class="st">"I love this product!"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Sino se indica lo contrario, <code>pipeline()</code> cargará el modelo predefinido para este tipo de tarea.</p>
+<p>Hay tres pasos que <code>pipeline()</code> realiza automáticamente:</p>
+<p>1- El texto es preprocesado en un formato que el modelo puede entender. 2- La entrada preprocesada se pasa al modelo. 3- La salida del modelo se postprocesa para devolver un resultado legible.</p>
+<p>Algunos pipelines disponibles son:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Pipeline</th>
+<th style="text-align: left;">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>sentiment-analysis</code></td>
+<td style="text-align: left;">Clasificación de sentimientos en texto.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>text-generation</code></td>
+<td style="text-align: left;">Generación de texto a partir de un prompt.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>translation</code></td>
+<td style="text-align: left;">Traducción de texto entre idiomas.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>question-answering</code></td>
+<td style="text-align: left;">Responder preguntas basadas en un contexto dado.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>summarization</code></td>
+<td style="text-align: left;">Resumir textos largos en versiones más cortas.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>token-classification</code></td>
+<td style="text-align: left;">Etiquetado de tokens para tareas como NER (Reconocimiento de Entidades Nombradas).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>text-classification</code></td>
+<td style="text-align: left;">Clasificación de texto en categorías predefinidas.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>fill-mask</code></td>
+<td style="text-align: left;">Predicción de palabras faltantes en una oración.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>zero-shot-classification</code></td>
+<td style="text-align: left;">Clasificación de texto sin necesidad de entrenamiento previo.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>image-classification</code></td>
+<td style="text-align: left;">Clasificación de imágenes en categorías predefinidas.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>object-detection</code></td>
+<td style="text-align: left;">Detección de objetos en imágenes.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>text2image</code></td>
+<td style="text-align: left;">Generación de imágenes a partir de descripciones textuales.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>text2text-generation</code></td>
+<td style="text-align: left;">Transformación de texto a texto, útil para tareas como traducción o resumen.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>audio-classification</code></td>
+<td style="text-align: left;">Clasificación de audio en categorías predefinidas.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>automatic-speech-recognition</code></td>
+<td style="text-align: left;">Transcripción de audio a texto.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>text-to-speech</code></td>
+<td style="text-align: left;">Generación de audio a partir de texto.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>feature-extraction</code></td>
+<td style="text-align: left;">Extracción de características de texto para tareas como clustering o visualización.</td>
+</tr>
+</tbody>
+</table>
+<section id="clasificación-zero-shot" class="level3">
+<h3 class="anchored" data-anchor-id="clasificación-zero-shot">Clasificación zero-shot</h3>
+<p>El pipeline de clasificación zero-shot permite clasificar texto en categorías sin necesidad de entrenar un modelo específico para esas categorías. Esto se logra utilizando modelos de lenguaje que han sido preentrenados en una amplia variedad de tareas y pueden generalizar a nuevas tareas sin entrenamiento adicional.</p>
+<div id="c6511818" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> pipeline(<span class="st">"zero-shot-classification"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>classifier(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"This is a course about the Transformers library"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    candidate_labels<span class="op">=</span>[<span class="st">"education"</span>, <span class="st">"politics"</span>, <span class="st">"business"</span>],</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="generación-de-texto" class="level3">
+<h3 class="anchored" data-anchor-id="generación-de-texto">Generación de texto</h3>
+<p>El pipeline de generación de texto permite generar texto a partir de un prompt dado. Es útil para tareas como redacción automática, generación de contenido, entre otros.</p>
+<div id="bc31190e" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>generator <span class="op">=</span> pipeline(<span class="st">"text-generation"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>generator(<span class="st">"Hugging Face es una plataforma de IA que"</span>, max_length<span class="op">=</span><span class="dv">50</span>, num_return_sequences<span class="op">=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="utilizar-un-modelo-específico" class="level3">
+<h3 class="anchored" data-anchor-id="utilizar-un-modelo-específico">Utilizar un modelo específico</h3>
+<p>Si desea utilizar un modelo específico en lugar del modelo predefinido para una tarea, puede indicarlo al crear el pipeline.</p>
+<div id="8fa524cb" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>generator <span class="op">=</span> pipeline(<span class="st">"text-generation"</span>, model<span class="op">=</span><span class="st">"distilgpt2"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>generator(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"In this course, we will teach you how to"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    max_length<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    num_return_sequences<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>En el <a href="https://huggingface.co/models">hub de modelos</a> están todos los disponibles, cada uno tiene una card con su documentación, incluyendo el nombre que se debe usar para cargarlo con <code>pipeline()</code>. El Hub de Modelos también contiene puntos de control (checkpoints) para modelos que soportan múltiples lenguajes. Algunos modelos su prueba en la propia web de Hugging Face.</p>
+</section>
+</section>
+<section id="architectures-vs.-checkpoints" class="level2">
+<h2 class="anchored" data-anchor-id="architectures-vs.-checkpoints">Architectures vs.&nbsp;checkpoints</h2>
+<p>En Hugging Face, es importante distinguir entre <strong>architectures</strong> y <strong>checkpoints</strong>:</p>
+<ul>
+<li><p><strong>Architectures:</strong> Se refiere a la estructura del modelo, es decir, cómo están organizadas las capas, los parámetros y la lógica interna. Por ejemplo, BERT, GPT-2 y T5 son diferentes architectures. Estas definen la forma general del modelo pero no contienen pesos específicos.</p></li>
+<li><p><strong>Checkpoints:</strong> Son los archivos que contienen los pesos entrenados de un modelo específico. Un checkpoint es el resultado de entrenar una architecture en un conjunto de datos particular. Por ejemplo, <code>bert-base-uncased</code> es un checkpoint de la architecture BERT que ha sido entrenado en un corpus específico.</p></li>
+</ul>
+</section>
+<section id="cómo-funciona-una-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="cómo-funciona-una-pipeline">¿Cómo funciona una <code>pipeline()</code>?</h2>
+<p>Es importante entender qué sucede internamente cuando se llama a <code>pipeline()</code>:</p>
+<div id="72e6d9e1" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>classifier <span class="op">=</span> pipeline(<span class="st">"sentiment-analysis"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>classifier(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"I've been waiting for a HuggingFace course my whole life."</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"I hate this so much!"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="preprocesamiento" class="level3">
+<h3 class="anchored" data-anchor-id="preprocesamiento">1. Preprocesamiento</h3>
+<p>Los Transformers no pueden procesar texto directamente, así que lo primero que hace <code>pipeline()</code> es convertir el texto de entrada a números. Para eso se usa un <code>tokenizador</code> que se encarga de:</p>
+<ul>
+<li>Dividir el texto en tokens (palabras, subpalabras o caracteres).</li>
+<li>Convertir esos tokens en IDs numéricos que el modelo puede entender.</li>
+<li>Agregar tokens especiales necesarios para el modelo (como [CLS], [SEP], etc.).</li>
+</ul>
+<p>Este preprocesamiento debe coincidir exactamente con el realizado por el modelo en el entrenamiento. Por eso, cada modelo tiene un tokenizador específico que se carga automáticamente con <code>pipeline()</code>. El objeto <code>AutoTokenizer</code> se encarga de obtener el tokenizador correcto para el modelo que se está utilizando.</p>
+<div id="3062288a" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>checkpoint <span class="op">=</span> <span class="st">"distilbert-base-uncased-finetuned-sst-2-english"</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(checkpoint)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Podemos pasar directamente el texto al tokenizador para obtener los IDs de los tokens. El tokenizador devuelve los IDs en formato tensor. Por ejemplo, para obtener un tensor de PyTorch<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.:</p>
+<div id="7b0950e9" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>raw_inputs <span class="op">=</span> [</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I've been waiting for a HuggingFace course my whole life."</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"I hate this so much!"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    raw_inputs,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    padding<span class="op">=</span><span class="va">True</span>, truncation<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    return_tensors<span class="op">=</span><span class="st">"pt"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>inputs</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="usando-el-modelo-para-obtener-los-embeddings-contextuales" class="level3">
+<h3 class="anchored" data-anchor-id="usando-el-modelo-para-obtener-los-embeddings-contextuales">2. Usando el modelo para obtener los embeddings contextuales</h3>
+<p>El siguiente paso es pasar los tensores de entrada al modelo para obtener las predicciones. El objeto `AutoModel se encarga de cargar el modelo correcto para el checkpoint que se está utilizando. Por ejemplo:</p>
+<div id="ab8b4073" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModel</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>checkpoint <span class="op">=</span> <span class="st">"distilbert-base-uncased-finetuned-sst-2-english"</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModel.from_pretrained(checkpoint)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Podemos pasar los tensores de entrada al modelo para obtener las predicciones. Cuando pasamos los tensores al modelo, este realiza una serie de operaciones internas (como multiplicaciones de matrices, activaciones, etc.) para procesar la información y generar una salida. La salida del modelo es un diccionario que contiene las salidas de cada capa, incluyendo las predicciones finales, que están en la clave <code>last_hidden_state</code>. Este tensor tiene las siguientes dimensiones:</p>
+<ul>
+<li><code>batch_size</code>: el número de ejemplos en el lote (en este caso, 2).</li>
+<li><code>sequence_length</code>: la longitud de la secuencia de entrada (en este caso, 16 tokens).</li>
+<li><code>hidden_size</code>: el tamaño de la representación interna del modelo (en este caso, 768).</li>
+</ul>
+<div id="b0ccc3a0" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>outputs <span class="op">=</span> model(<span class="op">**</span>inputs)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>outputs.last_hidden_state.shape</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="la-cabeza-head-del-modelo" class="level3">
+<h3 class="anchored" data-anchor-id="la-cabeza-head-del-modelo">3. La cabeza (head) del modelo</h3>
+<p>La salida del modelo no es directamente la predicción de la tarea, sino una representación interna de la información. Para obtener la predicción final, se necesita una “cabeza” (head) que tome esta representación y la transforme en el formato adecuado para la tarea específica (por ejemplo, probabilidades de clases para clasificación). Esta cabeza es una capa adicional que añade al final del modelo y se entrena junto con el modelo para adaptar la arquitectura general a una tarea específica. Ahora la salida del modelo, en lugar de embeddings, son logits:</p>
+<div id="09b15f7d" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForSequenceClassification</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>checkpoint <span class="op">=</span> <span class="st">"distilbert-base-uncased-finetuned-sst-2-english"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(checkpoint)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>outputs <span class="op">=</span> model(<span class="op">**</span>inputs)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>outputs.logits</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Para obtener las probabilidades de cada clase, se aplica la función softmax a los logits:</p>
+<div id="4a7c0a7c" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> torch.nn.functional.softmax(outputs.logits, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>predictions</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Para obtener las <code>labels</code> de cada clase:</p>
+<div id="eff7104e" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> model.config.id2label</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>labels</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Podemos mapear las probabilidades a las etiquetas para obtener una salida más legible:</p>
+<div id="0ae1e3ab" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>predicted_labels <span class="op">=</span> [labels[i.item()] <span class="cf">for</span> i <span class="kw">in</span> torch.argmax(predictions, dim<span class="op">=-</span><span class="dv">1</span>)]</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>predicted_labels</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+</section>
+<section id="modelos" class="level2">
+<h2 class="anchored" data-anchor-id="modelos">Modelos</h2>
+<p>En esta sección veremos un modelo por dentro. Un modelo se puede cargar directamente con AutoModel a partir de su checkpoint. Por ejemplo, para cargar el modelo BERT base cased:</p>
+<div id="89d7b5f5" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModel</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModel.from_pretrained(<span class="st">"bert-base-cased"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>model</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Este modelo tiene 12 capas (layers) y cada capa tiene 768 neuronas (hidden size). Cada capa se compone de dos subcomponentes principales: la atención (attention) y la red feed-forward (feed-forward network).</p>
+<p>También se puede cargar un modelo a partir de su arquitectura. Por ejemplo, para cargar la arquitectura BERT base cased:</p>
+<div id="b2886dbb" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertModel</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> BertModel.from_pretrained(<span class="st">"bert-base-cased"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>model</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Un modelo se puede guardar en el disco duro:</p>
+<div id="00386ce3" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>model.save_pretrained(<span class="st">"/tmp/models/bert-base-cased"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Esto creará dos ficheros:</p>
+<pre class="{bash}"><code>ls /tmp/models/bert-base-cased</code></pre>
+<p>El fichero <code>config.json</code> contiene la configuración del modelo, incluyendo la arquitectura, el número de capas, el tamaño de las capas, etc. El fichero <code>model.safetensors</code> contiene los pesos entrenados del modelo.</p>
+<pre class="{bash}"><code>cat /tmp/models/bert-base-cased/config.json</code></pre>
+<p>Podemos leer el modelo desde el disco duro:</p>
+<div id="909ca1b8" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModel</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModel.from_pretrained(<span class="st">"/tmp/models/bert-base-cased"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>model</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Si disponemos de cuenta en Hugging Face, también podemos subir nuestro modelo al Hub para compartirlo con la comunidad. Para eso, se necesita instalar la librería <code>huggingface_hub</code> y autenticarse con el token de acceso:</p>
+<div id="77fb0317" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> huggingface_hub <span class="im">import</span> login</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>load_dotenv(override<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>HG_TOKEN <span class="op">=</span> os.getenv(<span class="st">"HUGGINGFACE_API_KEY"</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>login(token<span class="op">=</span>HG_TOKEN)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Y podemos subir el modelo al Hub:</p>
+<div id="73c81b2d" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model.push_to_hub(<span class="st">"my-awesome-model"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Para recuperar el modelo desde el Hub:</p>
+<div id="0c0d4c22" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModel</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>load_dotenv(override<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>HG_USER <span class="op">=</span> os.getenv(<span class="st">"HUGGINGFACE_USER"</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModel.from_pretrained(<span class="ss">f"</span><span class="sc">{</span>HG_USER<span class="sc">}</span><span class="ss">/my-awesome-model"</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>model</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="codificación-de-texto-a-números" class="level2">
+<h2 class="anchored" data-anchor-id="codificación-de-texto-a-números">Codificación de texto a números</h2>
+<p>En la sección anterior vimos cómo el tokenizador convierte el texto en números para que el modelo pueda procesarlo. Ahora vamos a explicarlo con más detalle.</p>
+<div id="87a2d1f0" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(<span class="st">"bert-base-cased"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(<span class="st">"Hello, I'm a single sentence!"</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>encoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><code>encoded_input</code> es un diccionario que contiene los siguientes elementos:</p>
+<ul>
+<li><p><code>input_ids</code>: Es una lista de números que representan los tokens del texto. Cada número corresponde a un token específico en el vocabulario del modelo.</p></li>
+<li><p><code>token_type_ids</code>: Es una lista de números que indica a qué segmento pertenece cada token. En tareas de clasificación de texto, por ejemplo, se pueden tener dos segmentos (texto A y texto B) y esta lista indicará a cuál segmento pertenece cada token.</p></li>
+<li><p><code>attention_mask</code>: Es una lista de números que indica qué tokens deben ser atendidos por el modelo. Los tokens con un valor de 1 serán atendidos, mientras que los tokens con un valor de 0 serán ignorados. Esto es útil para manejar secuencias de longitud variable y para evitar que el modelo preste atención a los tokens de relleno (padding).</p></li>
+</ul>
+<p>Podemos usar el método <code>decode()</code> del tokenizador para convertir los números de vuelta a texto:</p>
+<div id="665a6589" class="cell" data-execution_count="22">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>decoded_input <span class="op">=</span> tokenizer.decode(encoded_input[<span class="st">"input_ids"</span>])</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>decoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>El tokenizador a añadido dos tokens especiales al principio y al final de la secuencia: <code>[CLS]</code> al principio y <code>[SEP]</code> al final. Estos tokens son necesarios para que el modelo pueda procesar la secuencia correctamente. No todos los modelos usan los mismos tokens especiales, por lo que es importante usar el tokenizador específico para cada modelo.</p>
+<p>Se pueden tokenizar varias frases a la vez:</p>
+<div id="13ef2b5d" class="cell" data-execution_count="23">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(<span class="st">"How are you?"</span>, <span class="st">"I'm fine, thank you!"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>encoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Le podemos pedir al tokenizador que devuelva tensores en lugar de listas de números:</p>
+<div id="c915b073" class="cell" data-execution_count="24">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(<span class="st">"How are you?"</span>, <span class="st">"I'm fine, thank you!"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>encoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>El problema es que los tensores deben ser de la misma longitud para poder ser procesados por el modelo. Para eso, se puede usar el argumento <code>padding=True</code> para rellenar las secuencias más cortas con un token de relleno (padding)<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>:</p>
+<div id="8166980e" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"How are you?"</span>, <span class="st">"I'm fine, thank you!"</span>],</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    padding<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>encoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>En ocasiones tenemos una sentencia muy large que no cabe en el modelo. Para eso, se puede usar el argumento <code>truncation=True</code> para truncar las secuencias más largas a la longitud máxima permitida por el modelo:</p>
+<div id="dfe76b2f" class="cell" data-execution_count="26">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"This is a very long sentence that exceeds the maximum length of the model."</span>,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    truncation<span class="op">=</span><span class="va">True</span>, padding<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>encoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="tokenizers" class="level2">
+<h2 class="anchored" data-anchor-id="tokenizers">Tokenizers</h2>
+<p>La tokenización es el proceso de convertir texto en tokens, que son unidades más pequeñas que el modelo puede procesar. Existen diferentes tipos de tokenizadores, como WordPiece, Byte-Pair Encoding (BPE) y SentencePiece. Cada modelo utiliza un tokenizador específico que se ha entrenado junto con la arquitectura del modelo.</p>
+<p>Podemos usar el tokenizador para convertir texto a números y viceversa. Por ejemplo, para convertir texto a números:</p>
+<div id="b17a7da1" class="cell" data-execution_count="27">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(<span class="st">"bert-base-cased"</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(<span class="st">"Using a Transformer network is simple"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>encoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>También podemos convertir números a texto:</p>
+<div id="e29ac416" class="cell" data-execution_count="28">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>decoded_input <span class="op">=</span> tokenizer.decode(encoded_input[<span class="st">"input_ids"</span>][<span class="dv">0</span>])</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>decoded_input</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Si queremos token en lugar de números podemos usar el método <code>tokenize()</code>:</p>
+<div id="cf9c1244" class="cell" data-execution_count="29">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> tokenizer.tokenize(<span class="st">"Using a Transformer network is simple"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>tokens</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Observe que, con este método, no se añaden los tokens especiales al principio y al final de la secuencia.</p>
+<p>O también el método <code>tokenizer.convert_ids_to_tokens()</code>:</p>
+<div id="11509cbc" class="cell" data-execution_count="30">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> tokenizer.convert_ids_to_tokens(encoded_input[<span class="st">"input_ids"</span>][<span class="dv">0</span>])</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>tokens</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Equivalentemente podemos convertir tokens a números con el método <code>tokenizer.convert_tokens_to_ids()</code>:</p>
+<div id="6c19cb29" class="cell" data-execution_count="31">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>token_ids <span class="op">=</span> tokenizer.convert_tokens_to_ids(tokens)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>token_ids</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="obteniendo-predicciones" class="level2">
+<h2 class="anchored" data-anchor-id="obteniendo-predicciones">Obteniendo predicciones</h2>
+<p>Como vimos en una sección anterior, para obtener predicciones de un modelo, primero debemos convertir el texto a números usando el tokenizador, luego pasar esos números al modelo para obtener las predicciones. Por ejemplo:</p>
+<div id="e8e4b089" class="cell" data-execution_count="32">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForSequenceClassification</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>checkpoint <span class="op">=</span> <span class="st">"distilbert-base-uncased-finetuned-sst-2-english"</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(checkpoint)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(checkpoint)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>sequence <span class="op">=</span> <span class="st">"I've been waiting for a HuggingFace course my whole life."</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Primera forma</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> tokenizer.tokenize(sequence)</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>ids <span class="op">=</span> tokenizer.convert_tokens_to_ids(tokens)</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>input_ids <span class="op">=</span> torch.tensor([ids]) <span class="co"># Convertimos a tensor y añadimos una dimensión para el batch.</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Input IDs:"</span>, input_ids)</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model(input_ids)</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Logits:"</span>, output.logits)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Podemos hacerlo de otra forma:</p>
+<div id="f8b57408" class="cell" data-execution_count="33">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Segunda forma (más sencilla)</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>encoded_input <span class="op">=</span> tokenizer(sequence, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Input IDs:"</span>, encoded_input[<span class="st">"input_ids"</span>])</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model(<span class="op">**</span>encoded_input)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Logits:"</span>, output.logits)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Vemos que no obtenemos los mismos <code>logits</code>. La razón es que antes no hemos alimentado el modelo que los tokens especiales.</p>
+<section id="attention-mask" class="level3">
+<h3 class="anchored" data-anchor-id="attention-mask">Attention mask</h3>
+<p>Supongamos que tenemos el siguiente input:</p>
+<div id="395fdd7c" class="cell" data-execution_count="34">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span> <span class="op">=</span> [</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">200</span>,  <span class="dv">200</span>, <span class="dv">200</span>],</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">200</span>,  <span class="dv">200</span>],</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>No podemos alimentar este input al modelo porque las secuencias tienen longitudes diferentes. Para solucionar esto, se añade un token de relleno (padding) a las secuencias más cortas para que todas tengan la misma longitud:</p>
+<div id="70fb089d" class="cell" data-execution_count="35">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span> <span class="op">=</span> [</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">200</span>,  <span class="dv">200</span>, <span class="dv">200</span>],</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">200</span>,  <span class="dv">200</span>, tokenizer.pad_token_id], <span class="co"># Se añade un token de relleno (padding) al final de la secuencia más corta.</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Vamos que si alimentamos el modelo sentencia a sentencia y sin padding, obtenemos estos logits:</p>
+<div id="7a36e2dd" class="cell" data-execution_count="36">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model(torch.tensor([[<span class="dv">200</span>, <span class="dv">200</span>, <span class="dv">200</span>]]))[<span class="st">"logits"</span>])</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model(torch.tensor([[<span class="dv">200</span>, <span class="dv">200</span>]]))[<span class="st">"logits"</span>])</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Pero si alimentamos el modelo con el input completo, obtenemos otros logits:</p>
+<div id="0945493e" class="cell" data-execution_count="37">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model(torch.tensor(<span class="bu">input</span>))[<span class="st">"logits"</span>])</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Los logits de la primera sentencia son los mismos en ambos casos, pero los logits de la segunda sentencia son diferentes. Esto se debe a que el modelo no sabe que el token de relleno (padding) no es un token real y le presta atención, lo que afecta a las predicciones. Para solucionar esto, se utiliza una <code>attention_mask</code> que indica al modelo qué tokens deben ser atendidos y cuáles deben ser ignorados:</p>
+<div id="8e8a3295" class="cell" data-execution_count="38">
+<details class="code-fold">
+<summary>Haz clic para ver el código</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>attention_mask <span class="op">=</span> [</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>], <span class="co"># La primera sentencia tiene una máscara de atención de 1, lo que indica que todos los tokens deben ser atendidos.</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>], <span class="co"># La segunda sentencia tiene una máscara de atención de 0 para el token de relleno, lo que indica que debe ser ignorado.</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span> <span class="op">=</span> [</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">200</span>,  <span class="dv">200</span>, <span class="dv">200</span>],</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">200</span>,  <span class="dv">200</span>, tokenizer.pad_token_id],</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>model(torch.tensor(<span class="bu">input</span>), attention_mask<span class="op">=</span>torch.tensor(attention_mask))[<span class="st">"logits"</span>]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Notas</h2>
+
+<ol>
+<li id="fn1"><p>De momento no es importante conocer el uso de los argumentos <code>padding</code> y <code>truncation</code><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Observe que ahora las frases se pasan como una lista de string.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
