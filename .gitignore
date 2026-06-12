@@ -17,3 +17,4 @@ site_libs
 node_modules
 **/87_demo/data
 qmd/**/*.html
+**/.vdoc.*

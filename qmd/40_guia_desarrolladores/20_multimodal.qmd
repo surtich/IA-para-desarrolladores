@@ -1,0 +1,131 @@
+---
+title: LLM multimodal
+execute:
+  echo: true
+  warning: false
+  message: true
+  output: true
+format:
+  html:
+    code-fold: true
+    code-summary: "Haz clic para ver el código"
+---
+
+## Introducción
+
+Los LLM tradicionales se limitaban exclusivamente al texto. Sin embargo, la arquitectura actual ha evolucionado hacia modelos **multimodales**, capaces de integrar diferentes modalidades (texto, imágenes, audio). La clave de esta capacidad reside en mecanismos de atención que no solo procesan secuencias de palabras, sino que pueden alinear representaciones de píxeles (imágenes) con tokens de texto en un espacio latente compartido.
+
+En este documento, exploraremos los dos pilares de esta multimodalidad:
+
+1. **Visión-Lenguaje (VLM):** Cómo el modelo "entiende" y describe el mundo visual.
+2. **Generación de Imagen:** Cómo el modelo "crea" realidades visuales a partir de instrucciones textuales.
+
+## Imagen a texto
+
+Para que un LLM procese una imagen, primero debemos "traducirla" a un formato que el protocolo de comunicación pueda manejar. Dado que las APIs transmiten texto, utilizamos la codificación **Base64** para convertir los bytes binarios de la imagen en una cadena de texto ASCII.
+
+```{python}
+from pathlib import Path
+from IPython.display import display, Markdown, Image
+image_path = Path(".").resolve() / "../../img/attention.png"
+Image(filename=image_path)
+```
+
+
+```{python}
+import base64
+
+def encode_image(image_path):
+    # Open the image file in binary mode and encode it in Base64
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+encoded_image = encode_image(image_path)
+print(encoded_image[:100])  # Print the first 100 characters of the encoded image
+``` 
+
+Usamos un modelo con capacidad multimodal, como Gemini 2.5 Flash, para enviar la imagen codificada junto con un mensaje de texto que le indique al modelo qué hacer con ella. En este caso, le pedimos que describa la imagen en formato Markdown, utilizando títulos, subtítulos y listas si es necesario. Podemos usar la API de OpenAI o la API de Google Generative Language.
+
+```{python}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+api_key = os.getenv('GOOGLE_API_KEY')
+
+MODEL = "gemini-2.5-flash"
+client = OpenAI(base_url="https://generativelanguage.googleapis.com/v1beta", api_key=api_key)
+
+system_prompt="Eres un asistente útil que describe imágenes de manera detallada y precisa."
+
+response = client.chat.completions.create(
+    model=MODEL,
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": [
+            {'type': 'text',
+             'text': "Describe esta imagen. El resultado debe ser un texto en ```markdown. Pon títulos, subtítulos, secciones y usa listas si es necesario."},
+            {'type': 'image_url',
+             'image_url': {'url': f'data:image/png;base64,{encoded_image}'}}
+        ]}
+    ],
+    temperature=0
+)
+
+Markdown(response.choices[0].message.content)
+```
+
+## Texto a imagen
+
+Para la generación, vamos a usar un modelos de difusión. A diferencia de los LLMs que predicen la siguiente palabra, estos modelos aprenden a revertir un proceso de ruido gaussiano: parten de una imagen llena de ruido estático y, paso a paso, "eliminan" ese ruido guiados por el prompt hasta revelar una imagen coherente.
+
+A continuación, veremos dos formas de abordar esta tarea:
+
+* Vía API: Ideal para entornos de producción, delegando el cómputo a servidores externos.
+
+* Vía Local: Permite ejecutar el modelo en tu propia máquina.
+
+
+```{python}
+#| eval: false
+from huggingface_hub import InferenceClient
+from IPython.display import display
+import os
+
+client = InferenceClient(api_key=os.environ["HUGGINGFACE_API_KEY"])
+
+model_id = "stabilityai/stable-diffusion-xl-base-1.0"
+
+prompt_text = (
+    "Genera una astronauta montando a caballo en la superficie de Marte, con un fondo de montañas rojas y un cielo estrellado. "
+)
+
+image = client.text_to_image(prompt=prompt_text, model=model_id)
+
+display(image)
+```
+
+```{python}
+#| eval: false
+from diffusers import StableDiffusionPipeline
+import torch
+
+# 1. Usamos un modelo SD 1.5 optimizado
+model_id = "runwayml/stable-diffusion-v1-5"
+
+# 2. Cargamos el pipeline forzando el uso de CPU y precisión float32
+# (Nota: 'cpu' es lento, pero funcionará)
+pipe = StableDiffusionPipeline.from_pretrained(
+    model_id, 
+    torch_dtype=torch.float32
+)
+pipe = pipe.to("cpu")
+
+# 3. Optimización clave: usar el scheduler LCM si es posible para reducir pasos
+# Generar imagen (esto tomará tiempo en CPU)
+prompt = "A simple technical diagram of attention mechanism"
+image = pipe(prompt, num_inference_steps=15).images[0]
+
+image.show()
+```
