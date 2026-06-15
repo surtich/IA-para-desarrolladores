@@ -209,7 +209,7 @@ Finalmente, decodificamos los tókens numéricos resultantes para transformarlos
 
 ``` {python}
 # Decodificación de la salida numérica a texto legible
-tokenizer.decode(output_text[0], skip_special_tokens=True)
+pprint(tokenizer.decode(output_text[0], skip_special_tokens=True))
 ```
 
 ### Personalización del formato de la respuesta generada
@@ -382,7 +382,7 @@ ds_combined.save_to_disk(base_path / "data/llm_dataset")
 ## Entrenamiento con LoRA
 
 ```{python}
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from datasets import load_from_disk, Dataset
 import torch
 ```
@@ -396,11 +396,24 @@ else:
     print("CUDA not available, using CPU.")
 ```
 
+Para inicializar el modelo de manera eficiente, utilizamos cuantización a 4-bits mediante la librería `bitsandbytes`. Esto reduce significativamente el consumo de VRAM.
 ```{python}
 model_id = "Qwen/Qwen2.5-0.5B-Instruct"
 
 tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
+
+# Configuración de 4-bits
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_quant_type="nf4"
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=bnb_config,
+    device_map="auto"
+)
 ```
 
 ```{python}
@@ -471,7 +484,11 @@ from trl import SFTTrainer, SFTConfig
 * **`do_train`**: Confirma que se debe ejecutar el proceso de entrenamiento.
 * **`learning_rate`**: Establece la tasa de aprendizaje (*learning rate*) inicial para el optimizador del modelo.
 * **`num_train_epochs`**: Define el número de veces (épocas) que el `Trainer` iterará sobre el conjunto de datos de entrenamiento (*dataset*) completo.
-* **`bf16=False` y `fp16=False`**: Desactiva el entrenamiento de precisión mixta (BFloat16 y Float16, respectivamente), lo que significa que el modelo probablemente se entrenará en precisión completa `float32`.
+* **`bf16=True`**: Activa el formato `bfloat16`. Esto reduce a la mitad el consumo de memoria frente a `float32` y es altamente recomendado para GPUs modernas (Arquitectura Ampere o superior).
+* **`fp16=False`**: Desactivado a favor de `bf16`.
+* **`gradient_checkpointing=True`**: Crítico para la VRAM. Sacrifica una pequeña cantidad de velocidad de cómputo para re-calcular activaciones durante el paso backward en lugar de almacenarlas, ahorrando una cantidad masiva de memoria.
+* **`gradient_accumulation_steps=8`**: Acumula los gradientes durante 8 pasos antes de realizar una actualización de pesos. Esto permite simular un tamaño de batch mayor sin aumentar el consumo de memoria.
+* **`per_device_train_batch_size=1`**: Mantiene el batch en un sólo ejemplo para ahorrar memoria.
 
 ```{python}
 training_args = SFTConfig(
@@ -480,8 +497,11 @@ training_args = SFTConfig(
    do_train=True,
    learning_rate=2e-4,
    num_train_epochs=3,
-   bf16=False,
-   fp16=False
+   bf16=True,
+   fp16=False,
+   gradient_checkpointing=True,
+   gradient_accumulation_steps=8,
+   per_device_train_batch_size=1,
 )
 ``` 
 
@@ -509,6 +529,7 @@ trainer.save_model(model_path)
 ## Evaluación del ajuste fino
 
 ```{python}
+from peft import PeftModel
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from datasets import load_from_disk, Dataset
 import torch
@@ -518,27 +539,57 @@ base_path = Path(".").resolve() / '87_demo'
 ```
 
 ```{python}
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-    print("Using CUDA device.")
-else:
-    device = torch.device("cpu")
-    print("CUDA not available, using CPU.")
-```
-
-```{python}
 model_path = base_path / "data/models/my_llm_classifier"
 ```
 
+Realizamos una carga del modelo en dos pasos. Dado que PEFT guarda los cambios de manera incremental (como una "capa" sobre el modelo original), primero cargamos el modelo base y posteriormente inyectamos los adaptadores aprendidos.
+
+* Carga del modelo base: Inicializamos el modelo original (model_id).
+
+* Integración de PeftModel: `PeftModel.from_pretrained combina el modelo base con los pesos de entrenamienot (incluyendo el lm_head personalizado). Es aquí donde se restauran todas las configuraciones específicas del fine-tuning almacenadas.
+
+* Tokenizador: Cargamos el tokenizador desde el directorio del modelo para asegurar que coincida exactamente con el vocabulario utilizado durante el entrenamiento.
+  
+::: {.callout-warning collapse="true"}
+
+### Diferencias al cargar un modelo: Modelo Completo vs. Adaptadores LoRA
+
+Al intentar cargar un modelo entrenado mediante técnicas PEFT (LoRA) utilizando únicamente la función `AutoModelForCausalLM.from_pretrained(model_path)`, se producirá un error o una inicialización incorrecta. La explicación técnica reside en la naturaleza del almacenamiento de estos modelos:
+
+1. **Estructura del directorio (`model_path`)**:
+   El directorio resultante tras el entrenamiento con LoRA no contiene el modelo completo. Únicamente almacena los archivos de configuración de los adaptadores (`adapter_config.json`) y los pesos de las matrices de entrenamiento (`adapter_model.safetensors`), junto con las capas explícitamente marcadas para guardarse (ej. `lm_head`). Los pesos del modelo base, que comprenden la mayor parte de la arquitectura (capas de atención, bloques transformadores, etc.), no están presentes.
+
+2. **Comportamiento del cargador**:
+   La función `AutoModelForCausalLM.from_pretrained` espera encontrar los pesos completos del modelo (ej. `model.safetensors`). Al no localizar estos archivos, el proceso genera errores de "archivo no encontrado" o intenta inicializar una arquitectura vacía, lo cual resulta inoperativo.
+
+3. **Advertencias de carga (`MISSING / UNEXPECTED`)**:
+   Cuando se intenta forzar la carga, el sistema reporta parámetros inesperados (los adaptadores, que no tienen dónde encajarse) y parámetros faltantes (la estructura base del modelo), lo que confirma la incapacidad del cargador estándar para reconocer la arquitectura completa sin el modelo base como referencia.
+
+**Conclusión**: Para que el modelo sea funcional, es indispensable realizar la carga en dos pasos:
+* Primero, se inicializa el modelo base (`AutoModelForCausalLM`).
+* Segundo, se inyectan los adaptadores mediante `PeftModel.from_pretrained`, permitiendo que el sistema ensamble correctamente la arquitectura final.
+  
+:::
+
 ```{python}
+# 1. Carga el modelo base
+base_model = AutoModelForCausalLM.from_pretrained(
+    model_id, 
+    device_map="auto"
+)
+
+# 2. Carga los adaptadores (esto integra el lm_head y los demás cambios)
+model = PeftModel.from_pretrained(
+    model=base_model, 
+    model_id=model_path  # Aquí pasas la ruta donde guardaste el entrenamiento
+)
+
+# 3. Carga el tokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForCausalLM.from_pretrained(model_path).to(device)
 ```
 
 ```{python}
 dataset = load_from_disk(base_path / "data/llm_dataset")
-
-label_names = dataset["train"].features["label"].names
 ```
 
 ```{python}

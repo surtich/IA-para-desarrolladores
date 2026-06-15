@@ -100,6 +100,7 @@ El paquete **Instructor** de OpenAI facilita la generación de salidas estructur
 
 
 ```{python}
+#| eval: false
 import instructor
 import logging
 
@@ -154,13 +155,11 @@ def analyze_sentiment(statement: str) -> SocialMessage:
 Eres un experto en comentarios de clientes en línea. Analiza cuidadosamente la declaración proporcionada 
 y responde con el sentimiento, el departamento y una respuesta.
 """},
-            {"role": "user", "content": "Declaración: {{statement}}, JSON:"}
+            {"role": "user", "content": f"Declaración: {statement}"}
         ],
         response_model=SocialMessage,
-        context={"statement": statement},
         temperature=0
     )
-
 
 social_message = analyze_sentiment(
     "No confíen en @AcmeCorp. ¡Han pasado semanas y ni siquiera han enviado mi pedido!")

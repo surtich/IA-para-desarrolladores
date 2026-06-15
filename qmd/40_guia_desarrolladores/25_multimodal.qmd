@@ -122,8 +122,6 @@ pipe = StableDiffusionPipeline.from_pretrained(
 )
 pipe = pipe.to("cpu")
 
-# 3. Optimización clave: usar el scheduler LCM si es posible para reducir pasos
-# Generar imagen (esto tomará tiempo en CPU)
 prompt = "A simple technical diagram of attention mechanism"
 image = pipe(prompt, num_inference_steps=15).images[0]
 

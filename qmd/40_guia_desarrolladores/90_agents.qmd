@@ -60,6 +60,7 @@ Supongamos que queremos conocer la temperatura actual de una ciudad.
 Si probamos a hacer esta pregunta a un LLM podemos comprobar que no será capaz de satisfacer nuestra petición:
 
 ```{python}
+import os
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -83,6 +84,7 @@ El modelo no tiene acceso a información en tiempo real, por lo que no puede res
 
 ```{python}
 import requests
+
 
 def obtener_coordenadas(ciudad):
     url = f"https://geocoding-api.open-meteo.com/v1/search?name={ciudad}"
@@ -117,7 +119,7 @@ def obtener_temperatura(lat, lon):
         return "Error al obtener los datos del clima."
 
 # Ejemplo de uso (coordenadas de Majadahonda):
-print(obtener_temperatura(*coords))
+#print(obtener_temperatura(*coords))
 ``` 
 
 Observe que hemos usado el modelo de Gemini ya que el que estábamos usando en Ollama no estaba llamando correctamente a las herramientas.
@@ -380,9 +382,15 @@ Estos frameworks permiten crear arquitecturas donde varios agentes especializado
 Los Code agents (agentes de código) son el tipo de agente predeterminado en smolagents. Generan llamadas a herramientas en Python para realizar acciones, logrando representaciones de acción que son eficientes, expresivas y precisas.
 
 ```{python}
+import os
+from dotenv import load_dotenv
 from huggingface_hub import login
 
-login()
+load_dotenv(override=True)
+
+hf_token = os.getenv("HUGGINGFACE_API_KEY")
+
+login(token=hf_token)
 ```
 
 En el siguiente ejemplo se usa InferenceClientModel, que permite ejecutar la API de inferencia de Hugging Face. El agente tiene acceso a la herramienta DuckDuckGoSearchTool, que le permite realizar búsquedas en la web.
